@@ -1,0 +1,17 @@
+# Build outputs
+.output
+.nuxt
+dist
+node_modules
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Logs
+*.log
+
+# Cache
+.cache
+
