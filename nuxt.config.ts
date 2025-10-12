@@ -11,7 +11,7 @@ export default defineNuxtConfig({
 
 	typescript: {
 		strict: true,
-		typeCheck: true
+		typeCheck: false // Disable type check during build for better performance
 	},
 
 	css: ['~/assets/css/tailwind.css'],

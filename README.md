@@ -1,6 +1,6 @@
-# Nuxt 3 + TypeScript + Tailwind CSS
+# Real-Time Chat - Nuxt 3 Application
 
-Pusty projekt startowy z Nuxt 3, TypeScript i Tailwind CSS.
+Aplikacja real-time chat z kompleksowym systemem autentykacji opartym o JWT i HttpOnly cookies.
 
 ## Setup
 
@@ -32,14 +32,34 @@ npm run generate
 ├── assets/
 │   └── css/
 │       └── tailwind.css           # Konfiguracja Tailwind
+├── components/
+│   └── ToastContainer.vue         # Komponent powiadomień
 ├── composables/
+│   ├── useAuth.ts                 # Composable autentykacji
+│   ├── useUser.ts                 # Composable zarządzania użytkownikami
+│   ├── useToast.ts                # Composable powiadomień
 │   ├── useSocket.ts               # Composable dla Socket.IO
 │   └── useNativeWebSocket.ts     # Composable dla natywnych WebSocketów
+├── middleware/
+│   ├── auth.ts                    # Middleware ochrony tras
+│   └── guest.ts                   # Middleware dla gości
 ├── pages/
-│   ├── index.vue                  # Strona główna
+│   ├── index.vue                  # Strona główna (redirect)
+│   ├── login.vue                  # Strona logowania
+│   ├── register.vue               # Strona rejestracji
+│   ├── dashboard.vue              # Panel użytkownika
+│   ├── users/
+│   │   ├── index.vue              # Lista użytkowników
+│   │   └── [id].vue               # Profil użytkownika
 │   └── websocket-example.vue     # Przykład WebSocket
 ├── plugins/
 │   └── socket.client.ts           # Plugin Socket.IO
+├── types/
+│   ├── auth.ts                    # Typy autentykacji
+│   ├── user.ts                    # Typy użytkowników
+│   └── socket.d.ts                # Typy Socket.IO
+├── utils/
+│   └── api.ts                     # API client z auto-refresh
 ├── app.vue                        # Główny komponent aplikacji
 ├── nuxt.config.ts                 # Konfiguracja Nuxt
 ├── tailwind.config.ts             # Konfiguracja Tailwind
@@ -56,7 +76,58 @@ npm run generate
 - **Socket.IO Client** - Komunikacja WebSocket
 - **VueUse** - Kolekcja composables (w tym useWebSocket)
 
-## Konfiguracja WebSocket
+## System Autentykacji
+
+Aplikacja posiada kompletny system autentykacji z następującymi funkcjonalnościami:
+
+### Strony
+
+- **`/register`** - Rejestracja nowego użytkownika
+- **`/login`** - Logowanie użytkownika
+- **`/dashboard`** - Panel użytkownika (chroniony)
+    - Edycja profilu (username, email)
+    - Zmiana hasła
+    - Wylogowanie
+- **`/users`** - Lista użytkowników z paginacją (chroniony)
+- **`/users/:id`** - Profil pojedynczego użytkownika (chroniony)
+
+### Funkcjonalności
+
+✅ **Rejestracja i logowanie** z walidacją formularzy
+✅ **JWT + HttpOnly Cookies** dla bezpiecznej autentykacji
+✅ **Automatyczne odświeżanie tokenów** (refresh token)
+✅ **Middleware ochrony tras** (auth/guest)
+✅ **Zarządzanie profilem** użytkownika
+✅ **Zmiana hasła** z walidacją
+✅ **Lista użytkowników** z paginacją
+✅ **Status online/offline** użytkowników
+✅ **Toast notifications** dla informacji zwrotnych
+✅ **Responsywny design** z Tailwind CSS
+✅ **Pełne wsparcie TypeScript**
+✅ **Accessibility features** (ARIA, keyboard navigation)
+
+### API Backend
+
+Backend powinien być uruchomiony na `http://localhost:3000` z następującymi endpointami:
+
+#### Auth Endpoints
+
+- `POST /api/auth/register` - Rejestracja
+- `POST /api/auth/login` - Logowanie
+- `POST /api/auth/logout` - Wylogowanie
+- `POST /api/auth/refresh` - Odświeżenie tokenu
+- `GET /api/auth/me` - Dane zalogowanego użytkownika
+
+#### User Endpoints
+
+- `GET /api/users?page=1&limit=10` - Lista użytkowników
+- `GET /api/users/:id` - Profil użytkownika
+- `GET /api/users/:id/status` - Status użytkownika
+- `PUT /api/users/:id` - Aktualizacja profilu
+- `PATCH /api/users/:id/password` - Zmiana hasła
+- `DELETE /api/users/:id` - Usunięcie konta
+
+## Konfiguracja
 
 Utwórz plik `.env` w głównym katalogu projektu:
 
@@ -64,7 +135,88 @@ Utwórz plik `.env` w głównym katalogu projektu:
 NUXT_PUBLIC_SOCKET_URL=http://localhost:3000
 ```
 
-Zmień adres na adres swojego serwera WebSocket.
+Zmień adres na adres swojego serwera backend.
+
+## Użycie Composables
+
+### useAuth()
+
+```typescript
+const {
+	user, // Dane zalogowanego użytkownika
+	isAuthenticated, // Czy użytkownik jest zalogowany
+	isLoading, // Stan ładowania
+	error, // Błąd autentykacji
+	login, // Funkcja logowania
+	register, // Funkcja rejestracji
+	logout, // Funkcja wylogowania
+	checkAuth, // Sprawdź stan autentykacji
+	refreshToken, // Odśwież token
+	clearError // Wyczyść błąd
+} = useAuth()
+
+// Logowanie
+await login({ email: 'user@example.com', password: 'password' })
+
+// Rejestracja
+await register({
+	email: 'user@example.com',
+	username: 'username',
+	password: 'password'
+})
+
+// Wylogowanie
+await logout()
+```
+
+### useUser()
+
+```typescript
+const {
+	isLoading,
+	error,
+	getUserProfile, // Pobierz profil użytkownika
+	getAllUsers, // Pobierz listę użytkowników
+	getUserStatus, // Pobierz status użytkownika
+	updateProfile, // Aktualizuj profil
+	updatePassword, // Zmień hasło
+	deleteUser, // Usuń konto
+	clearError
+} = useUser()
+
+// Pobierz profil
+const user = await getUserProfile('user-id')
+
+// Lista użytkowników
+const response = await getAllUsers(1, 10)
+
+// Status użytkownika
+const status = await getUserStatus('user-id')
+
+// Aktualizuj profil
+await updateProfile('user-id', { username: 'newname' })
+
+// Zmień hasło
+await updatePassword('user-id', {
+	currentPassword: 'old',
+	newPassword: 'new'
+})
+```
+
+### useToast()
+
+```typescript
+const { toasts, success, error, info, warning, clear } = useToast()
+
+// Pokaż powiadomienie
+success('Operacja zakończona sukcesem!')
+error('Wystąpił błąd')
+info('Informacja')
+warning('Ostrzeżenie')
+
+// Wyczyść wszystkie powiadomienia
+clear()
+```
 
 ## Użycie WebSocket
 
@@ -82,7 +234,7 @@ emit('message', { text: 'Hello' })
 
 // Nasłuchuj wiadomości
 on('message', (data) => {
-  console.log('Otrzymano:', data)
+	console.log('Otrzymano:', data)
 })
 
 // Rozłącz
@@ -99,7 +251,7 @@ send('Hello')
 
 // Status: 'CONNECTING' | 'OPEN' | 'CLOSING' | 'CLOSED'
 watch(status, (newStatus) => {
-  console.log('Status:', newStatus)
+	console.log('Status:', newStatus)
 })
 ```
 
@@ -111,4 +263,3 @@ watch(status, (newStatus) => {
 - [TypeScript](https://www.typescriptlang.org/)
 - [Socket.IO Client](https://socket.io/docs/v4/client-api/)
 - [VueUse](https://vueuse.org/)
-
