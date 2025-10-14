@@ -12,7 +12,7 @@ export default withNuxt(
 					order: ['script', 'template', 'style']
 				}
 			],
-			'@typescript-eslint/no-explicit-any': 'warn',
+			'@typescript-eslint/no-explicit-any': 'off',
 			'no-console': ['warn', { allow: ['error', 'warn'] }],
 			'prettier/prettier': [
 				'error',

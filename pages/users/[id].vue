@@ -1,7 +1,6 @@
 <template>
 	<div class="min-h-screen bg-gray-50 py-8 px-4">
 		<div class="max-w-4xl mx-auto">
-			<!-- Header -->
 			<div class="mb-6">
 				<NuxtLink
 					to="/users"
@@ -14,23 +13,19 @@
 							clip-rule="evenodd"
 						/>
 					</svg>
-					Powrót do listy użytkowników
+					Back to user list
 				</NuxtLink>
 			</div>
 
-			<!-- User Profile -->
 			<div class="space-y-6">
-				<!-- Profile Header -->
 				<div class="bg-white rounded-lg shadow-lg p-8">
 					<div class="flex flex-col items-center text-center">
-						<!-- Avatar -->
 						<div
 							class="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-3xl mb-4"
 						>
 							JK
 						</div>
 
-						<!-- Username and Status -->
 						<div class="mb-2">
 							<h1 class="text-3xl font-bold text-gray-900 mb-2">Jan Kowalski</h1>
 							<span
@@ -41,27 +36,24 @@
 							</span>
 						</div>
 
-						<!-- Email -->
 						<p class="text-gray-600 mt-4 text-lg">jan.kowalski@example.com</p>
 
-						<!-- Edit Button -->
 						<NuxtLink
 							to="/dashboard"
 							class="mt-6 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
 						>
-							Edytuj profil
+							Edit Profile
 						</NuxtLink>
 					</div>
 				</div>
 
-				<!-- Profile Details -->
 				<div class="bg-white rounded-lg shadow-lg p-6">
-					<h2 class="text-xl font-bold text-gray-900 mb-4">Szczegóły profilu</h2>
+					<h2 class="text-xl font-bold text-gray-900 mb-4">Profile Details</h2>
 					<div class="space-y-4">
 						<div
 							class="flex justify-between items-center py-3 border-b border-gray-200"
 						>
-							<span class="text-gray-600 font-medium">ID użytkownika</span>
+							<span class="text-gray-600 font-medium">User ID</span>
 							<span class="text-gray-900 font-mono text-sm">123456</span>
 						</div>
 
@@ -75,7 +67,7 @@
 						<div
 							class="flex justify-between items-center py-3 border-b border-gray-200"
 						>
-							<span class="text-gray-600 font-medium">Nazwa użytkownika</span>
+							<span class="text-gray-600 font-medium">Username</span>
 							<span class="text-gray-900">Jan Kowalski</span>
 						</div>
 
@@ -89,18 +81,17 @@
 						<div
 							class="flex justify-between items-center py-3 border-b border-gray-200"
 						>
-							<span class="text-gray-600 font-medium">Data utworzenia</span>
-							<span class="text-gray-900">1 stycznia 2024, 10:00</span>
+							<span class="text-gray-600 font-medium">Created Date</span>
+							<span class="text-gray-900">January 1, 2024, 10:00</span>
 						</div>
 
 						<div class="flex justify-between items-center py-3">
-							<span class="text-gray-600 font-medium">Ostatnia aktywność</span>
-							<span class="text-gray-900">5 stycznia 2024, 15:30</span>
+							<span class="text-gray-600 font-medium">Last Activity</span>
+							<span class="text-gray-900">January 5, 2024, 15:30</span>
 						</div>
 					</div>
 				</div>
 
-				<!-- Activity Info -->
 				<div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg shadow-lg p-6">
 					<div class="flex items-start gap-4">
 						<div class="flex-shrink-0">
@@ -117,10 +108,10 @@
 							</svg>
 						</div>
 						<div>
-							<h3 class="font-bold text-gray-900 mb-1">Informacja o aktywności</h3>
+							<h3 class="font-bold text-gray-900 mb-1">Activity Information</h3>
 							<p class="text-gray-700">
-								Użytkownik Jan Kowalski jest obecnie online. Ostatnia aktywność: 5
-								stycznia 2024, 15:30.
+								User Jan Kowalski is currently online. Last activity: January 5,
+								2024, 15:30.
 							</p>
 						</div>
 					</div>

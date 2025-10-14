@@ -1,59 +1,88 @@
+<script setup lang="ts">
+const email = ref('test100@post.com')
+const password = ref('Password100@')
+const { login, loading, error } = useAuth()
+
+async function handleSubmit(event: Event) {
+	event.preventDefault()
+
+	if (!email.value || !password.value) {
+		return
+	}
+
+	try {
+		await login(email.value, password.value)
+		await navigateTo('/dashboard')
+	} catch (err) {
+		console.error('Login failed:', err)
+	}
+}
+</script>
+
 <template>
 	<div class="min-h-screen flex items-center justify-center px-4 py-12">
 		<div class="max-w-md w-full">
 			<div class="bg-white rounded-lg shadow-lg p-8">
 				<div class="text-center mb-8">
-					<h1 class="text-3xl font-bold text-gray-900 mb-2">Logowanie</h1>
-					<p class="text-gray-600">Witaj ponownie!</p>
+					<h1 class="text-3xl font-bold text-gray-900 mb-2">Login</h1>
+					<p class="text-gray-600">Welcome back!</p>
 				</div>
 
-				<form class="space-y-6">
-					<!-- Email -->
+				<form class="space-y-6" @submit="handleSubmit">
+					<div
+						v-if="error"
+						class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"
+					>
+						{{ error }}
+					</div>
+
 					<div>
 						<label for="email" class="block text-sm font-medium text-gray-700 mb-2">
 							Email
 						</label>
 						<input
 							id="email"
+							v-model="email"
 							type="email"
 							autocomplete="email"
+							required
 							class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-							placeholder="twoj@email.com"
+							placeholder="your@email.com"
 						/>
 					</div>
 
-					<!-- Password -->
 					<div>
 						<label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-							Hasło
+							Password
 						</label>
 						<input
 							id="password"
+							v-model="password"
 							type="password"
 							autocomplete="current-password"
+							required
 							class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-							placeholder="Wpisz hasło"
+							placeholder="Enter your password"
 						/>
 					</div>
 
-					<!-- Submit Button -->
 					<button
 						type="submit"
-						class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+						:disabled="loading"
+						class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 					>
-						Zaloguj się
+						{{ loading ? 'Logging in...' : 'Login' }}
 					</button>
 				</form>
 
-				<!-- Register Link -->
 				<div class="mt-6 text-center">
 					<p class="text-gray-600">
-						Nie masz konta?
+						Don't have an account?
 						<NuxtLink
 							to="/register"
 							class="text-blue-600 hover:text-blue-700 font-medium hover:underline"
 						>
-							Zarejestruj się
+							Register
 						</NuxtLink>
 					</p>
 				</div>
