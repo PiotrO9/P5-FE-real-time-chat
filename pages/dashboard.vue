@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { logout } = useAuth()
+const { user, logout } = useAuth()
 
 async function handleLogout() {
 	await logout()
@@ -7,7 +7,6 @@ async function handleLogout() {
 }
 
 onMounted(() => {
-	const { user } = useAuth()
 	console.log(user.value)
 })
 </script>

@@ -7,7 +7,7 @@ export default defineNuxtConfig({
 		port: 3001
 	},
 
-	modules: ['@nuxtjs/tailwindcss', '@vueuse/nuxt', '@nuxt/eslint'],
+	modules: ['@nuxtjs/tailwindcss', '@vueuse/nuxt', '@nuxt/eslint', '@pinia/nuxt'],
 
 	typescript: {
 		strict: true,

@@ -13,7 +13,7 @@ export default withNuxt(
 				}
 			],
 			'@typescript-eslint/no-explicit-any': 'off',
-			'no-console': ['warn', { allow: ['error', 'warn'] }],
+			'no-console': 'off',
 			'prettier/prettier': [
 				'error',
 				{
