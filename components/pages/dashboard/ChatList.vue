@@ -38,11 +38,13 @@ function handleListKeyDown(event: KeyboardEvent, chatId: number) {
 					<div
 						class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold"
 					>
-						{{ chat.name.charAt(0) }}
+						{{ (chat.name ?? '').charAt(0) || '?' }}
 					</div>
 					<div class="min-w-0 flex-1">
 						<div class="flex items-center justify-between">
-							<p class="font-medium text-slate-900 truncate">{{ chat.name }}</p>
+							<p class="font-medium text-slate-900 truncate">
+								{{ chat.name ?? 'Czat' }}
+							</p>
 							<span
 								v-if="chat.unreadCount > 0"
 								class="ml-2 inline-flex items-center justify-center text-xs font-semibold bg-blue-600 text-white rounded-full h-5 px-2"
@@ -50,7 +52,7 @@ function handleListKeyDown(event: KeyboardEvent, chatId: number) {
 								{{ chat.unreadCount }}
 							</span>
 						</div>
-						<p class="text-sm text-slate-600 truncate">{{ chat.lastMessage }}</p>
+						<p class="text-sm text-slate-600 truncate">{{ chat.lastMessage ?? '' }}</p>
 					</div>
 				</div>
 			</li>

@@ -2,131 +2,44 @@
 import ChatList from '~/components/pages/dashboard/ChatList.vue'
 import ChatPanel from '~/components/pages/dashboard/ChatPanel.vue'
 import MessageForm from '~/components/pages/dashboard/MessageForm.vue'
+import type { Chat, Message } from '~/types/Chat'
+import {
+	fetchChats as fetchChatsFromService,
+	fetchMessages as fetchMessagesFromService,
+	sendMessage as sendMessageToService
+} from '~/services/chatService'
+import type { ApiResponse } from '~/types/Api'
+import type { ChatsResponse } from '~/types/ChatsApi'
 
-type Message = {
-	id: number
-	chatId: number
-	senderId: number
-	senderName: string
-	content: string
-	createdAt: string
-}
+// using ApiResponse from types/Api
 
-type Chat = {
-	id: number
-	name: string
-	avatar?: string
-	lastMessage: string
-	unreadCount: number
-	messages: Message[]
-}
+const { error: toastError } = useToast()
 
-const currentUserId = 1
+const currentUserId = 0
 
 const searchQuery = ref('')
 const selectedChatId = ref<number | null>(null)
 const newMessageText = ref('')
 const chatPanelRef = ref<any>(null)
 
-const chats = ref<Chat[]>([
-	{
-		id: 101,
-		name: 'Jan Kowalski',
-		avatar: '',
-		lastMessage: 'Jasne, widzimy się jutro!',
-		unreadCount: 2,
-		messages: [
-			{
-				id: 1,
-				chatId: 101,
-				senderId: 2,
-				senderName: 'Jan Kowalski',
-				content: 'Hej, pasuje Ci jutro?',
-				createdAt: new Date(Date.now() - 1000 * 60 * 60).toISOString()
-			},
-			{
-				id: 2,
-				chatId: 101,
-				senderId: 1,
-				senderName: 'Ty',
-				content: 'Tak, super.',
-				createdAt: new Date(Date.now() - 1000 * 60 * 45).toISOString()
-			},
-			{
-				id: 3,
-				chatId: 101,
-				senderId: 2,
-				senderName: 'Jan Kowalski',
-				content: 'Jasne, widzimy się jutro!',
-				createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString()
-			}
-		]
-	},
-	{
-		id: 102,
-		name: 'Zespół Frontend',
-		avatar: '',
-		lastMessage: 'Wrzuć proszę PR do review.',
-		unreadCount: 0,
-		messages: [
-			{
-				id: 1,
-				chatId: 102,
-				senderId: 3,
-				senderName: 'Anna',
-				content: 'Pamiętaj o testach e2e.',
-				createdAt: new Date(Date.now() - 1000 * 60 * 120).toISOString()
-			},
-			{
-				id: 2,
-				chatId: 102,
-				senderId: 1,
-				senderName: 'Ty',
-				content: 'Ok, dorzucę dzisiaj.',
-				createdAt: new Date(Date.now() - 1000 * 60 * 90).toISOString()
-			},
-			{
-				id: 3,
-				chatId: 102,
-				senderId: 4,
-				senderName: 'Marek',
-				content: 'Wrzuć proszę PR do review.',
-				createdAt: new Date(Date.now() - 1000 * 60 * 15).toISOString()
-			}
-		]
-	},
-	{
-		id: 103,
-		name: 'Kasia',
-		avatar: '',
-		lastMessage: 'Do zobaczenia!',
-		unreadCount: 5,
-		messages: [
-			{
-				id: 1,
-				chatId: 103,
-				senderId: 1,
-				senderName: 'Ty',
-				content: 'Dzięki za pomoc.',
-				createdAt: new Date(Date.now() - 1000 * 60 * 240).toISOString()
-			},
-			{
-				id: 2,
-				chatId: 103,
-				senderId: 5,
-				senderName: 'Kasia',
-				content: 'Nie ma sprawy. Do zobaczenia!',
-				createdAt: new Date(Date.now() - 1000 * 60 * 200).toISOString()
-			}
-		]
-	}
-])
+const chats = ref<Chat[]>([])
+const chatsLoading = ref(false)
+const chatsError = ref<string | null>(null)
 
-onMounted(() => {
+const messagesState = reactive<
+	Record<
+		number,
+		{ limit: number; offset: number; loading: boolean; error: string | null; hasMore: boolean }
+	>
+>({})
+
+onMounted(async () => {
+	await fetchChats()
 	if (selectedChatId.value !== null) return
 	const firstChat = chats.value.at(0)
 	if (!firstChat) return
 	selectedChatId.value = firstChat.id
+	await fetchMessages(firstChat.id, false)
 	nextTick(() => handleScrollToBottom())
 })
 
@@ -141,35 +54,115 @@ const selectedChat = computed<Chat | null>(() => {
 	return chats.value.find((c) => c.id === selectedChatId.value) ?? null
 })
 
+async function fetchChats() {
+	try {
+		chatsLoading.value = true
+		chatsError.value = null
+		const res = (await fetchChatsFromService()) as ApiResponse<ChatsResponse>
+		const raw = res?.data
+		const list: any[] = Array.isArray(raw?.chats) ? raw.chats : []
+		chats.value = list.map((c) => ({
+			...c,
+			name: String(c?.name ?? c?.title ?? 'Czat'),
+			lastMessage: String(c?.lastMessage ?? ''),
+			unreadCount: Number.isFinite(c?.unreadCount) ? Number(c.unreadCount) : 0,
+			messages: Array.isArray(c?.messages) ? c.messages : []
+		}))
+	} catch (err: any) {
+		chatsError.value = err?.message || 'Nie udało się pobrać listy czatów'
+		toastError(chatsError.value || 'Błąd')
+	} finally {
+		chatsLoading.value = false
+	}
+}
+
+function ensureChatState(chatId: number) {
+	if (messagesState[chatId]) return
+	messagesState[chatId] = { limit: 50, offset: 0, loading: false, error: null, hasMore: true }
+}
+
+function getChatState(chatId: number) {
+	ensureChatState(chatId)
+	return messagesState[chatId] as {
+		limit: number
+		offset: number
+		loading: boolean
+		error: string | null
+		hasMore: boolean
+	}
+}
+
+async function fetchMessages(chatId: number, append: boolean) {
+	const state = getChatState(chatId)
+
+	if (state.loading) return
+
+	try {
+		state.loading = true
+		state.error = null
+		const res = await fetchMessagesFromService(chatId, state.limit, state.offset)
+
+		const raw = res?.data
+		const items: any[] = Array.isArray(raw)
+			? raw
+			: Array.isArray(raw?.items)
+				? raw.items
+				: Array.isArray(raw?.messages)
+					? raw.messages
+					: []
+		const chat = chats.value.find((c) => c.id === chatId)
+		if (!chat) return
+		if (append) {
+			chat.messages = [...chat.messages, ...items]
+		} else {
+			chat.messages = items
+		}
+		state.offset = chat.messages.length
+		state.hasMore = items.length >= state.limit
+		if (items.length > 0) {
+			chat.lastMessage = items[items.length - 1]?.content || chat.lastMessage
+		}
+	} catch (err: any) {
+		state.error = err?.message || 'Nie udało się pobrać wiadomości'
+		toastError(state.error || 'Błąd')
+	} finally {
+		state.loading = false
+	}
+}
+
 function handleSelectChat(chatId: number) {
 	if (selectedChatId.value === chatId) return
 	selectedChatId.value = chatId
 	const chat = chats.value.find((c) => c.id === chatId)
 	if (chat) chat.unreadCount = 0
+	fetchMessages(chatId, false)
 	nextTick(() => handleScrollToBottom())
 }
 
-function handleSendMessage() {
+async function handleSendMessage() {
 	const chat = selectedChat.value
 	if (!chat) return
 	const text = newMessageText.value.trim()
 	if (text.length === 0) return
-	const newId = (chat.messages.at(-1)?.id ?? 0) + 1
-	const message: Message = {
-		id: newId,
-		chatId: chat.id,
-		senderId: currentUserId,
-		senderName: 'Ty',
-		content: text,
-		createdAt: new Date().toISOString()
+	try {
+		const res = await sendMessageToService(chat.id, text)
+		const saved = res.data as unknown as Message
+		chat.messages.push(saved)
+		chat.lastMessage = saved.content
+		newMessageText.value = ''
+		nextTick(() => handleScrollToBottom())
+	} catch (err: any) {
+		toastError(err?.message || 'Nie udało się wysłać wiadomości')
 	}
-	chat.messages.push(message)
-	chat.lastMessage = text
-	newMessageText.value = ''
-	nextTick(() => handleScrollToBottom())
 }
 
-// key handlers przeniesione do komponentów podrzędnych
+function handleLoadMore() {
+	const chatId = selectedChatId.value
+	if (chatId === null) return
+	const state = getChatState(chatId)
+	if (!state.hasMore) return
+	fetchMessages(chatId, true)
+}
 
 function handleScrollToBottom() {
 	chatPanelRef.value?.scrollToBottom?.()
@@ -194,7 +187,14 @@ function handleScrollToBottom() {
 							class="mt-3 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 						/>
 					</div>
+					<div v-if="chatsLoading" class="p-4 text-sm text-slate-600">
+						Ładowanie czatów...
+					</div>
+					<div v-else-if="chatsError" class="p-4 text-sm text-red-600">
+						{{ chatsError }}
+					</div>
 					<ChatList
+						v-else
 						:chats="filteredChats"
 						:selected-chat-id="selectedChatId"
 						@select-chat="handleSelectChat"
@@ -206,6 +206,13 @@ function handleScrollToBottom() {
 						ref="chatPanelRef"
 						:selected-chat="selectedChat"
 						:current-user-id="currentUserId"
+						:can-load-more="
+							selectedChat ? messagesState[selectedChat.id]?.hasMore : false
+						"
+						:is-loading-more="
+							selectedChat ? messagesState[selectedChat.id]?.loading : false
+						"
+						@load-more="handleLoadMore"
 					/>
 					<template v-if="selectedChat">
 						<MessageForm v-model="newMessageText" @submit="handleSendMessage" />

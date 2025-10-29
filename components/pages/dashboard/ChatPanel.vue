@@ -4,6 +4,8 @@ import type { Chat } from '~/types/Chat'
 const props = defineProps<{
 	selectedChat: Chat | null
 	currentUserId: number
+	canLoadMore?: boolean
+	isLoadingMore?: boolean
 }>()
 
 const messagesContainerRef = ref<HTMLDivElement | null>(null)
@@ -12,6 +14,18 @@ function scrollToBottom() {
 	const el = messagesContainerRef.value
 	if (!el) return
 	el.scrollTop = el.scrollHeight
+}
+
+const emit = defineEmits<{ (e: 'load-more'): void }>()
+
+function handleLoadMoreClick() {
+	emit('load-more')
+}
+
+function handleLoadMoreKeyDown(event: KeyboardEvent) {
+	if (event.key !== 'Enter' && event.key !== ' ') return
+	event.preventDefault()
+	emit('load-more')
 }
 
 defineExpose({ scrollToBottom })
@@ -26,9 +40,11 @@ defineExpose({ scrollToBottom })
 				<div
 					class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold"
 				>
-					{{ props.selectedChat.name.charAt(0) }}
+					{{ (props.selectedChat.name ?? '').charAt(0) || '?' }}
 				</div>
-				<h2 class="text-lg font-semibold text-gray-900">{{ props.selectedChat.name }}</h2>
+				<h2 class="text-lg font-semibold text-gray-900">
+					{{ props.selectedChat.name ?? 'Czat' }}
+				</h2>
 			</div>
 		</div>
 
@@ -36,6 +52,23 @@ defineExpose({ scrollToBottom })
 			ref="messagesContainerRef"
 			class="flex-1 overflow-y-auto px-4 md:px-6 py-4 space-y-4 bg-gray-50"
 		>
+			<div v-if="props.canLoadMore" class="flex justify-center">
+				<button
+					type="button"
+					class="text-sm text-blue-600 hover:text-blue-700 underline disabled:opacity-50"
+					:aria-label="
+						props.isLoadingMore
+							? 'Ładowanie starszych wiadomości'
+							: 'Załaduj starsze wiadomości'
+					"
+					:tabindex="0"
+					:disabled="props.isLoadingMore"
+					@click="handleLoadMoreClick"
+					@keydown="handleLoadMoreKeyDown"
+				>
+					{{ props.isLoadingMore ? 'Ładowanie...' : 'Załaduj starsze' }}
+				</button>
+			</div>
 			<div
 				v-for="m in props.selectedChat.messages"
 				:key="m.id"
