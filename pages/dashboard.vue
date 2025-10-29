@@ -1,156 +1,222 @@
 <script setup lang="ts">
-const { user, logout } = useAuth()
+import ChatList from '~/components/pages/dashboard/ChatList.vue'
+import ChatPanel from '~/components/pages/dashboard/ChatPanel.vue'
+import MessageForm from '~/components/pages/dashboard/MessageForm.vue'
 
-async function handleLogout() {
-	await logout()
-	await navigateTo('/login')
+type Message = {
+	id: number
+	chatId: number
+	senderId: number
+	senderName: string
+	content: string
+	createdAt: string
 }
 
+type Chat = {
+	id: number
+	name: string
+	avatar?: string
+	lastMessage: string
+	unreadCount: number
+	messages: Message[]
+}
+
+const currentUserId = 1
+
+const searchQuery = ref('')
+const selectedChatId = ref<number | null>(null)
+const newMessageText = ref('')
+const chatPanelRef = ref<any>(null)
+
+const chats = ref<Chat[]>([
+	{
+		id: 101,
+		name: 'Jan Kowalski',
+		avatar: '',
+		lastMessage: 'Jasne, widzimy się jutro!',
+		unreadCount: 2,
+		messages: [
+			{
+				id: 1,
+				chatId: 101,
+				senderId: 2,
+				senderName: 'Jan Kowalski',
+				content: 'Hej, pasuje Ci jutro?',
+				createdAt: new Date(Date.now() - 1000 * 60 * 60).toISOString()
+			},
+			{
+				id: 2,
+				chatId: 101,
+				senderId: 1,
+				senderName: 'Ty',
+				content: 'Tak, super.',
+				createdAt: new Date(Date.now() - 1000 * 60 * 45).toISOString()
+			},
+			{
+				id: 3,
+				chatId: 101,
+				senderId: 2,
+				senderName: 'Jan Kowalski',
+				content: 'Jasne, widzimy się jutro!',
+				createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString()
+			}
+		]
+	},
+	{
+		id: 102,
+		name: 'Zespół Frontend',
+		avatar: '',
+		lastMessage: 'Wrzuć proszę PR do review.',
+		unreadCount: 0,
+		messages: [
+			{
+				id: 1,
+				chatId: 102,
+				senderId: 3,
+				senderName: 'Anna',
+				content: 'Pamiętaj o testach e2e.',
+				createdAt: new Date(Date.now() - 1000 * 60 * 120).toISOString()
+			},
+			{
+				id: 2,
+				chatId: 102,
+				senderId: 1,
+				senderName: 'Ty',
+				content: 'Ok, dorzucę dzisiaj.',
+				createdAt: new Date(Date.now() - 1000 * 60 * 90).toISOString()
+			},
+			{
+				id: 3,
+				chatId: 102,
+				senderId: 4,
+				senderName: 'Marek',
+				content: 'Wrzuć proszę PR do review.',
+				createdAt: new Date(Date.now() - 1000 * 60 * 15).toISOString()
+			}
+		]
+	},
+	{
+		id: 103,
+		name: 'Kasia',
+		avatar: '',
+		lastMessage: 'Do zobaczenia!',
+		unreadCount: 5,
+		messages: [
+			{
+				id: 1,
+				chatId: 103,
+				senderId: 1,
+				senderName: 'Ty',
+				content: 'Dzięki za pomoc.',
+				createdAt: new Date(Date.now() - 1000 * 60 * 240).toISOString()
+			},
+			{
+				id: 2,
+				chatId: 103,
+				senderId: 5,
+				senderName: 'Kasia',
+				content: 'Nie ma sprawy. Do zobaczenia!',
+				createdAt: new Date(Date.now() - 1000 * 60 * 200).toISOString()
+			}
+		]
+	}
+])
+
 onMounted(() => {
-	console.log(user.value)
+	if (selectedChatId.value !== null) return
+	const firstChat = chats.value.at(0)
+	if (!firstChat) return
+	selectedChatId.value = firstChat.id
+	nextTick(() => handleScrollToBottom())
 })
+
+const filteredChats = computed(() => {
+	const query = searchQuery.value.trim().toLowerCase()
+	if (query.length === 0) return chats.value
+	return chats.value.filter((c) => c.name.toLowerCase().includes(query))
+})
+
+const selectedChat = computed<Chat | null>(() => {
+	if (selectedChatId.value === null) return null
+	return chats.value.find((c) => c.id === selectedChatId.value) ?? null
+})
+
+function handleSelectChat(chatId: number) {
+	if (selectedChatId.value === chatId) return
+	selectedChatId.value = chatId
+	const chat = chats.value.find((c) => c.id === chatId)
+	if (chat) chat.unreadCount = 0
+	nextTick(() => handleScrollToBottom())
+}
+
+function handleSendMessage() {
+	const chat = selectedChat.value
+	if (!chat) return
+	const text = newMessageText.value.trim()
+	if (text.length === 0) return
+	const newId = (chat.messages.at(-1)?.id ?? 0) + 1
+	const message: Message = {
+		id: newId,
+		chatId: chat.id,
+		senderId: currentUserId,
+		senderName: 'Ty',
+		content: text,
+		createdAt: new Date().toISOString()
+	}
+	chat.messages.push(message)
+	chat.lastMessage = text
+	newMessageText.value = ''
+	nextTick(() => handleScrollToBottom())
+}
+
+// key handlers przeniesione do komponentów podrzędnych
+
+function handleScrollToBottom() {
+	chatPanelRef.value?.scrollToBottom?.()
+}
 </script>
 
 <template>
-	<div class="min-h-screen bg-gray-50 py-8 px-4">
-		<div class="max-w-4xl mx-auto">
-			<div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-				<div class="flex items-center justify-between flex-wrap gap-4">
-					<div>
-						<h1 class="text-3xl font-bold text-gray-900 mb-2">User Dashboard</h1>
-						<p class="text-gray-600">Manage your profile and settings</p>
-					</div>
-					<div class="flex gap-3">
-						<NuxtLink
-							to="/users"
-							class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
-						>
-							User List
-						</NuxtLink>
-						<button
-							type="button"
-							class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors"
-							@click="handleLogout"
-						>
-							Logout
-						</button>
-					</div>
-				</div>
-			</div>
-
-			<div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-				<h2 class="text-xl font-bold text-gray-900 mb-4">Account Information</h2>
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<div>
-						<p class="text-sm text-gray-600">User ID</p>
-						<p class="font-medium text-gray-900">123456</p>
-					</div>
-					<div>
-						<p class="text-sm text-gray-600">Created Date</p>
-						<p class="font-medium text-gray-900">January 1, 2024</p>
-					</div>
-					<div>
-						<p class="text-sm text-gray-600">Last Activity</p>
-						<p class="font-medium text-gray-900">January 5, 2024</p>
-					</div>
-				</div>
-			</div>
-
-			<div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-				<h2 class="text-xl font-bold text-gray-900 mb-4">Edit Profile</h2>
-				<form class="space-y-4">
-					<div>
-						<label for="username" class="block text-sm font-medium text-gray-700 mb-2">
-							Username
-						</label>
+	<div class="h-screen w-screen bg-slate-50">
+		<div class="h-full w-full">
+			<div class="h-full flex bg-white">
+				<aside class="w-full md:w-96 border-r border-gray-200 flex flex-col">
+					<div
+						class="p-4 border-b border-gray-200 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60"
+					>
+						<h1 class="text-xl font-semibold text-slate-900">Wiadomości</h1>
+						<label for="chat-search" class="sr-only">Szukaj czatu</label>
 						<input
-							id="username"
+							id="chat-search"
+							v-model="searchQuery"
 							type="text"
-							class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+							placeholder="Szukaj..."
+							class="mt-3 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 						/>
 					</div>
+					<ChatList
+						:chats="filteredChats"
+						:selected-chat-id="selectedChatId"
+						@select-chat="handleSelectChat"
+					/>
+				</aside>
 
-					<div>
-						<label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-							Email
-						</label>
-						<input
-							id="email"
-							type="email"
-							class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-						/>
-					</div>
-
-					<button
-						type="submit"
-						class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
-					>
-						Save Changes
-					</button>
-				</form>
-			</div>
-
-			<div class="bg-white rounded-lg shadow-lg p-6">
-				<div class="flex items-center justify-between mb-4">
-					<h2 class="text-xl font-bold text-gray-900">Change Password</h2>
-					<button type="button" class="text-blue-600 hover:text-blue-700 font-medium">
-						Change Password
-					</button>
+				<div class="flex flex-col w-full">
+					<ChatPanel
+						ref="chatPanelRef"
+						:selected-chat="selectedChat"
+						:current-user-id="currentUserId"
+					/>
+					<template v-if="selectedChat">
+						<MessageForm v-model="newMessageText" @submit="handleSendMessage" />
+					</template>
 				</div>
 
-				<form class="space-y-4">
-					<div>
-						<label
-							for="current-password"
-							class="block text-sm font-medium text-gray-700 mb-2"
-						>
-							Current Password
-						</label>
-						<input
-							id="current-password"
-							type="password"
-							autocomplete="current-password"
-							class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-						/>
+				<section v-if="!selectedChat" class="md:hidden flex-1 flex flex-col">
+					<div class="flex-1 flex items-center justify-center text-gray-500">
+						Wybierz czat z listy po lewej
 					</div>
-
-					<div>
-						<label
-							for="new-password"
-							class="block text-sm font-medium text-gray-700 mb-2"
-						>
-							New Password
-						</label>
-						<input
-							id="new-password"
-							type="password"
-							autocomplete="new-password"
-							class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-						/>
-					</div>
-
-					<div>
-						<label
-							for="confirm-new-password"
-							class="block text-sm font-medium text-gray-700 mb-2"
-						>
-							Confirm New Password
-						</label>
-						<input
-							id="confirm-new-password"
-							type="password"
-							autocomplete="new-password"
-							class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-						/>
-					</div>
-
-					<button
-						type="submit"
-						class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
-					>
-						Change Password
-					</button>
-				</form>
+				</section>
 			</div>
 		</div>
 	</div>

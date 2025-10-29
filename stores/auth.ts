@@ -1,10 +1,5 @@
 import { useApi } from '~/composables/useApi'
-
-export interface User {
-	id: string
-	username: string
-	email: string
-}
+import type { User } from '~/types/Chat'
 
 export interface ApiResponse<T> {
 	data: T
