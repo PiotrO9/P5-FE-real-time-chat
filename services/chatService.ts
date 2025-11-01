@@ -8,7 +8,7 @@ export async function fetchChats() {
 }
 
 export async function fetchMessages(chatId: number, limit: number, offset: number) {
-    return await useApi<ApiResponse<MessagesResponse>>(
+	return await useApi<ApiResponse<MessagesResponse>>(
 		'GET',
 		`/api/messages/${chatId}/messages?limit=${limit}&offset=${offset}`
 	)
@@ -18,4 +18,8 @@ export async function sendMessage(chatId: number, content: string) {
 	return await useApi<ApiResponse<Message>>('POST', `/api/messages/${chatId}/messages`, {
 		content
 	})
+}
+
+export async function deleteMessage(messageId: string | number) {
+	return await useApi<ApiResponse<void>>('DELETE', `/api/messages/${messageId}`)
 }

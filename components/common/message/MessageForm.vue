@@ -1,7 +1,9 @@
 <script setup lang="ts">
-const props = defineProps<{
+interface Props {
 	modelValue: string
-}>()
+}
+
+const props = defineProps<Props>()
 
 const emit = defineEmits<{
 	(e: 'update:modelValue', value: string): void
@@ -16,10 +18,13 @@ function handleInput(event: Event) {
 
 function handleKeyDown(event: KeyboardEvent) {
 	if (event.key !== 'Enter') return
+
 	const isShift = event.shiftKey
+
 	if (isShift) return
+
 	event.preventDefault()
-	emit('submit')
+	handleSubmit()
 }
 
 function handleSubmit() {

@@ -3,13 +3,14 @@ export interface User {
 	email: string
 	lastSeen: string
 	createdAt: string
+	id: string
 }
 
 export type Message = {
 	id: number
 	chatId: number
 	senderId: number
-	senderName: string
+	senderUsername: string
 	content: string
 	createdAt: string
 }
@@ -18,7 +19,7 @@ export type Chat = {
 	id: number
 	name: string
 	avatar?: string
-	lastMessage: string
+	lastMessage: Message
 	unreadCount: number
 	messages: Message[]
 }

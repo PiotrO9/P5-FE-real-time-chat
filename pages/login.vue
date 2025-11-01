@@ -1,6 +1,6 @@
 <script setup lang="ts">
-const email = ref('test100@post.com')
-const password = ref('Password100@')
+const email = ref('jan.kowalski@example.com')
+const password = ref('password123')
 const { login, loading, error } = useAuth()
 
 async function handleSubmit(event: Event) {

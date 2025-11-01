@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import ChatList from '~/components/pages/dashboard/ChatList.vue'
-import ChatPanel from '~/components/pages/dashboard/ChatPanel.vue'
-import MessageForm from '~/components/pages/dashboard/MessageForm.vue'
+import ChatList from '~/components/common/chat/ChatList.vue'
+import ChatPanel from '~/components/common/chat/ChatPanel.vue'
+import MessageForm from '~/components/common/message/MessageForm.vue'
 import type { Chat, Message } from '~/types/Chat'
 import {
 	fetchChats as fetchChatsFromService,
 	fetchMessages as fetchMessagesFromService,
-	sendMessage as sendMessageToService
+	sendMessage as sendMessageToService,
+	deleteMessage as deleteMessageFromService
 } from '~/services/chatService'
 import type { ApiResponse } from '~/types/Api'
 import type { ChatsResponse } from '~/types/ChatsApi'
 
-// using ApiResponse from types/Api
-
 const { error: toastError } = useToast()
+const { user } = useAuth()
 
-const currentUserId = 0
+const currentUserId = computed(() => (user.value as any)?.id ?? 0)
 
 const searchQuery = ref('')
 const selectedChatId = ref<number | null>(null)
@@ -35,22 +35,30 @@ const messagesState = reactive<
 
 onMounted(async () => {
 	await fetchChats()
+
 	if (selectedChatId.value !== null) return
+
 	const firstChat = chats.value.at(0)
+
 	if (!firstChat) return
+
 	selectedChatId.value = firstChat.id
+
 	await fetchMessages(firstChat.id, false)
 	nextTick(() => handleScrollToBottom())
 })
 
 const filteredChats = computed(() => {
 	const query = searchQuery.value.trim().toLowerCase()
+
 	if (query.length === 0) return chats.value
+
 	return chats.value.filter((c) => c.name.toLowerCase().includes(query))
 })
 
 const selectedChat = computed<Chat | null>(() => {
 	if (selectedChatId.value === null) return null
+
 	return chats.value.find((c) => c.id === selectedChatId.value) ?? null
 })
 
@@ -58,18 +66,21 @@ async function fetchChats() {
 	try {
 		chatsLoading.value = true
 		chatsError.value = null
+
 		const res = (await fetchChatsFromService()) as ApiResponse<ChatsResponse>
 		const raw = res?.data
 		const list: any[] = Array.isArray(raw?.chats) ? raw.chats : []
-		chats.value = list.map((c) => ({
-			...c,
-			name: String(c?.name ?? c?.title ?? 'Czat'),
-			lastMessage: String(c?.lastMessage ?? ''),
-			unreadCount: Number.isFinite(c?.unreadCount) ? Number(c.unreadCount) : 0,
-			messages: Array.isArray(c?.messages) ? c.messages : []
+
+		chats.value = list.map((chat) => ({
+			...chat,
+			name: String(chat?.name ?? chat?.title ?? 'Czat'),
+			lastMessage: chat?.lastMessage,
+			unreadCount: Number.isFinite(chat?.unreadCount) ? Number(chat.unreadCount) : 0,
+			messages: Array.isArray(chat?.messages) ? chat.messages : []
 		}))
 	} catch (err: any) {
 		chatsError.value = err?.message || 'Nie udało się pobrać listy czatów'
+
 		toastError(chatsError.value || 'Błąd')
 	} finally {
 		chatsLoading.value = false
@@ -78,11 +89,13 @@ async function fetchChats() {
 
 function ensureChatState(chatId: number) {
 	if (messagesState[chatId]) return
+
 	messagesState[chatId] = { limit: 50, offset: 0, loading: false, error: null, hasMore: true }
 }
 
 function getChatState(chatId: number) {
 	ensureChatState(chatId)
+
 	return messagesState[chatId] as {
 		limit: number
 		offset: number
@@ -119,8 +132,12 @@ async function fetchMessages(chatId: number, append: boolean) {
 		}
 		state.offset = chat.messages.length
 		state.hasMore = items.length >= state.limit
+
 		if (items.length > 0) {
-			chat.lastMessage = items[items.length - 1]?.content || chat.lastMessage
+			const lastMsg = items[items.length - 1]
+			if (lastMsg) {
+				chat.lastMessage = lastMsg
+			}
 		}
 	} catch (err: any) {
 		state.error = err?.message || 'Nie udało się pobrać wiadomości'
@@ -141,15 +158,21 @@ function handleSelectChat(chatId: number) {
 
 async function handleSendMessage() {
 	const chat = selectedChat.value
+
 	if (!chat) return
+
 	const text = newMessageText.value.trim()
+
 	if (text.length === 0) return
+
 	try {
 		const res = await sendMessageToService(chat.id, text)
 		const saved = res.data as unknown as Message
+
 		chat.messages.push(saved)
-		chat.lastMessage = saved.content
+		chat.lastMessage = saved as Message
 		newMessageText.value = ''
+
 		nextTick(() => handleScrollToBottom())
 	} catch (err: any) {
 		toastError(err?.message || 'Nie udało się wysłać wiadomości')
@@ -166,6 +189,25 @@ function handleLoadMore() {
 
 function handleScrollToBottom() {
 	chatPanelRef.value?.scrollToBottom?.()
+}
+
+async function handleDeleteMessage(messageId: string | number) {
+	const chat = selectedChat.value
+	if (!chat) return
+
+	try {
+		await deleteMessageFromService(messageId)
+		chat.messages = chat.messages.filter((m) => String(m.id) !== String(messageId))
+
+		const lastMessage = chat.messages[chat.messages.length - 1]
+		if (lastMessage) {
+			chat.lastMessage = lastMessage
+		} else {
+			chat.lastMessage = null as any
+		}
+	} catch (err: any) {
+		toastError(err?.message || 'Nie udało się usunąć wiadomości')
+	}
 }
 </script>
 
@@ -196,12 +238,12 @@ function handleScrollToBottom() {
 					<ChatList
 						v-else
 						:chats="filteredChats"
-						:selected-chat-id="selectedChatId"
+						:selected-chat-id="selectedChatId?.toString() ?? null"
 						@select-chat="handleSelectChat"
 					/>
 				</aside>
 
-				<div class="flex flex-col w-full">
+				<div class="flex-1 flex flex-col min-h-0 w-full">
 					<ChatPanel
 						ref="chatPanelRef"
 						:selected-chat="selectedChat"
@@ -213,6 +255,7 @@ function handleScrollToBottom() {
 							selectedChat ? messagesState[selectedChat.id]?.loading : false
 						"
 						@load-more="handleLoadMore"
+						@delete-message="handleDeleteMessage"
 					/>
 					<template v-if="selectedChat">
 						<MessageForm v-model="newMessageText" @submit="handleSendMessage" />
