@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Message, Reaction } from '~/types/Chat'
 import Dialog from '~/components/common/Dialog.vue'
+import EmojiTooltip from '~/components/common/emoji/EmojiTooltip.vue'
 import { addReaction, removeReaction } from '~/services/chatService'
 
 interface Props {
@@ -34,11 +35,8 @@ const isDeleting = ref(false)
 const showDeleteDialog = ref(false)
 const justClosedDialog = ref(false)
 
-const showReactionPicker = ref(false)
 const isReacting = ref(false)
-const reactionsContainerRef = ref<HTMLDivElement | null>(null)
-
-const quickReactions = ['👍', '❤️', '😄', '😮', '😢', '🙏']
+const emojiTooltipRef = ref<InstanceType<typeof EmojiTooltip> | null>(null)
 
 const senderDisplayName = computed(() => {
 	if (isOwnMessage.value) {
@@ -188,28 +186,17 @@ function handleMessageMouseEnter() {
 		if (isOwnMessage.value) {
 			showDeleteButton.value = true
 		}
-		showReactionPicker.value = true
+		emojiTooltipRef.value?.showTooltip()
 	}
 }
 
 function handleMessageMouseLeave() {
 	showDeleteButton.value = false
-	if (!showReactionPicker.value) {
-		return
-	}
-	setTimeout(() => {
-		if (!reactionsContainerRef.value?.matches(':hover')) {
-			showReactionPicker.value = false
-		}
-	}, 200)
+	emojiTooltipRef.value?.hideTooltip()
 }
 
-function handleReactionPickerMouseEnter() {
-	showReactionPicker.value = true
-}
-
-function handleReactionPickerMouseLeave() {
-	showReactionPicker.value = false
+function handleTooltipShowChange(_show: boolean) {
+	// Można użyć tego do dodatkowej logiki jeśli potrzeba
 }
 
 async function handleReactionClick(emoji: string) {
@@ -239,14 +226,6 @@ async function handleReactionClick(emoji: string) {
 		console.error('Błąd podczas obsługi reakcji:', error)
 	} finally {
 		isReacting.value = false
-		showReactionPicker.value = false
-	}
-}
-
-function handleReactionKeyDown(event: KeyboardEvent, emoji: string) {
-	if (event.key === 'Enter' || event.key === ' ') {
-		event.preventDefault()
-		handleReactionClick(emoji)
 	}
 }
 
@@ -313,30 +292,17 @@ function handleReactionBadgeKeyDown(event: KeyboardEvent, emoji: string) {
 						</button>
 					</div>
 
-					<div
-						v-if="showReactionPicker"
-						ref="reactionsContainerRef"
-						class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 flex gap-1 bg-white rounded-full px-2 py-1 shadow-lg border border-gray-200 z-20"
-						@mouseenter="handleReactionPickerMouseEnter"
-						@mouseleave="handleReactionPickerMouseLeave"
-					>
-						<button
-							v-for="emoji in quickReactions"
-							:key="emoji"
-							type="button"
-							tabindex="0"
-							:aria-label="`Dodaj reakcję ${emoji}`"
-							class="w-8 h-8 flex items-center justify-center text-lg hover:scale-125 transition-transform rounded-full hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-							:class="{
-								'bg-blue-50': hasUserReaction(emoji)
-							}"
-							:disabled="isReacting"
-							@click="handleReactionClick(emoji)"
-							@keydown="handleReactionKeyDown($event, emoji)"
-						>
-							{{ emoji }}
-						</button>
-					</div>
+					<EmojiTooltip
+						ref="emojiTooltipRef"
+						:message-id="message.id"
+						:current-user-id="currentUserId"
+						:grouped-reactions="groupedReactions"
+						:user-reactions="userReactions"
+						:is-deleting="isDeleting"
+						position="left"
+						@reaction-click="handleReactionClick"
+						@show-change="handleTooltipShowChange"
+					/>
 				</div>
 			</div>
 		</div>
@@ -420,30 +386,17 @@ function handleReactionBadgeKeyDown(event: KeyboardEvent, emoji: string) {
 					</button>
 				</div>
 
-				<div
-					v-if="showReactionPicker"
-					ref="reactionsContainerRef"
-					class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 flex gap-1 bg-white rounded-full px-2 py-1 shadow-lg border border-gray-200 z-20"
-					@mouseenter="handleReactionPickerMouseEnter"
-					@mouseleave="handleReactionPickerMouseLeave"
-				>
-					<button
-						v-for="emoji in quickReactions"
-						:key="emoji"
-						type="button"
-						tabindex="0"
-						:aria-label="`Dodaj reakcję ${emoji}`"
-						class="w-8 h-8 flex items-center justify-center text-lg hover:scale-125 transition-transform rounded-full hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-						:class="{
-							'bg-blue-50': hasUserReaction(emoji)
-						}"
-						:disabled="isReacting"
-						@click="handleReactionClick(emoji)"
-						@keydown="handleReactionKeyDown($event, emoji)"
-					>
-						{{ emoji }}
-					</button>
-				</div>
+				<EmojiTooltip
+					ref="emojiTooltipRef"
+					:message-id="message.id"
+					:current-user-id="currentUserId"
+					:grouped-reactions="groupedReactions"
+					:user-reactions="userReactions"
+					:is-deleting="isDeleting"
+					position="right"
+					@reaction-click="handleReactionClick"
+					@show-change="handleTooltipShowChange"
+				/>
 			</div>
 		</div>
 

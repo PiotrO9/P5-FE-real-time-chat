@@ -1,0 +1,161 @@
+<script setup lang="ts">
+import type { Reaction } from '~/types/Chat'
+
+interface GroupedReaction {
+	userIds: (string | number)[]
+	reactions: Reaction[]
+}
+
+interface Props {
+	messageId: string | number
+	currentUserId: string | number
+	groupedReactions: Record<string, GroupedReaction>
+	userReactions: Reaction[]
+	isDeleting: boolean
+	position: 'left' | 'right'
+}
+
+const props = defineProps<Props>()
+
+interface Emits {
+	(e: 'reaction-click', emoji: string): void
+	(e: 'show-change', show: boolean): void
+}
+
+const emit = defineEmits<Emits>()
+
+const showReactionPicker = ref(false)
+const reactionsContainerRef = ref<HTMLDivElement | null>(null)
+
+const groupedEmojiCategories = [
+	{
+		label: 'Szybkie',
+		emojis: ['👍', '❤️', '😄', '😮', '😢', '🙏']
+	},
+	{
+		label: 'Pozytywne',
+		emojis: ['😁', '😂', '🥳', '😎', '🤩', '😇', '😋', '🤗']
+	},
+	{
+		label: 'Negatywne',
+		emojis: ['😕', '😞', '😡', '😠', '😭', '🤬', '😤', '😢']
+	},
+	{
+		label: 'Gesty',
+		emojis: ['👍', '👎', '👏', '🙌', '🤝', '🤞', '✌️', '👊']
+	},
+	{
+		label: 'Emocje',
+		emojis: ['😅', '🤔', '😳', '😬', '🥹', '😴', '🤯', '🥶']
+	},
+	{
+		label: 'Zwierzęta',
+		emojis: ['🐶', '🐱', '🐻', '🦊', '🐸', '🐼', '🐧', '🦄']
+	},
+	{
+		label: 'Symbole',
+		emojis: ['⭐', '🔥', '💯', '✨', '⚡', '🎯', '🎉', '💎']
+	}
+]
+
+function hasUserReaction(emoji: string): boolean {
+	const reactionGroup = props.groupedReactions[emoji]
+	if (!reactionGroup) return false
+	const foundReaction = reactionGroup.reactions.find((r) => r.emoji === emoji)
+	if (!foundReaction) return false
+	return foundReaction.userIds.some((userId) => String(userId) === String(props.currentUserId))
+}
+
+function handleReactionPickerMouseEnter() {
+	showReactionPicker.value = true
+	emit('show-change', true)
+}
+
+function handleReactionPickerMouseLeave() {
+	showReactionPicker.value = false
+	emit('show-change', false)
+}
+
+function handleReactionClick(emoji: string) {
+	emit('reaction-click', emoji)
+	showReactionPicker.value = false
+	emit('show-change', false)
+}
+
+function handleReactionKeyDown(event: KeyboardEvent, emoji: string) {
+	if (event.key === 'Enter' || event.key === ' ') {
+		event.preventDefault()
+		handleReactionClick(emoji)
+	}
+}
+
+function showTooltip() {
+	if (!props.isDeleting) {
+		showReactionPicker.value = true
+		emit('show-change', true)
+	}
+}
+
+function hideTooltip() {
+	if (!showReactionPicker.value) return
+	setTimeout(() => {
+		if (!reactionsContainerRef.value?.matches(':hover')) {
+			showReactionPicker.value = false
+			emit('show-change', false)
+		}
+	}, 200)
+}
+
+defineExpose({
+	showTooltip,
+	hideTooltip,
+	showReactionPicker
+})
+</script>
+
+<template>
+	<div
+		v-if="showReactionPicker"
+		ref="reactionsContainerRef"
+		class="absolute top-1/2 -translate-y-1/2 flex flex-col gap-2 bg-white rounded-2xl p-2 shadow-xl border border-gray-200 z-20 w-64 max-h-80 overflow-y-auto"
+		:class="{
+			'left-full ml-2': position === 'left',
+			'right-full mr-2': position === 'right'
+		}"
+		@mouseenter="handleReactionPickerMouseEnter"
+		@mouseleave="handleReactionPickerMouseLeave"
+	>
+		<div v-for="group in groupedEmojiCategories" :key="group.label" class="flex flex-col">
+			<p class="text-xs font-medium text-gray-500 mb-1 ml-1">{{ group.label }}</p>
+			<div class="flex flex-wrap gap-1">
+				<button
+					v-for="emoji in group.emojis"
+					:key="emoji"
+					type="button"
+					tabindex="0"
+					:aria-label="`Dodaj reakcję ${emoji}`"
+					class="w-8 h-8 flex items-center justify-center text-lg transition-transform rounded-full hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+					:class="{
+						'bg-blue-50': hasUserReaction(emoji),
+						'hover:scale-110': true
+					}"
+					@click="handleReactionClick(emoji)"
+					@keydown="handleReactionKeyDown($event, emoji)"
+				>
+					{{ emoji }}
+				</button>
+			</div>
+		</div>
+	</div>
+</template>
+
+<style scoped>
+::-webkit-scrollbar {
+	width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+	background-color: #ccc;
+	border-radius: 3px;
+}
+</style>

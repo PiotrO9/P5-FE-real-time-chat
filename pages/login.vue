@@ -1,8 +1,9 @@
 <script setup lang="ts">
-const title = ref('Login')
-const email = ref('jan.kowalski@example.com')
-const password = ref('Password1234@')
 const { login, loading, error } = useAuth()
+
+const title = ref('Login')
+const email = ref('')
+const password = ref('')
 
 async function handleSubmit(event: Event) {
 	event.preventDefault()
