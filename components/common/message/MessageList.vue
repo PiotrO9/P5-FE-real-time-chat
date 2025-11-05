@@ -8,6 +8,7 @@ interface Props {
 
 interface Emits {
 	(e: 'delete-message', messageId: string | number): void
+	(e: 'reaction-updated'): void
 }
 
 const props = defineProps<Props>()
@@ -18,6 +19,10 @@ const messagesList = computed(() => props.messages)
 function handleDeleteMessage(messageId: string | number) {
 	emit('delete-message', messageId)
 }
+
+function handleReactionUpdated() {
+	emit('reaction-updated')
+}
 </script>
 
 <template>
@@ -26,5 +31,6 @@ function handleDeleteMessage(messageId: string | number) {
 		:key="message.id"
 		:message="message"
 		@delete="handleDeleteMessage"
+		@reaction-updated="handleReactionUpdated"
 	/>
 </template>

@@ -209,6 +209,13 @@ async function handleDeleteMessage(messageId: string | number) {
 		toastError(err?.message || 'Nie udało się usunąć wiadomości')
 	}
 }
+
+async function handleReactionUpdated() {
+	const chatId = selectedChatId.value
+	if (chatId === null) return
+
+	await fetchMessages(chatId, false)
+}
 </script>
 
 <template>
@@ -256,6 +263,7 @@ async function handleDeleteMessage(messageId: string | number) {
 						"
 						@load-more="handleLoadMore"
 						@delete-message="handleDeleteMessage"
+						@reaction-updated="handleReactionUpdated"
 					/>
 					<template v-if="selectedChat">
 						<MessageForm v-model="newMessageText" @submit="handleSendMessage" />

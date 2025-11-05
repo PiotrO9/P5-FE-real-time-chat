@@ -6,6 +6,12 @@ export interface MessageReadItem {
 	readAt: string
 }
 
+export interface Reaction {
+	emoji: string
+	userId: UUID
+	username: string
+}
+
 export interface MessagesApiItem {
 	id: UUID
 	chatId: UUID
@@ -16,7 +22,7 @@ export interface MessagesApiItem {
 	createdAt: string
 	updatedAt: string
 	replyTo: UUID | null
-	reactions: unknown[]
+	reactions: Reaction[]
 	reads: MessageReadItem[]
 }
 

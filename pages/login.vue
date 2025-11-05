@@ -14,6 +14,7 @@ async function handleSubmit(event: Event) {
 		await login(email.value, password.value)
 		await navigateTo('/dashboard')
 	} catch (err) {
+		console.log(err)
 		console.error('Login failed:', err)
 	}
 }

@@ -23,3 +23,16 @@ export async function sendMessage(chatId: number, content: string) {
 export async function deleteMessage(messageId: string | number) {
 	return await useApi<ApiResponse<void>>('DELETE', `/api/messages/${messageId}`)
 }
+
+export async function addReaction(messageId: string | number, emoji: string) {
+	return await useApi<ApiResponse<void>>('POST', `/api/messages/${messageId}/reactions`, {
+		emoji
+	})
+}
+
+export async function removeReaction(messageId: string | number, emoji: string) {
+	return await useApi<ApiResponse<void>>(
+		'DELETE',
+		`/api/messages/${messageId}/reactions/${emoji}}`
+	)
+}

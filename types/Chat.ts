@@ -6,6 +6,12 @@ export interface User {
 	id: string
 }
 
+export interface Reaction {
+	emoji: string
+	userId: number | string
+	username: string
+}
+
 export type Message = {
 	id: number
 	chatId: number
@@ -13,6 +19,7 @@ export type Message = {
 	senderUsername: string
 	content: string
 	createdAt: string
+	reactions?: Reaction[]
 }
 
 export type Chat = {

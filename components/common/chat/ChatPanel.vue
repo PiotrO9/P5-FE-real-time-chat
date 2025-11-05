@@ -30,7 +30,7 @@ function scrollToBottom() {
 }
 
 interface Emits {
-	(e: 'load-more'): void
+	(e: 'load-more' | 'reaction-updated'): void
 	(e: 'delete-message', messageId: string | number): void
 }
 
@@ -42,6 +42,10 @@ function handleLoadMore() {
 
 function handleDeleteMessage(messageId: string | number) {
 	emit('delete-message', messageId)
+}
+
+function handleReactionUpdated() {
+	emit('reaction-updated')
 }
 
 defineExpose({ scrollToBottom })
@@ -63,7 +67,12 @@ defineExpose({ scrollToBottom })
 
 			<EmptyState v-if="!hasMessages" />
 
-			<MessageList v-else :messages="messages" @delete-message="handleDeleteMessage" />
+			<MessageList
+				v-else
+				:messages="messages"
+				@delete-message="handleDeleteMessage"
+				@reaction-updated="handleReactionUpdated"
+			/>
 		</div>
 	</section>
 
