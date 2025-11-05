@@ -8,7 +8,7 @@ export interface User {
 
 export interface Reaction {
 	emoji: string
-	userId: number | string
+	userIds: (number | string)[]
 	username: string
 }
 

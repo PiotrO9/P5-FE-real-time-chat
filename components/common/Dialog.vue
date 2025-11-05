@@ -91,12 +91,10 @@ onMounted(() => {
 			@click="handleBackdropClick"
 		>
 			<div class="p-6">
-				<!-- Header slot -->
 				<header v-if="hasHeaderSlot" class="mb-3">
 					<slot name="header" />
 				</header>
 
-				<!-- Default title (if no header slot and title provided) -->
 				<h2
 					v-else-if="title"
 					id="dialog-title"
@@ -105,22 +103,18 @@ onMounted(() => {
 					{{ title }}
 				</h2>
 
-				<!-- Default slot for content -->
 				<div v-if="hasDefaultSlot" class="mb-6">
 					<slot />
 				</div>
 
-				<!-- Default message (if no default slot and message provided) -->
 				<p v-else-if="message" id="dialog-message" class="text-gray-600 mb-6">
 					{{ message }}
 				</p>
 
-				<!-- Footer slot -->
 				<footer v-if="hasFooterSlot">
 					<slot name="footer" />
 				</footer>
 
-				<!-- Default footer buttons (if no footer slot) -->
 				<div v-else class="flex justify-end gap-3">
 					<button
 						type="button"

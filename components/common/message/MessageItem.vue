@@ -11,7 +11,12 @@ const props = defineProps<Props>()
 
 interface Emits {
 	(e: 'delete', messageId: string | number): void
-	(e: 'reaction-updated'): void
+	(
+		e: 'reaction-updated',
+		messageId: string | number,
+		emoji: string,
+		action: 'add' | 'remove'
+	): void
 }
 
 const emit = defineEmits<Emits>()
@@ -75,14 +80,20 @@ const groupedReactions = computed<Record<string, GroupedReaction>>(() => {
 	reactions.value.forEach((reaction) => {
 		if (!groups[reaction.emoji]) {
 			groups[reaction.emoji] = {
-				userIds: [],
-				reactions: []
+				userIds: [...reaction.userIds],
+				reactions: [reaction]
 			}
-		}
-		const group = groups[reaction.emoji]
-		if (group && !group.userIds.includes(reaction.userId)) {
-			group.userIds.push(reaction.userId)
-			group.reactions.push(reaction)
+		} else {
+			const group = groups[reaction.emoji]
+			if (group) {
+				reaction.userIds.forEach((userId) => {
+					if (!group.userIds.includes(userId)) {
+						group.userIds.push(userId)
+					}
+				})
+
+				group.reactions.push(reaction)
+			}
 		}
 	})
 	return groups
@@ -91,7 +102,9 @@ const groupedReactions = computed<Record<string, GroupedReaction>>(() => {
 const hasReactions = computed(() => reactions.value.length > 0)
 
 const userReactions = computed(() => {
-	return reactions.value.filter((r) => String(r.userId) === String(currentUserId.value))
+	return reactions.value.filter((r) =>
+		r.userIds.some((userId) => String(userId) === String(currentUserId.value))
+	)
 })
 
 function hasUserReaction(emoji: string): boolean {
@@ -99,7 +112,11 @@ function hasUserReaction(emoji: string): boolean {
 
 	if (!reactionGroup) return false
 
-	return reactionGroup.userIds.some((userId) => String(userId) === String(currentUserId.value))
+	const foundReaction = reactionGroup.reactions.find((r) => r.emoji == emoji)
+
+	if (!foundReaction) return false
+
+	return foundReaction.userIds.some((userId) => String(userId) === String(currentUserId.value))
 }
 
 function getReactionCount(emoji: string): number {
@@ -199,24 +216,25 @@ async function handleReactionClick(emoji: string) {
 	if (isReacting.value) return
 
 	const hasThisReaction = hasUserReaction(emoji)
-	const currentUserReaction = userReactions.value[0]
+	const currentUserReaction = userReactions.value.find((r) => r.emoji === emoji)
 
 	try {
 		isReacting.value = true
 
-		// Jeśli użytkownik klika na reakcję, którą już ma - usuń ją
-		if (hasThisReaction) {
+		if (hasThisReaction || currentUserReaction) {
 			await removeReaction(message.value.id, emoji)
+			emit('reaction-updated', message.value.id, emoji, 'remove')
 		} else {
-			// Jeśli użytkownik ma inną reakcję - najpierw usuń starą, potem dodaj nową
-			if (currentUserReaction) {
-				await removeReaction(message.value.id, currentUserReaction.emoji)
-			}
-			// Dodaj nową reakcję
-			await addReaction(message.value.id, emoji)
-		}
+			const otherUserReaction = userReactions.value[0]
 
-		emit('reaction-updated')
+			if (otherUserReaction) {
+				await removeReaction(message.value.id, otherUserReaction.emoji)
+				emit('reaction-updated', message.value.id, otherUserReaction.emoji, 'remove')
+			}
+
+			await addReaction(message.value.id, emoji)
+			emit('reaction-updated', message.value.id, emoji, 'add')
+		}
 	} catch (error) {
 		console.error('Błąd podczas obsługi reakcji:', error)
 	} finally {
@@ -248,7 +266,6 @@ function handleReactionBadgeKeyDown(event: KeyboardEvent, emoji: string) {
 
 <template>
 	<div class="w-full flex group" :class="isOwnMessage ? 'justify-end' : 'justify-start'">
-		<!-- Wiadomości innych użytkowników: awatar + nazwa nadawcy + dymek -->
 		<div v-if="!isOwnMessage" class="flex items-start gap-2 max-w-[85%] relative">
 			<div
 				class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold flex-shrink-0"
@@ -275,7 +292,6 @@ function handleReactionBadgeKeyDown(event: KeyboardEvent, emoji: string) {
 						</p>
 					</div>
 
-					<!-- Reakcje pod wiadomością -->
 					<div v-if="hasReactions" class="flex flex-wrap gap-1 mt-1 px-1">
 						<button
 							v-for="(reactionGroup, emoji) in groupedReactions"
@@ -297,7 +313,6 @@ function handleReactionBadgeKeyDown(event: KeyboardEvent, emoji: string) {
 						</button>
 					</div>
 
-					<!-- Picker reakcji -->
 					<div
 						v-if="showReactionPicker"
 						ref="reactionsContainerRef"
@@ -326,7 +341,6 @@ function handleReactionBadgeKeyDown(event: KeyboardEvent, emoji: string) {
 			</div>
 		</div>
 
-		<!-- Twoje wiadomości: nazwa nadawcy + dymek, wyrównane do prawej -->
 		<div
 			v-else
 			class="flex flex-col items-end max-w-[85%] relative"
@@ -387,7 +401,6 @@ function handleReactionBadgeKeyDown(event: KeyboardEvent, emoji: string) {
 					</template>
 				</div>
 
-				<!-- Reakcje pod wiadomością -->
 				<div v-if="hasReactions" class="flex flex-wrap gap-1 mt-1 px-1 justify-end">
 					<button
 						v-for="(reactionGroup, emoji) in groupedReactions"
@@ -407,7 +420,6 @@ function handleReactionBadgeKeyDown(event: KeyboardEvent, emoji: string) {
 					</button>
 				</div>
 
-				<!-- Picker reakcji -->
 				<div
 					v-if="showReactionPicker"
 					ref="reactionsContainerRef"

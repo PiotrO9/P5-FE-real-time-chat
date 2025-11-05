@@ -210,11 +210,48 @@ async function handleDeleteMessage(messageId: string | number) {
 	}
 }
 
-async function handleReactionUpdated() {
-	const chatId = selectedChatId.value
-	if (chatId === null) return
+function handleReactionUpdated(
+	messageId: string | number,
+	emoji: string,
+	action: 'add' | 'remove'
+) {
+	const chat = selectedChat.value
+	if (!chat) return
 
-	await fetchMessages(chatId, false)
+	const message = chat.messages.find((m) => String(m.id) === String(messageId))
+	if (!message) return
+
+	if (!message.reactions) {
+		message.reactions = []
+	}
+
+	if (action === 'add') {
+		const existingReaction = message.reactions.find((r) => r.emoji === emoji)
+
+		if (existingReaction) {
+			if (!existingReaction.userIds.includes(currentUserId.value)) {
+				existingReaction.userIds.push(currentUserId.value)
+			}
+		} else {
+			message.reactions.push({
+				emoji,
+				userIds: [currentUserId.value],
+				username: user.value?.username || ''
+			})
+		}
+	} else {
+		const existingReaction = message.reactions.find((r) => r.emoji === emoji)
+
+		if (existingReaction) {
+			existingReaction.userIds = existingReaction.userIds.filter(
+				(id) => String(id) !== String(currentUserId.value)
+			)
+
+			if (existingReaction.userIds.length === 0) {
+				message.reactions = message.reactions.filter((r) => r.emoji !== emoji)
+			}
+		}
+	}
 }
 </script>
 

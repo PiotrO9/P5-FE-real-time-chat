@@ -8,7 +8,12 @@ interface Props {
 
 interface Emits {
 	(e: 'delete-message', messageId: string | number): void
-	(e: 'reaction-updated'): void
+	(
+		e: 'reaction-updated',
+		messageId: string | number,
+		emoji: string,
+		action: 'add' | 'remove'
+	): void
 }
 
 const props = defineProps<Props>()
@@ -20,8 +25,12 @@ function handleDeleteMessage(messageId: string | number) {
 	emit('delete-message', messageId)
 }
 
-function handleReactionUpdated() {
-	emit('reaction-updated')
+function handleReactionUpdated(
+	messageId: string | number,
+	emoji: string,
+	action: 'add' | 'remove'
+) {
+	emit('reaction-updated', messageId, emoji, action)
 }
 </script>
 

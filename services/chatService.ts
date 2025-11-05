@@ -33,6 +33,6 @@ export async function addReaction(messageId: string | number, emoji: string) {
 export async function removeReaction(messageId: string | number, emoji: string) {
 	return await useApi<ApiResponse<void>>(
 		'DELETE',
-		`/api/messages/${messageId}/reactions/${emoji}}`
+		`/api/messages/${messageId}/reactions/${emoji}`
 	)
 }

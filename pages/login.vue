@@ -1,6 +1,7 @@
 <script setup lang="ts">
+const title = ref('Login')
 const email = ref('jan.kowalski@example.com')
-const password = ref('password123')
+const password = ref('Password1234@')
 const { login, loading, error } = useAuth()
 
 async function handleSubmit(event: Event) {
@@ -13,8 +14,7 @@ async function handleSubmit(event: Event) {
 	try {
 		await login(email.value, password.value)
 		await navigateTo('/dashboard')
-	} catch (err) {
-		console.log(err)
+	} catch (err: any) {
 		console.error('Login failed:', err)
 	}
 }
@@ -25,7 +25,7 @@ async function handleSubmit(event: Event) {
 		<div class="max-w-md w-full">
 			<div class="bg-white rounded-lg shadow-lg p-8">
 				<div class="text-center mb-8">
-					<h1 class="text-3xl font-bold text-gray-900 mb-2">Login</h1>
+					<h1 class="text-3xl font-bold text-gray-900 mb-2">{{ title }}</h1>
 					<p class="text-gray-600">Welcome back!</p>
 				</div>
 

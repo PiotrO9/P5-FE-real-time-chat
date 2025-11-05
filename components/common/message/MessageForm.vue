@@ -34,7 +34,7 @@ function handleSubmit() {
 
 <template>
 	<form
-		class="border-t border-gray-200 px-4 md:px-6 py-3 flex items-end gap-3 bg-white"
+		class="border-t border-gray-200 md:px-3 py-3 flex items-end gap-3 bg-white"
 		@submit.prevent="handleSubmit"
 	>
 		<label for="message" class="sr-only">Wiadomość</label>

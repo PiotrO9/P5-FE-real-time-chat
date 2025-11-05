@@ -17,15 +17,18 @@ export const useAuthStore = defineStore('auth', () => {
 		try {
 			loading.value = true
 			error.value = null
+
 			const response = await useApi<ApiResponse<{ user: User }>>('POST', '/api/auth/login', {
 				email,
 				password
 			})
+
 			user.value = response.data.user
 			isAuthenticated.value = true
 			return response
 		} catch (err: any) {
-			error.value = err?.message || 'Failed to login'
+			const errorMessage = err?.response?._data?.message
+			error.value = errorMessage
 			isAuthenticated.value = false
 			throw err
 		} finally {
