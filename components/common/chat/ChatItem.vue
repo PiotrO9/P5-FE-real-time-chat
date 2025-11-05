@@ -14,7 +14,9 @@ const chatData = computed(() => props.chat)
 const selected = computed(() => props.isSelected)
 
 const chatInitial = computed(() => (chatData.value.name ?? '').charAt(0) || '?')
-const chatName = computed(() => chatData.value.name ?? 'Czat')
+const chatName = computed(() =>
+	chatData.value.isGroup ? chatData.value.name : chatData.value.otherUser.username
+)
 const lastMessage = computed(() => chatData.value.lastMessage?.content || '')
 const unreadCount = computed(() => Number(chatData.value.unreadCount))
 

@@ -23,10 +23,24 @@ export type Message = {
 }
 
 export type Chat = {
+	createdAt: string
 	id: number
+	isGroup: boolean
+	lastMessage: Message
 	name: string
 	avatar?: string
-	lastMessage: Message
+	otherUser: User
 	unreadCount: number
 	messages: Message[]
+}
+
+export interface Friend {
+	id: string | number
+	username: string
+	email: string
+	avatar?: string
+	lastSeen?: string
+	isOnline?: boolean
+	friendshipCreatedAt?: string
+	createdAt?: string
 }
