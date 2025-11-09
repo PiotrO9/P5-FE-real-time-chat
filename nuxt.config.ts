@@ -21,5 +21,12 @@ export default defineNuxtConfig({
 			socketUrl: process.env.NUXT_PUBLIC_SOCKET_URL || 'http://localhost:3000',
 			apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:3000'
 		}
+	},
+
+	app: {
+		head: {
+			title: 'Realtime Chat'
+		},
+		link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }]
 	}
 })

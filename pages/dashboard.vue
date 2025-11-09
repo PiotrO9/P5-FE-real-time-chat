@@ -936,210 +936,219 @@ function handleReactionUpdated(
 	<div class="h-screen w-screen bg-slate-50">
 		<div class="h-full w-full">
 			<div class="h-full flex bg-white">
-				<aside class="w-full md:w-96 border-r border-gray-200 flex flex-col">
-					<div
-						class="p-4 border-b border-gray-200 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60"
-					>
-						<div class="flex items-center justify-between mb-3">
-							<h1 class="text-xl font-semibold text-slate-900">
-								{{ viewMode === 'chats' ? 'Wiadomości' : 'Znajomi' }}
-							</h1>
-							<div class="flex gap-1">
-								<button
-									type="button"
-									:class="[
-										'px-3 py-1.5 text-xs font-medium rounded-lg transition-colors',
-										viewMode === 'chats'
-											? 'bg-blue-500 text-white'
-											: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-									]"
-									tabindex="0"
-									aria-label="Widok czatów"
-									@click="handleViewModeChange('chats')"
-									@keydown.enter="handleViewModeChange('chats')"
-									@keydown.space.prevent="handleViewModeChange('chats')"
-								>
-									Czaty
-								</button>
-								<button
-									type="button"
-									:class="[
-										'px-3 py-1.5 text-xs font-medium rounded-lg transition-colors',
-										viewMode === 'friends'
-											? 'bg-blue-500 text-white'
-											: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-									]"
-									tabindex="0"
-									aria-label="Widok znajomych"
-									@click="handleViewModeChange('friends')"
-									@keydown.enter="handleViewModeChange('friends')"
-									@keydown.space.prevent="handleViewModeChange('friends')"
-								>
-									Znajomi
-								</button>
-							</div>
-						</div>
-
-						<template v-if="viewMode === 'friends'">
-							<div class="flex gap-2 mb-3">
-								<button
-									type="button"
-									:class="[
-										'flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors',
-										friendsSubView === 'list'
-											? 'bg-blue-500 text-white'
-											: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-									]"
-									tabindex="0"
-									aria-label="Lista znajomych"
-									@click="handleFriendsSubViewChange('list')"
-									@keydown.enter="handleFriendsSubViewChange('list')"
-									@keydown.space.prevent="handleFriendsSubViewChange('list')"
-								>
-									Znajomi
-								</button>
-								<button
-									type="button"
-									:class="[
-										'flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors relative',
-										friendsSubView === 'invites'
-											? 'bg-blue-500 text-white'
-											: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-									]"
-									tabindex="0"
-									aria-label="Zaproszenia"
-									@click="handleFriendsSubViewChange('invites')"
-									@keydown.enter="handleFriendsSubViewChange('invites')"
-									@keydown.space.prevent="handleFriendsSubViewChange('invites')"
-								>
-									Zaproszenia
-									<span
-										v-if="invites.totalPending > 0"
-										class="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center"
+				<aside class="w-full md:w-96 h-dvh border-gray-200 flex flex-col p-4 bg-gray">
+					<div class="flex flex-col rounded-lg bg-white h-full">
+						<div
+							class="p-4 border-b border-gray-200 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 rounded-t-[1.125rem]"
+						>
+							<div class="flex items-center justify-between mb-3">
+								<h1 class="text-xl font-semibold text-slate-900">
+									{{ viewMode === 'chats' ? 'Wiadomości' : 'Znajomi' }}
+								</h1>
+								<div class="flex gap-1">
+									<button
+										type="button"
+										:class="[
+											'px-3 py-1.5 text-xs font-medium rounded-lg transition-colors',
+											viewMode === 'chats'
+												? 'bg-blue-500 text-white'
+												: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+										]"
+										tabindex="0"
+										aria-label="Widok czatów"
+										@click="handleViewModeChange('chats')"
+										@keydown.enter="handleViewModeChange('chats')"
+										@keydown.space.prevent="handleViewModeChange('chats')"
 									>
-										{{ invites.totalPending > 9 ? '9+' : invites.totalPending }}
-									</span>
-								</button>
-								<button
-									type="button"
-									:class="[
-										'flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors',
-										friendsSubView === 'add'
-											? 'bg-blue-500 text-white'
-											: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-									]"
-									tabindex="0"
-									aria-label="Dodaj znajomych"
-									@click="handleFriendsSubViewChange('add')"
-									@keydown.enter="handleFriendsSubViewChange('add')"
-									@keydown.space.prevent="handleFriendsSubViewChange('add')"
-								>
-									Dodaj
-								</button>
+										Czaty
+									</button>
+									<button
+										type="button"
+										:class="[
+											'px-3 py-1.5 text-xs font-medium rounded-lg transition-colors',
+											viewMode === 'friends'
+												? 'bg-blue-500 text-white'
+												: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+										]"
+										tabindex="0"
+										aria-label="Widok znajomych"
+										@click="handleViewModeChange('friends')"
+										@keydown.enter="handleViewModeChange('friends')"
+										@keydown.space.prevent="handleViewModeChange('friends')"
+									>
+										Znajomi
+									</button>
+								</div>
 							</div>
-						</template>
+
+							<template v-if="viewMode === 'friends'">
+								<div class="flex gap-2 mb-3">
+									<button
+										type="button"
+										:class="[
+											'flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors',
+											friendsSubView === 'list'
+												? 'bg-blue-500 text-white'
+												: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+										]"
+										tabindex="0"
+										aria-label="Lista znajomych"
+										@click="handleFriendsSubViewChange('list')"
+										@keydown.enter="handleFriendsSubViewChange('list')"
+										@keydown.space.prevent="handleFriendsSubViewChange('list')"
+									>
+										Znajomi
+									</button>
+									<button
+										type="button"
+										:class="[
+											'flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors relative',
+											friendsSubView === 'invites'
+												? 'bg-blue-500 text-white'
+												: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+										]"
+										tabindex="0"
+										aria-label="Zaproszenia"
+										@click="handleFriendsSubViewChange('invites')"
+										@keydown.enter="handleFriendsSubViewChange('invites')"
+										@keydown.space.prevent="
+											handleFriendsSubViewChange('invites')
+										"
+									>
+										Zaproszenia
+										<span
+											v-if="invites.totalPending > 0"
+											class="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center"
+										>
+											{{
+												invites.totalPending > 9
+													? '9+'
+													: invites.totalPending
+											}}
+										</span>
+									</button>
+									<button
+										type="button"
+										:class="[
+											'flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors',
+											friendsSubView === 'add'
+												? 'bg-blue-500 text-white'
+												: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+										]"
+										tabindex="0"
+										aria-label="Dodaj znajomych"
+										@click="handleFriendsSubViewChange('add')"
+										@keydown.enter="handleFriendsSubViewChange('add')"
+										@keydown.space.prevent="handleFriendsSubViewChange('add')"
+									>
+										Dodaj
+									</button>
+								</div>
+							</template>
+
+							<template v-if="viewMode === 'chats'">
+								<label for="chat-search" class="sr-only">Szukaj czatu</label>
+								<input
+									id="chat-search"
+									v-model="searchQuery"
+									type="text"
+									placeholder="Szukaj..."
+									class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+								/>
+							</template>
+						</div>
 
 						<template v-if="viewMode === 'chats'">
-							<label for="chat-search" class="sr-only">Szukaj czatu</label>
-							<input
-								id="chat-search"
-								v-model="searchQuery"
-								type="text"
-								placeholder="Szukaj..."
-								class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+							<div v-if="chatsLoading" class="p-4 text-sm text-slate-600">
+								Ładowanie czatów...
+							</div>
+							<div v-else-if="chatsError" class="p-4 text-sm text-red-600">
+								{{ chatsError }}
+							</div>
+							<ChatList
+								v-else
+								:chats="filteredChats"
+								:selected-chat-id="selectedChatId?.toString() ?? null"
+								:typing-users-by-chat="typingUsersByChat"
+								@select-chat="handleSelectChat"
+							/>
+						</template>
+
+						<template v-else-if="viewMode === 'friends'">
+							<div v-if="friendsSubView === 'list'" class="h-full">
+								<div v-if="friendsLoading" class="p-4 text-sm text-slate-600">
+									Ładowanie znajomych...
+								</div>
+								<div v-else-if="friendsError" class="p-4 text-sm text-red-600">
+									{{ friendsError }}
+								</div>
+								<FriendsList
+									v-else
+									:friends="friends"
+									@remove-friend="handleRemoveFriend"
+									@start-chat="handleStartChat"
+								/>
+							</div>
+							<div v-else-if="friendsSubView === 'invites'">
+								<div v-if="invitesLoading" class="p-4 text-sm text-slate-600">
+									Ładowanie zaproszeń...
+								</div>
+								<div v-else-if="invitesError" class="p-4 text-sm text-red-600">
+									{{ invitesError }}
+								</div>
+								<InvitesPanel
+									v-else
+									:sent-invites="invites.sentInvites"
+									:received-invites="invites.receivedInvites"
+									@accept-invite="handleAcceptInvite"
+									@reject-invite="handleRejectInvite"
+								/>
+							</div>
+							<AddFriendsPanel v-else @add-friend="handleAddFriend" />
+						</template>
+					</div>
+				</aside>
+
+				<div class="p-4 pl-0 w-full bg-gray">
+					<div class="flex-1 flex flex-col min-h-0 w-full h-full">
+						<ChatPanel
+							ref="chatPanelRef"
+							:selected-chat="selectedChat"
+							:current-user-id="currentUserId"
+							:typing-users="currentTypingUsers"
+							:can-load-more="
+								selectedChat ? messagesState[selectedChat.id]?.hasMore : false
+							"
+							:is-loading-more="
+								selectedChat ? messagesState[selectedChat.id]?.loading : false
+							"
+							@load-more="handleLoadMore"
+							@delete-message="handleDeleteMessage"
+							@reaction-updated="handleReactionUpdated"
+							@toggle-actions="isActionsPanelOpen = !isActionsPanelOpen"
+						/>
+						<template v-if="selectedChat">
+							<MessageForm
+								v-model="newMessageText"
+								@submit="handleSendMessage"
+								@typing="handleTypingInput"
 							/>
 						</template>
 					</div>
 
-					<template v-if="viewMode === 'chats'">
-						<div v-if="chatsLoading" class="p-4 text-sm text-slate-600">
-							Ładowanie czatów...
-						</div>
-						<div v-else-if="chatsError" class="p-4 text-sm text-red-600">
-							{{ chatsError }}
-						</div>
-						<ChatList
-							v-else
-							:chats="filteredChats"
-							:selected-chat-id="selectedChatId?.toString() ?? null"
-							:typing-users-by-chat="typingUsersByChat"
-							@select-chat="handleSelectChat"
-						/>
-					</template>
-
-					<template v-else-if="viewMode === 'friends'">
-						<div v-if="friendsSubView === 'list'">
-							<div v-if="friendsLoading" class="p-4 text-sm text-slate-600">
-								Ładowanie znajomych...
-							</div>
-							<div v-else-if="friendsError" class="p-4 text-sm text-red-600">
-								{{ friendsError }}
-							</div>
-							<FriendsList
-								v-else
-								:friends="friends"
-								@remove-friend="handleRemoveFriend"
-								@start-chat="handleStartChat"
-							/>
-						</div>
-						<div v-else-if="friendsSubView === 'invites'">
-							<div v-if="invitesLoading" class="p-4 text-sm text-slate-600">
-								Ładowanie zaproszeń...
-							</div>
-							<div v-else-if="invitesError" class="p-4 text-sm text-red-600">
-								{{ invitesError }}
-							</div>
-							<InvitesPanel
-								v-else
-								:sent-invites="invites.sentInvites"
-								:received-invites="invites.receivedInvites"
-								@accept-invite="handleAcceptInvite"
-								@reject-invite="handleRejectInvite"
-							/>
-						</div>
-						<AddFriendsPanel v-else @add-friend="handleAddFriend" />
-					</template>
-				</aside>
-
-				<div class="flex-1 flex flex-col min-h-0 w-full">
-					<ChatPanel
-						ref="chatPanelRef"
-						:selected-chat="selectedChat"
+					<ChatActionsPanel
+						v-model="isActionsPanelOpen"
+						:chat="selectedChat"
 						:current-user-id="currentUserId"
-						:typing-users="currentTypingUsers"
-						:can-load-more="
-							selectedChat ? messagesState[selectedChat.id]?.hasMore : false
-						"
-						:is-loading-more="
-							selectedChat ? messagesState[selectedChat.id]?.loading : false
-						"
-						@load-more="handleLoadMore"
-						@delete-message="handleDeleteMessage"
-						@reaction-updated="handleReactionUpdated"
-						@toggle-actions="isActionsPanelOpen = !isActionsPanelOpen"
+						@chat-updated="handleChatUpdated"
 					/>
-					<template v-if="selectedChat">
-						<MessageForm
-							v-model="newMessageText"
-							@submit="handleSendMessage"
-							@typing="handleTypingInput"
-						/>
-					</template>
+
+					<section v-if="!selectedChat" class="md:hidden flex-1 flex flex-col">
+						<div class="flex-1 flex items-center justify-center text-gray-500">
+							Wybierz czat z listy po lewej
+						</div>
+					</section>
 				</div>
-
-				<!-- Panel akcji czatu -->
-				<ChatActionsPanel
-					v-model="isActionsPanelOpen"
-					:chat="selectedChat"
-					:current-user-id="currentUserId"
-					@chat-updated="handleChatUpdated"
-				/>
-
-				<section v-if="!selectedChat" class="md:hidden flex-1 flex flex-col">
-					<div class="flex-1 flex items-center justify-center text-gray-500">
-						Wybierz czat z listy po lewej
-					</div>
-				</section>
 			</div>
 		</div>
 	</div>

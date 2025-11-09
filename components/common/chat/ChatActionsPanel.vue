@@ -9,10 +9,15 @@ import {
 import { fetchFriends as fetchFriendsFromService } from '~/services/friendsService'
 import type { FriendResponse } from '~/types/FriendsApi'
 import { useToast } from '~/composables/useToast'
+import Icon from '../Icon.vue'
 
 interface Props {
 	chat: Chat | null
 	currentUserId: number | string
+}
+
+interface Emits {
+	(e: 'chat-updated', data: { members: ChatMember[]; currentUserRole?: Role }): void
 }
 
 const props = defineProps<Props>()
@@ -36,7 +41,12 @@ const isAddingUser = ref(false)
 const isRemovingUser = ref<string | null>(null)
 const chatDetailsLoading = ref(false)
 
-// Pobierz listę znajomych do dodania
+function handleAddUserClick(friend: Friend) {
+	addUserUsername.value = friend.username
+
+	handleAddUser()
+}
+
 async function fetchFriends() {
 	if (!isOwner.value) return
 
@@ -59,7 +69,6 @@ async function fetchFriends() {
 	}
 }
 
-// Pobierz szczegóły czatu z członkami
 async function fetchChatDetails() {
 	if (!chat.value) return
 
@@ -172,10 +181,13 @@ function getRoleColor(role: Role): string {
 }
 
 const availableFriends = computed(() => {
-	// Zwróć znajomych, którzy nie są jeszcze w czacie
 	const memberIds = members.value.map((m) => String(m.id))
 	return friends.value.filter((f) => !memberIds.includes(String(f.id)))
 })
+
+function handleToggleState() {
+	isOpen.value = !isOpen.value
+}
 
 watch(isOpen, (newValue) => {
 	if (newValue && isOwner.value) {
@@ -186,10 +198,6 @@ watch(isOpen, (newValue) => {
 	}
 })
 
-interface Emits {
-	(e: 'chat-updated', data: { members: ChatMember[]; currentUserRole?: Role }): void
-}
-
 const emit = defineEmits<Emits>()
 </script>
 
@@ -199,7 +207,6 @@ const emit = defineEmits<Emits>()
 			v-if="isOpen && chat && isGroupChat"
 			class="w-full md:w-80 border-l border-gray-200 bg-white flex flex-col"
 		>
-			<!-- Header -->
 			<div class="p-4 border-b border-gray-200 bg-white/80 backdrop-blur">
 				<div class="flex items-center justify-between mb-2">
 					<h2 class="text-lg font-semibold text-gray-900">Akcje czatu</h2>
@@ -208,24 +215,11 @@ const emit = defineEmits<Emits>()
 						tabindex="0"
 						aria-label="Zamknij panel akcji"
 						class="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-						@click="isOpen = false"
-						@keydown.enter="isOpen = false"
-						@keydown.space.prevent="isOpen = false"
+						@click="handleToggleState"
+						@keydown.enter="handleToggleState"
+						@keydown.space.prevent="handleToggleState"
 					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							class="h-5 w-5 text-gray-600"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-							stroke-width="2"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								d="M6 18L18 6M6 6l12 12"
-							/>
-						</svg>
+						<Icon name="remove" class="h-5 w-5 text-gray-600" />
 					</button>
 				</div>
 				<p class="text-sm text-gray-600">
@@ -233,11 +227,8 @@ const emit = defineEmits<Emits>()
 				</p>
 			</div>
 
-			<!-- Content -->
 			<div class="flex-1 overflow-y-auto">
-				<!-- Panel dla właściciela -->
 				<template v-if="isOwner">
-					<!-- Formularz dodawania użytkownika -->
 					<div class="p-4 border-b border-gray-200">
 						<h3 class="text-sm font-semibold text-gray-900 mb-3">Dodaj użytkownika</h3>
 						<div class="space-y-2">
@@ -263,7 +254,6 @@ const emit = defineEmits<Emits>()
 							</button>
 						</div>
 
-						<!-- Lista dostępnych znajomych -->
 						<div v-if="availableFriends.length > 0" class="mt-4">
 							<p class="text-xs text-gray-600 mb-2">Dostępni znajomi:</p>
 							<div class="space-y-1 max-h-32 overflow-y-auto">
@@ -274,8 +264,8 @@ const emit = defineEmits<Emits>()
 									tabindex="0"
 									:aria-label="`Dodaj ${friend.username} do czatu`"
 									class="w-full text-left px-2 py-1.5 text-xs rounded hover:bg-gray-100 transition-colors flex items-center justify-between"
-									@click="addUserUsername = friend.username; handleAddUser()"
-									@keydown.enter="addUserUsername = friend.username; handleAddUser()"
+									@click="handleAddUserClick(friend)"
+									@keydown.enter="handleAddUserClick(friend)"
 								>
 									<span class="font-medium">{{ friend.username }}</span>
 									<span
@@ -288,9 +278,10 @@ const emit = defineEmits<Emits>()
 						</div>
 					</div>
 
-					<!-- Lista członków z możliwością usunięcia -->
 					<div class="p-4">
-						<h3 class="text-sm font-semibold text-gray-900 mb-3">Członkowie ({{ members.length }})</h3>
+						<h3 class="text-sm font-semibold text-gray-900 mb-3">
+							Członkowie ({{ members.length }})
+						</h3>
 						<div v-if="chatDetailsLoading" class="text-sm text-gray-600">
 							Ładowanie...
 						</div>
@@ -337,27 +328,13 @@ const emit = defineEmits<Emits>()
 									@click="handleRemoveUser(String(member.id))"
 									@keydown.enter="handleRemoveUser(String(member.id))"
 								>
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										class="h-4 w-4"
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke="currentColor"
-										stroke-width="2"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-										/>
-									</svg>
+									<Icon name="bin" class="h-4 w-4" />
 								</button>
 							</div>
 						</div>
 					</div>
 				</template>
 
-				<!-- Panel dla zwykłego użytkownika -->
 				<template v-else>
 					<div class="p-4">
 						<h3 class="text-sm font-semibold text-gray-900 mb-3">
@@ -417,4 +394,3 @@ const emit = defineEmits<Emits>()
 	transform: translateX(100%);
 }
 </style>
-

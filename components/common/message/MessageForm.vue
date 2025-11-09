@@ -36,7 +36,7 @@ function handleSubmit() {
 
 <template>
 	<form
-		class="border-t border-gray-200 md:px-3 py-3 flex items-end gap-3 bg-white"
+		class="border-t border-gray-200 md:px-3 py-3 flex items-end gap-3 bg-white rounded-b-[1.125rem]"
 		@submit.prevent="handleSubmit"
 	>
 		<label for="message" class="sr-only">Wiadomość</label>
@@ -46,7 +46,7 @@ function handleSubmit() {
 			:tabindex="0"
 			:rows="1"
 			:placeholder="'Napisz wiadomość...'"
-			class="flex-1 resize-none px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+			class="flex-1 resize-none px-3 py-2 border border-gray-300 rounded-lg focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-transparent bg-white"
 			:value="props.modelValue"
 			@input="handleInput"
 			@keydown="handleKeyDown"

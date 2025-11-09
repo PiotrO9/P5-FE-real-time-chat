@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import Icon from '../Icon.vue'
+
 interface Props {
 	chatName: string
 	isGroupChat?: boolean
@@ -22,7 +24,7 @@ function handleToggleActions() {
 
 <template>
 	<div
-		class="border-b border-gray-200 px-6 py-4 flex items-center justify-between bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60"
+		class="border-b rounded-t-[1.125rem] border-gray-200 px-6 py-4 flex items-center justify-between bg-white backdrop-blur supports-[backdrop-filter]:bg-white"
 	>
 		<div class="flex items-center gap-3">
 			<div
@@ -44,20 +46,7 @@ function handleToggleActions() {
 			@keydown.enter="handleToggleActions"
 			@keydown.space.prevent="handleToggleActions"
 		>
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				class="h-5 w-5 text-gray-600"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke="currentColor"
-				stroke-width="2"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
-				/>
-			</svg>
+			<Icon name="context-menu-dots" class="h-5 w-5 text-gray-600" />
 		</button>
 	</div>
 </template>

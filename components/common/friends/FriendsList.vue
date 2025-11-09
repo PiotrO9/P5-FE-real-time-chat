@@ -59,7 +59,7 @@ function formatLastSeen(lastSeen?: string): string {
 </script>
 
 <template>
-	<div class="flex-1 overflow-y-auto bg-white">
+	<div class="flex-1 overflow-y-auto bg-white rounded-b-[1.125rem] max-h-[calc(100vh-150px)]">
 		<div v-if="friendsList.length === 0" class="p-8 text-center">
 			<p class="text-gray-500 text-sm">Nie masz jeszcze żadnych znajomych</p>
 			<p class="text-gray-400 text-xs mt-2">Dodaj znajomych, aby zacząć czatować</p>
@@ -102,19 +102,7 @@ function formatLastSeen(lastSeen?: string): string {
 								@keydown.enter.stop="handleRemoveFriend(friend.id, $event)"
 								@keydown.space.stop="handleRemoveFriend(friend.id, $event)"
 							>
-								<svg
-									class="w-5 h-5"
-									fill="none"
-									stroke="currentColor"
-									viewBox="0 0 24 24"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M6 18L18 6M6 6l12 12"
-									/>
-								</svg>
+								<Icon name="remove" class="w-5 h-5" />
 							</button>
 						</div>
 						<p class="text-xs text-gray-500 truncate">

@@ -79,7 +79,7 @@ defineExpose({ scrollToBottom })
 </script>
 
 <template>
-	<section v-if="selectedChat" class="hidden md:flex flex-1 flex-col min-h-0">
+	<section v-if="selectedChat" class="hidden md:flex flex-1 flex-col min-h-0 h-full">
 		<ChatHeader
 			:chat-name="chatName"
 			:is-group-chat="selectedChat.isGroup"
@@ -88,7 +88,7 @@ defineExpose({ scrollToBottom })
 
 		<div
 			ref="messagesContainerRef"
-			class="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 py-4 space-y-4 bg-gray-50 min-h-0"
+			class="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 py-4 space-y-4 bg-white min-h-0"
 		>
 			<LoadMoreButton
 				v-if="canLoadMore"

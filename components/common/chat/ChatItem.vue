@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import type { Chat } from '~/types/Chat'
+import UnreadMessagesCount from './UnreadMessages.vue'
+import UnreadMessages from './UnreadMessages.vue'
+import ChatItemActionsMenu from './ChatItemActionsMenu.vue'
 
 interface Props {
 	chat: Chat
@@ -44,18 +47,11 @@ const displayMessage = computed(() => {
 })
 
 const hasUnread = computed(() => Number(chatData.value.unreadCount) > 0)
-const isOver99 = computed(() => unreadCount.value > 99)
 
 const itemClasses = computed(() => {
 	const base =
-		'flex items-center gap-3 px-4 py-3 hover:bg-slate-50 focus:bg-slate-50 outline-none'
+		'flex items-center gap-3 px-4 py-3 hover:bg-slate-50 focus-visible:bg-slate-50 outline-none rounded-[0.625rem]'
 	return selected.value ? `${base} bg-blue-50` : base
-})
-
-const badgeClasses = computed(() => {
-	const base =
-		'inline-flex items-center justify-center font-semibold bg-blue-600 text-white rounded-full size-7 px-2'
-	return isOver99.value ? `${base} text-[10px]` : `${base} text-xs`
 })
 
 const ariaLabel = computed(() => `Otwórz czat: ${chatName.value}`)
@@ -72,7 +68,7 @@ function handleKeyDown(event: KeyboardEvent) {
 </script>
 
 <template>
-	<li class="cursor-pointer select-none">
+	<li class="cursor-pointer select-none border-none">
 		<div
 			tabindex="0"
 			role="option"
@@ -83,7 +79,7 @@ function handleKeyDown(event: KeyboardEvent) {
 			@keydown="handleKeyDown"
 		>
 			<div
-				class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold"
+				class="h-10 w-10 bg-blue-100 flex items-center justify-center text-blue-600 font-bold rounded"
 			>
 				{{ chatInitial }}
 			</div>
@@ -92,10 +88,6 @@ function handleKeyDown(event: KeyboardEvent) {
 					<p class="font-medium text-slate-900 truncate min-w-0">
 						{{ chatName }}
 					</p>
-					<span v-if="hasUnread" :class="`${badgeClasses} flex-shrink-0`">
-						{{ unreadCount > 99 ? '99+' : unreadCount }}
-					</span>
-					<span v-else class="size-7 flex-shrink-0" aria-hidden="true"></span>
 				</div>
 				<div
 					v-if="hasTypingUsers"
@@ -103,7 +95,6 @@ function handleKeyDown(event: KeyboardEvent) {
 						'text-sm truncate min-w-0 flex items-center gap-1.5 text-blue-600 italic'
 					]"
 				>
-					<!-- Animowane kropki w stylu Messengera -->
 					<div class="flex items-center gap-0.5 flex-shrink-0">
 						<span
 							class="w-1.5 h-1.5 bg-blue-600 rounded-full typing-dot"
@@ -124,6 +115,18 @@ function handleKeyDown(event: KeyboardEvent) {
 					{{ displayMessage }}
 				</p>
 			</div>
+			<ChatItemActionsMenu />
+			<UnreadMessages :unread-count :has-unread variant="simple" />
 		</div>
 	</li>
 </template>
+
+<style scoped>
+li {
+	&:hover {
+		&:deep(.chat-item-action-menu) {
+			display: flex;
+		}
+	}
+}
+</style>
