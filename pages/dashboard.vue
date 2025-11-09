@@ -23,16 +23,22 @@ import {
 import type { ApiResponse } from '~/types/Api'
 import type { ChatsResponse } from '~/types/ChatsApi'
 import type { FriendResponse, Invite } from '~/types/FriendsApi'
+import { useSocket } from '~/composables/useSocket'
 
 const { error: toastError, success: toastSuccess } = useToast()
 const { user } = useAuth()
+const { connect, disconnect, on, off, emit } = useSocket()
 
 const currentUserId = computed(() => (user.value as any)?.id ?? 0)
 
+// Stan przechowujący kto aktualnie pisze (chatId -> Map<userId, username>)
+const typingUsers = reactive<Record<string, Map<string | number, string>>>({})
+
 type ViewMode = 'chats' | 'friends'
+type SubView = 'list' | 'add' | 'invites'
 
 const viewMode = ref<ViewMode>('chats')
-const friendsSubView = ref<'list' | 'add' | 'invites'>('list')
+const friendsSubView = ref<SubView>('list')
 const searchQuery = ref('')
 const selectedChatId = ref<number | null>(null)
 const newMessageText = ref('')
@@ -219,7 +225,435 @@ function handleStartChat(friendId: string | number) {
 	toastError('Nie znaleziono czatu z tym znajomym')
 }
 
+// Funkcje do obsługi eventów WebSocket
+function mapMessageFromBackend(messageData: any): Message {
+	// Mapuj ID z string na number jeśli potrzeba
+	const id =
+		typeof messageData.id === 'string'
+			? Number(messageData.id) || messageData.id
+			: messageData.id
+	const chatId =
+		typeof messageData.chatId === 'string'
+			? Number(messageData.chatId) || messageData.chatId
+			: messageData.chatId
+	const senderId =
+		typeof messageData.senderId === 'string'
+			? Number(messageData.senderId) || messageData.senderId
+			: messageData.senderId
+
+	return {
+		id,
+		chatId,
+		senderId,
+		senderUsername: messageData.senderUsername,
+		content: messageData.content,
+		createdAt:
+			typeof messageData.createdAt === 'string'
+				? messageData.createdAt
+				: messageData.createdAt.toISOString(),
+		reactions: messageData.reactions?.map((r: any) => ({
+			emoji: r.emoji,
+			userIds: r.userIds.map((uid: any) =>
+				typeof uid === 'string' ? Number(uid) || uid : uid
+			),
+			username: r.username || ''
+		}))
+	}
+}
+
+function handleNewMessage(data: { chatId: string; message: any }) {
+	const chatId =
+		typeof data.chatId === 'string' ? Number(data.chatId) || data.chatId : data.chatId
+	const chat = chats.value.find((c) => String(c.id) === String(chatId))
+
+	if (!chat) {
+		// Jeśli nie ma czatu, odśwież listę czatów
+		fetchChats()
+		return
+	}
+
+	const mappedMessage = mapMessageFromBackend(data.message)
+
+	// Sprawdź czy wiadomość już nie istnieje (zapobieganie duplikatom)
+	if (!chat.messages.find((m) => String(m.id) === String(mappedMessage.id))) {
+		chat.messages.push(mappedMessage)
+		chat.lastMessage = mappedMessage
+
+		// Jeśli to nie jest aktualnie wybrany czat, zwiększ unreadCount
+		if (selectedChatId.value !== chat.id) {
+			chat.unreadCount++
+		}
+
+		// Jeśli to aktualnie wybrany czat, przewiń na dół
+		if (selectedChatId.value === chat.id) {
+			nextTick(() => handleScrollToBottom())
+		}
+	}
+}
+
+function handleMessageDeleted(data: { chatId: string; messageId: string }) {
+	const chatId =
+		typeof data.chatId === 'string' ? Number(data.chatId) || data.chatId : data.chatId
+	const chat = chats.value.find((c) => String(c.id) === String(chatId))
+	if (!chat) return
+
+	chat.messages = chat.messages.filter((m) => String(m.id) !== String(data.messageId))
+
+	// Zaktualizuj lastMessage
+	const lastMessage = chat.messages[chat.messages.length - 1]
+	if (lastMessage) {
+		chat.lastMessage = lastMessage
+	} else {
+		chat.lastMessage = null as any
+	}
+}
+
+function handleReactionAdded(data: {
+	chatId: string
+	messageId: string
+	reaction: { emoji: string; userId: string; username: string }
+}) {
+	const chatId =
+		typeof data.chatId === 'string' ? Number(data.chatId) || data.chatId : data.chatId
+	const chat = chats.value.find((c) => String(c.id) === String(chatId))
+	if (!chat) return
+
+	const message = chat.messages.find((m) => String(m.id) === String(data.messageId))
+	if (!message) return
+
+	if (!message.reactions) {
+		message.reactions = []
+	}
+
+	const userId =
+		typeof data.reaction.userId === 'string'
+			? Number(data.reaction.userId) || data.reaction.userId
+			: data.reaction.userId
+	const existingReaction = message.reactions.find((r) => r.emoji === data.reaction.emoji)
+
+	if (existingReaction) {
+		// Sprawdź czy użytkownik już nie dodał tej reakcji
+		if (!existingReaction.userIds.some((id) => String(id) === String(userId))) {
+			existingReaction.userIds.push(userId)
+		}
+	} else {
+		message.reactions.push({
+			emoji: data.reaction.emoji,
+			userIds: [userId],
+			username: data.reaction.username
+		})
+	}
+}
+
+function handleReactionRemoved(data: {
+	chatId: string
+	messageId: string
+	reaction: { emoji: string; userId: string }
+}) {
+	const chatId =
+		typeof data.chatId === 'string' ? Number(data.chatId) || data.chatId : data.chatId
+	const chat = chats.value.find((c) => String(c.id) === String(chatId))
+	if (!chat) return
+
+	const message = chat.messages.find((m) => String(m.id) === String(data.messageId))
+	if (!message || !message.reactions) return
+
+	const userId =
+		typeof data.reaction.userId === 'string'
+			? Number(data.reaction.userId) || data.reaction.userId
+			: data.reaction.userId
+	const existingReaction = message.reactions.find((r) => r.emoji === data.reaction.emoji)
+
+	if (existingReaction) {
+		existingReaction.userIds = existingReaction.userIds.filter(
+			(id) => String(id) !== String(userId)
+		)
+
+		// Jeśli nie ma już żadnych użytkowników z tą reakcją, usuń reakcję
+		if (existingReaction.userIds.length === 0) {
+			message.reactions = message.reactions.filter((r) => r.emoji !== data.reaction.emoji)
+		}
+	}
+}
+
+function handleTypingStart(data: { chatId: string; userId: string; username: string }) {
+	const chatId = String(data.chatId)
+	const userId =
+		typeof data.userId === 'string' ? Number(data.userId) || data.userId : data.userId
+
+	// Ignoruj własne eventy typing
+	if (String(userId) === String(currentUserId.value)) return
+
+	if (!typingUsers[chatId]) {
+		typingUsers[chatId] = new Map()
+	}
+	typingUsers[chatId].set(userId, data.username)
+}
+
+function handleTypingStop(data: { chatId: string; userId: string }) {
+	const chatId = String(data.chatId)
+	const userId =
+		typeof data.userId === 'string' ? Number(data.userId) || data.userId : data.userId
+
+	// Ignoruj własne eventy typing
+	if (String(userId) === String(currentUserId.value)) return
+
+	if (typingUsers[chatId]) {
+		typingUsers[chatId].delete(userId)
+		// Nie usuwamy klucza - zostawiamy pusty Map, computed zwróci pustą tablicę
+	}
+}
+
+// Funkcja pomocnicza do tworzenia systemowych wiadomości
+function createSystemMessage(
+	chatId: number | string,
+	systemType: 'member:added' | 'member:removed' | 'chat:created' | 'chat:updated',
+	systemData: {
+		userId?: string | number
+		username?: string
+		chatId?: string | number
+		updates?: any
+	}
+): Message {
+	const timestamp = Date.now()
+	const numericChatId = typeof chatId === 'string' ? Number(chatId) || 0 : chatId
+	return {
+		id: -timestamp, // Ujemne ID dla systemowych wiadomości
+		chatId: numericChatId,
+		senderId: 0,
+		senderUsername: 'System',
+		content: '',
+		createdAt: new Date().toISOString(),
+		isSystem: true,
+		systemType,
+		systemData
+	}
+}
+
+function handleMessageUpdated(data: { chatId: string; message: any }) {
+	const chatId =
+		typeof data.chatId === 'string' ? Number(data.chatId) || data.chatId : data.chatId
+	const chat = chats.value.find((c) => String(c.id) === String(chatId))
+	if (!chat) return
+
+	const mappedMessage = mapMessageFromBackend(data.message)
+	const messageIndex = chat.messages.findIndex((m) => String(m.id) === String(mappedMessage.id))
+
+	if (messageIndex !== -1) {
+		chat.messages[messageIndex] = mappedMessage
+		// Zaktualizuj lastMessage jeśli to była ostatnia wiadomość
+		if (chat.lastMessage && String(chat.lastMessage.id) === String(mappedMessage.id)) {
+			chat.lastMessage = mappedMessage
+		}
+	}
+}
+
+function handleMessageRead(data: {
+	chatId: string
+	messageId: string
+	reader: { userId: string; username: string; readAt: Date }
+}) {
+	const chatId =
+		typeof data.chatId === 'string' ? Number(data.chatId) || data.chatId : data.chatId
+	const chat = chats.value.find((c) => String(c.id) === String(chatId))
+	if (!chat) return
+
+	// Można tutaj dodać logikę do śledzenia przeczytanych wiadomości
+	// Na razie tylko logujemy
+	console.log('Message read:', data)
+}
+
+function handleUserStatus(data: { userId: string; isOnline: boolean; lastSeen?: Date }) {
+	const userId =
+		typeof data.userId === 'string' ? Number(data.userId) || data.userId : data.userId
+
+	// Aktualizuj status użytkownika w liście znajomych
+	const friend = friends.value.find((f) => String(f.id) === String(userId))
+	if (friend) {
+		friend.isOnline = data.isOnline
+		if (data.lastSeen) {
+			friend.lastSeen = data.lastSeen.toISOString()
+		}
+	}
+
+	// Aktualizuj status w czatach
+	chats.value.forEach((chat) => {
+		if (chat.otherUser && String(chat.otherUser.id) === String(userId)) {
+			// Można dodać logikę aktualizacji statusu w czacie
+		}
+	})
+}
+
+function handleChatCreated(_data: { chat: any }) {
+	// Odśwież listę czatów
+	fetchChats()
+}
+
+function handleChatUpdated(data: { chatId: string; updates: any }) {
+	const chatId =
+		typeof data.chatId === 'string' ? Number(data.chatId) || data.chatId : data.chatId
+	const chat = chats.value.find((c) => String(c.id) === String(chatId))
+	if (!chat) return
+
+	// Aktualizuj dane czatu
+	if (data.updates.name) {
+		chat.name = data.updates.name
+	}
+
+	// Dodaj systemową wiadomość o aktualizacji czatu
+	const systemMessage = createSystemMessage(chatId, 'chat:updated', {
+		chatId,
+		updates: data.updates
+	})
+	chat.messages.push(systemMessage)
+
+	if (selectedChatId.value === chat.id) {
+		nextTick(() => handleScrollToBottom())
+	}
+}
+
+function handleMemberAdded(data: { chatId: string; member: any }) {
+	const chatId =
+		typeof data.chatId === 'string' ? Number(data.chatId) || data.chatId : data.chatId
+	const chat = chats.value.find((c) => String(c.id) === String(chatId))
+	if (!chat) return
+
+	const memberId =
+		typeof data.member.userId === 'string'
+			? Number(data.member.userId) || data.member.userId
+			: data.member.userId
+	const username = data.member.username || data.member.user?.username || 'Nieznany użytkownik'
+
+	// Dodaj systemową wiadomość o dołączeniu członka
+	const systemMessage = createSystemMessage(chatId, 'member:added', {
+		userId: memberId,
+		username,
+		chatId
+	})
+	chat.messages.push(systemMessage)
+
+	if (selectedChatId.value === chat.id) {
+		nextTick(() => handleScrollToBottom())
+	}
+}
+
+function handleMemberRemoved(data: { chatId: string; userId: string }) {
+	const chatId =
+		typeof data.chatId === 'string' ? Number(data.chatId) || data.chatId : data.chatId
+	const chat = chats.value.find((c) => String(c.id) === String(chatId))
+	if (!chat) return
+
+	const userId =
+		typeof data.userId === 'string' ? Number(data.userId) || data.userId : data.userId
+
+	// Pobierz username z czatu lub znajomych
+	let username = 'Nieznany użytkownik'
+	if (chat.otherUser && String(chat.otherUser.id) === String(userId)) {
+		username = chat.otherUser.username
+	} else {
+		const friend = friends.value.find((f) => String(f.id) === String(userId))
+		if (friend) {
+			username = friend.username
+		}
+	}
+
+	// Dodaj systemową wiadomość o opuszczeniu członka
+	const systemMessage = createSystemMessage(chatId, 'member:removed', {
+		userId,
+		username,
+		chatId
+	})
+	chat.messages.push(systemMessage)
+
+	if (selectedChatId.value === chat.id) {
+		nextTick(() => handleScrollToBottom())
+	}
+}
+
+// Funkcje do wysyłania eventów typing
+let typingTimeout: NodeJS.Timeout | null = null
+let isTyping = false
+
+function handleTypingInput() {
+	if (!selectedChatId.value) return
+
+	const chatId = String(selectedChatId.value)
+
+	// Wyślij typing:start jeśli jeszcze nie wysłaliśmy
+	if (!isTyping) {
+		emit('typing:start', { chatId })
+		isTyping = true
+	}
+
+	// Reset timeout
+	if (typingTimeout) {
+		clearTimeout(typingTimeout)
+	}
+
+	// Wyślij typing:stop po 3 sekundach bez pisania
+	typingTimeout = setTimeout(() => {
+		if (isTyping) {
+			emit('typing:stop', { chatId })
+			isTyping = false
+		}
+		typingTimeout = null
+	}, 3000)
+}
+
+function handleMessageSent() {
+	if (!selectedChatId.value) return
+
+	const chatId = String(selectedChatId.value)
+
+	// Wyślij typing:stop gdy wysyłamy wiadomość
+	if (isTyping) {
+		emit('typing:stop', { chatId })
+		isTyping = false
+	}
+
+	if (typingTimeout) {
+		clearTimeout(typingTimeout)
+		typingTimeout = null
+	}
+}
+
+function setupWebSocketListeners() {
+	on('message:new', handleNewMessage)
+	on('message:updated', handleMessageUpdated)
+	on('message:deleted', handleMessageDeleted)
+	on('message:read', handleMessageRead)
+	on('reaction:added', handleReactionAdded)
+	on('reaction:removed', handleReactionRemoved)
+	on('typing:start', handleTypingStart)
+	on('typing:stop', handleTypingStop)
+	on('user:status', handleUserStatus)
+	on('chat:created', handleChatCreated)
+	on('chat:updated', handleChatUpdated)
+	on('member:added', handleMemberAdded)
+	on('member:removed', handleMemberRemoved)
+}
+
+function cleanupWebSocketListeners() {
+	off('message:new', handleNewMessage)
+	off('message:updated', handleMessageUpdated)
+	off('message:deleted', handleMessageDeleted)
+	off('message:read', handleMessageRead)
+	off('reaction:added', handleReactionAdded)
+	off('reaction:removed', handleReactionRemoved)
+	off('typing:start', handleTypingStart)
+	off('typing:stop', handleTypingStop)
+	off('user:status', handleUserStatus)
+	off('chat:created', handleChatCreated)
+	off('chat:updated', handleChatUpdated)
+	off('member:added', handleMemberAdded)
+	off('member:removed', handleMemberRemoved)
+}
+
 onMounted(async () => {
+	// Połącz z WebSocket
+	connect()
+	setupWebSocketListeners()
+
 	await fetchChats()
 
 	if (selectedChatId.value !== null) return
@@ -232,6 +666,35 @@ onMounted(async () => {
 
 	await fetchMessages(firstChat.id, false)
 	nextTick(() => handleScrollToBottom())
+})
+
+// Computed dla aktualnego czatu - lista użytkowników piszących
+const currentTypingUsers = computed(() => {
+	if (!selectedChatId.value) return []
+	const chatId = String(selectedChatId.value)
+	const users = typingUsers[chatId]
+	return users ? Array.from(users.values()) : []
+})
+
+// Computed dla wszystkich czatów - mapa chatId -> lista użytkowników piszących
+const typingUsersByChat = computed(() => {
+	const result: Record<number, string[]> = {}
+	chats.value.forEach((chat) => {
+		const chatId = String(chat.id)
+		const users = typingUsers[chatId]
+		if (users && users.size > 0) {
+			result[chat.id] = Array.from(users.values())
+		}
+	})
+	return result
+})
+
+onUnmounted(() => {
+	if (typingTimeout) {
+		clearTimeout(typingTimeout)
+	}
+	cleanupWebSocketListeners()
+	disconnect()
 })
 
 const filteredChats = computed(() => {
@@ -299,6 +762,11 @@ async function fetchMessages(chatId: number, append: boolean) {
 	try {
 		state.loading = true
 		state.error = null
+
+		if (!append) {
+			state.offset = 0
+		}
+
 		const res = await fetchMessagesFromService(chatId, state.limit, state.offset)
 
 		const raw = res?.data
@@ -351,14 +819,20 @@ async function handleSendMessage() {
 
 	if (text.length === 0) return
 
+	handleMessageSent() // Wyślij typing:stop
+
 	try {
 		const res = await sendMessageToService(chat.id, text)
 		const saved = res.data as unknown as Message
 
-		chat.messages.push(saved)
-		chat.lastMessage = saved as Message
-		newMessageText.value = ''
+		// Sprawdź czy wiadomość już nie została dodana przez WebSocket
+		const exists = chat.messages.find((m) => String(m.id) === String(saved.id))
+		if (!exists) {
+			chat.messages.push(saved)
+			chat.lastMessage = saved as Message
+		}
 
+		newMessageText.value = ''
 		nextTick(() => handleScrollToBottom())
 	} catch (err: any) {
 		toastError(err?.message || 'Nie udało się wysłać wiadomości')
@@ -571,6 +1045,7 @@ function handleReactionUpdated(
 							v-else
 							:chats="filteredChats"
 							:selected-chat-id="selectedChatId?.toString() ?? null"
+							:typing-users-by-chat="typingUsersByChat"
 							@select-chat="handleSelectChat"
 						/>
 					</template>
@@ -614,6 +1089,7 @@ function handleReactionUpdated(
 						ref="chatPanelRef"
 						:selected-chat="selectedChat"
 						:current-user-id="currentUserId"
+						:typing-users="currentTypingUsers"
 						:can-load-more="
 							selectedChat ? messagesState[selectedChat.id]?.hasMore : false
 						"
@@ -625,7 +1101,11 @@ function handleReactionUpdated(
 						@reaction-updated="handleReactionUpdated"
 					/>
 					<template v-if="selectedChat">
-						<MessageForm v-model="newMessageText" @submit="handleSendMessage" />
+						<MessageForm
+							v-model="newMessageText"
+							@submit="handleSendMessage"
+							@typing="handleTypingInput"
+						/>
 					</template>
 				</div>
 

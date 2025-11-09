@@ -5,6 +5,7 @@ import ChatItem from '../../common/chat/ChatItem.vue'
 interface Props {
 	chats: Chat[]
 	selectedChatId: string | null
+	typingUsersByChat?: Record<number, string[]>
 }
 
 const props = defineProps<Props>()
@@ -15,6 +16,7 @@ const emit = defineEmits<{
 
 const chatsList = computed(() => props.chats ?? [])
 const selectedId = computed(() => props.selectedChatId ?? '')
+const typingUsers = computed(() => props.typingUsersByChat ?? {})
 
 function handleSelectChat(chatId: number) {
 	emit('select-chat', chatId)
@@ -22,6 +24,10 @@ function handleSelectChat(chatId: number) {
 
 function isChatSelected(chatId: number) {
 	return selectedId.value === chatId.toString()
+}
+
+function getTypingUsers(chatId: number): string[] {
+	return typingUsers.value[chatId] ?? []
 }
 </script>
 
@@ -33,6 +39,7 @@ function isChatSelected(chatId: number) {
 				:key="chat.id"
 				:chat="chat"
 				:is-selected="isChatSelected(chat.id)"
+				:typing-users="getTypingUsers(chat.id)"
 				@select="handleSelectChat"
 			/>
 		</ul>

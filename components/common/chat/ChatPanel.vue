@@ -9,6 +9,7 @@ interface Props {
 	selectedChat: Chat | null
 	canLoadMore?: boolean
 	isLoadingMore?: boolean
+	typingUsers?: string[]
 }
 
 const props = defineProps<Props>()
@@ -20,6 +21,18 @@ const isLoadingMore = computed(() => props.isLoadingMore ?? false)
 const hasMessages = computed(() => (selectedChat.value?.messages.length ?? 0) > 0)
 const chatName = computed(() => selectedChat.value?.name ?? 'Czat')
 const messages = computed(() => selectedChat.value?.messages ?? [])
+
+const typingText = computed(() => {
+	if (!props.typingUsers || props.typingUsers.length === 0) return null
+
+	if (props.typingUsers.length === 1) {
+		return `${props.typingUsers[0]} pisze...`
+	}
+	if (props.typingUsers.length === 2) {
+		return `${props.typingUsers[0]} i ${props.typingUsers[1]} piszą...`
+	}
+	return `${props.typingUsers[0]} i ${props.typingUsers.length - 1} innych piszą...`
+})
 
 const messagesContainerRef = ref<HTMLDivElement | null>(null)
 
@@ -83,6 +96,33 @@ defineExpose({ scrollToBottom })
 				@delete-message="handleDeleteMessage"
 				@reaction-updated="handleReactionUpdated"
 			/>
+		</div>
+
+		<!-- Wskaźnik pisania - na dole, poza kontenerem scrollującym -->
+		<div v-if="typingText" class="px-4 md:px-6 py-2 bg-gray-50 border-t border-gray-200">
+			<div class="flex items-center gap-3">
+				<!-- Bąbelek wiadomości z animacją -->
+				<div
+					class="inline-flex items-center gap-1.5 bg-white rounded-2xl rounded-tl-sm px-4 py-2.5 shadow-sm border border-gray-200"
+				>
+					<!-- Animowane kropki w stylu Messengera -->
+					<div class="flex items-center gap-1 px-1">
+						<span
+							class="w-1.5 h-1.5 bg-gray-500 rounded-full typing-dot"
+							style="animation-delay: 0ms"
+						></span>
+						<span
+							class="w-1.5 h-1.5 bg-gray-500 rounded-full typing-dot"
+							style="animation-delay: 150ms"
+						></span>
+						<span
+							class="w-1.5 h-1.5 bg-gray-500 rounded-full typing-dot"
+							style="animation-delay: 300ms"
+						></span>
+					</div>
+					<span class="text-sm text-gray-600 font-medium">{{ typingText }}</span>
+				</div>
+			</div>
 		</div>
 	</section>
 

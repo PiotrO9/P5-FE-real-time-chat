@@ -12,6 +12,8 @@ export interface Reaction {
 	username: string
 }
 
+export type SystemMessageType = 'member:added' | 'member:removed' | 'chat:created' | 'chat:updated'
+
 export type Message = {
 	id: number
 	chatId: number
@@ -20,6 +22,14 @@ export type Message = {
 	content: string
 	createdAt: string
 	reactions?: Reaction[]
+	isSystem?: boolean
+	systemType?: SystemMessageType
+	systemData?: {
+		userId?: string | number
+		username?: string
+		chatId?: string | number
+		updates?: any
+	}
 }
 
 export type Chat = {

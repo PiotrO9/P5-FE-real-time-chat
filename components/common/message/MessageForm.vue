@@ -8,12 +8,14 @@ const props = defineProps<Props>()
 const emit = defineEmits<{
 	(e: 'update:modelValue', value: string): void
 	(e: 'submit'): void
+	(e: 'typing'): void
 }>()
 
 function handleInput(event: Event) {
 	const target = event.target as HTMLTextAreaElement | null
 	if (!target) return
 	emit('update:modelValue', target.value)
+	emit('typing')
 }
 
 function handleKeyDown(event: KeyboardEvent) {

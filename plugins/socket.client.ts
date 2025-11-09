@@ -7,9 +7,24 @@ export default defineNuxtPlugin(() => {
 	// Ustaw adres swojego backendu WebSocket
 	const socketUrl = config.public.socketUrl || 'http://localhost:3000'
 
+	// Funkcja do pobrania tokenu z cookies
+	function getTokenFromCookies(): string | null {
+		if (typeof document === 'undefined') return null
+
+		const cookies = document.cookie.split('; ')
+		const tokenCookie = cookies.find((row) => row.startsWith('accessToken='))
+		return tokenCookie ? tokenCookie.split('=')[1] : null
+	}
+
 	const socket: Socket = io(socketUrl, {
 		autoConnect: false, // Ręczne połączenie
-		transports: ['websocket', 'polling']
+		transports: ['websocket', 'polling'],
+		withCredentials: true, // Wysyłaj cookies
+		auth: (cb) => {
+			// Przekaż token w auth jeśli jest dostępny
+			const token = getTokenFromCookies()
+			cb({ token: token || undefined })
+		}
 	})
 
 	// Event handlers

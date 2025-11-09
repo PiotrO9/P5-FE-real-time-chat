@@ -1,12 +1,14 @@
 export type UUID = string
 
+export type Role = 'OWNER' | 'MODERATOR' | 'MEMBER'
+
 export interface ChatMember {
 	id: UUID
 	username: string
 	email: string
 	isOnline: boolean
 	lastSeen: string
-	role: 'OWNER' | 'MODERATOR' | 'MEMBER'
+	role: Role
 	joinedAt: string
 }
 

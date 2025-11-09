@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Message } from '~/types/Chat'
 import MessageItem from '../../common/message/MessageItem.vue'
+import SystemMessage from '../../common/message/SystemMessage.vue'
 
 interface Props {
 	messages: Message[]
@@ -35,11 +36,13 @@ function handleReactionUpdated(
 </script>
 
 <template>
-	<MessageItem
-		v-for="message in messagesList"
-		:key="message.id"
-		:message="message"
-		@delete="handleDeleteMessage"
-		@reaction-updated="handleReactionUpdated"
-	/>
+	<template v-for="message in messagesList" :key="message.id">
+		<SystemMessage v-if="message.isSystem" :message="message" />
+		<MessageItem
+			v-else
+			:message="message"
+			@delete="handleDeleteMessage"
+			@reaction-updated="handleReactionUpdated"
+		/>
+	</template>
 </template>

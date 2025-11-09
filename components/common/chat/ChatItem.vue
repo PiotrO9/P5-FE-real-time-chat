@@ -4,6 +4,7 @@ import type { Chat } from '~/types/Chat'
 interface Props {
 	chat: Chat
 	isSelected: boolean
+	typingUsers?: string[]
 }
 
 const props = defineProps<Props>()
@@ -19,6 +20,28 @@ const chatName = computed(() =>
 )
 const lastMessage = computed(() => chatData.value.lastMessage?.content || '')
 const unreadCount = computed(() => Number(chatData.value.unreadCount))
+
+const typingUsers = computed(() => props.typingUsers ?? [])
+const hasTypingUsers = computed(() => typingUsers.value.length > 0)
+
+const typingText = computed(() => {
+	if (!hasTypingUsers.value) return null
+
+	if (typingUsers.value.length === 1) {
+		return `${typingUsers.value[0]} pisze...`
+	}
+	if (typingUsers.value.length === 2) {
+		return `${typingUsers.value[0]} i ${typingUsers.value[1]} piszą...`
+	}
+	return `${typingUsers.value[0]} i ${typingUsers.value.length - 1} innych piszą...`
+})
+
+const displayMessage = computed(() => {
+	if (hasTypingUsers.value && typingText.value) {
+		return typingText.value
+	}
+	return lastMessage.value || 'Brak wiadomości'
+})
 
 const hasUnread = computed(() => Number(chatData.value.unreadCount) > 0)
 const isOver99 = computed(() => unreadCount.value > 99)
@@ -74,8 +97,31 @@ function handleKeyDown(event: KeyboardEvent) {
 					</span>
 					<span v-else class="size-7 flex-shrink-0" aria-hidden="true"></span>
 				</div>
-				<p class="text-sm text-slate-600 truncate min-w-0">
-					{{ lastMessage || 'Brak wiadomości' }}
+				<div
+					v-if="hasTypingUsers"
+					:class="[
+						'text-sm truncate min-w-0 flex items-center gap-1.5 text-blue-600 italic'
+					]"
+				>
+					<!-- Animowane kropki w stylu Messengera -->
+					<div class="flex items-center gap-0.5 flex-shrink-0">
+						<span
+							class="w-1.5 h-1.5 bg-blue-600 rounded-full typing-dot"
+							style="animation-delay: 0ms"
+						></span>
+						<span
+							class="w-1.5 h-1.5 bg-blue-600 rounded-full typing-dot"
+							style="animation-delay: 150ms"
+						></span>
+						<span
+							class="w-1.5 h-1.5 bg-blue-600 rounded-full typing-dot"
+							style="animation-delay: 300ms"
+						></span>
+					</div>
+					<span class="truncate">{{ typingText }}</span>
+				</div>
+				<p v-else :class="['text-sm truncate min-w-0 text-slate-600']">
+					{{ displayMessage }}
 				</p>
 			</div>
 		</div>
