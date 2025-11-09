@@ -1,3 +1,5 @@
+export type InviteStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED'
+
 export interface FriendResponse {
 	id: string
 	username: string
@@ -22,7 +24,7 @@ export interface InviteUser {
 
 export interface Invite {
 	id: string
-	status: 'PENDING' | 'ACCEPTED' | 'REJECTED'
+	status: InviteStatus
 	createdAt: string
 	receiver?: InviteUser
 	sender?: InviteUser

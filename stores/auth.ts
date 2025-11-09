@@ -1,10 +1,6 @@
 import { useApi } from '~/composables/useApi'
+import type { ApiResponse } from '~/types/Api'
 import type { User } from '~/types/Chat'
-
-export interface ApiResponse<T> {
-	data: T
-	message?: string
-}
 
 export const useAuthStore = defineStore('auth', () => {
 	const user = ref<User | null>(null)

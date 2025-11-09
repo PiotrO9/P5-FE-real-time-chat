@@ -6,779 +6,108 @@ import MessageForm from '~/components/common/message/MessageForm.vue'
 import FriendsList from '~/components/common/friends/FriendsList.vue'
 import AddFriendsPanel from '~/components/common/friends/AddFriendsPanel.vue'
 import InvitesPanel from '~/components/common/friends/InvitesPanel.vue'
-import type { Chat, Message, Friend } from '~/types/Chat'
-import {
-	fetchChats as fetchChatsFromService,
-	fetchMessages as fetchMessagesFromService,
-	sendMessage as sendMessageToService,
-	deleteMessage as deleteMessageFromService
-} from '~/services/chatService'
-import {
-	fetchFriends as fetchFriendsFromService,
-	sendFriendInvite,
-	fetchInvites as fetchInvitesFromService,
-	acceptInvite,
-	rejectInvite,
-	deleteFriend as deleteFriendFromService
-} from '~/services/friendsService'
-import type { ApiResponse } from '~/types/Api'
-import type { ChatsResponse } from '~/types/ChatsApi'
-import type { FriendResponse, Invite } from '~/types/FriendsApi'
 import { useSocket } from '~/composables/useSocket'
+import { useViewMode } from '~/composables/useViewMode'
+import { useChats } from '~/composables/useChats'
+import { useMessages } from '~/composables/useMessages'
+import { useFriends } from '~/composables/useFriends'
+import { useInvites } from '~/composables/useInvites'
+import { useTypingUsers } from '~/composables/useTypingUsers'
+import { useReactions } from '~/composables/useReactions'
+import { useSocketHandlers } from '~/composables/useSocketHandlers'
+import { toNumber } from '~/utils/typeHelpers'
+import { useToast } from '~/composables/useToast'
 
-const { error: toastError, success: toastSuccess } = useToast()
-const { connect, disconnect, on, off, emit } = useSocket()
 const { user } = useAuth()
 const chatStore = useChatStore()
+const { connect, disconnect, emit } = useSocket()
+const { error: toastError } = useToast()
 
-const currentUserId = computed(() => (user.value as any)?.id ?? 0)
+const currentUserId = computed(() => toNumber(user.value?.id ?? 0))
 const currentChat = computed(() => chatStore.currentChatDetails)
 
-const typingUsers = reactive<Record<string, Map<string | number, string>>>({})
+const viewModeComposable = useViewMode()
+const chatsComposable = useChats()
+const messagesComposable = useMessages(chatsComposable.chats, chatsComposable.selectedChatId)
+const friendsComposable = useFriends()
+const invitesComposable = useInvites()
+const typingUsersComposable = useTypingUsers(currentUserId)
+const reactionsComposable = useReactions(
+	chatsComposable.chats,
+	chatsComposable.selectedChatId,
+	currentUserId,
+	user
+)
 
-type ViewMode = 'chats' | 'friends'
-type SubView = 'list' | 'add' | 'invites'
-
-const viewMode = ref<ViewMode>('chats')
-const friendsSubView = ref<SubView>('list')
-const searchQuery = ref('')
-const selectedChatId = ref<number | null>(null)
-const newMessageText = ref('')
 const chatPanelRef = ref<any>(null)
 const isActionsPanelOpen = ref(false)
 
-const chats = ref<Chat[]>([])
-const chatsLoading = ref(false)
-const chatsError = ref<string | null>(null)
-
-const messagesState = reactive<
-	Record<
-		number,
-		{ limit: number; offset: number; loading: boolean; error: string | null; hasMore: boolean }
-	>
->({})
-
-const friends = ref<Friend[]>([])
-const friendsLoading = ref(false)
-const friendsError = ref<string | null>(null)
-
-const invites = ref<{
-	sentInvites: Invite[]
-	receivedInvites: Invite[]
-	totalSent: number
-	totalReceived: number
-	totalPending: number
-}>({
-	sentInvites: [],
-	receivedInvites: [],
-	totalSent: 0,
-	totalReceived: 0,
-	totalPending: 0
+const currentTypingUsers = computed(() => {
+	if (!chatsComposable.selectedChatId.value) return []
+	return typingUsersComposable.getTypingUsers(chatsComposable.selectedChatId.value)
 })
-const invitesLoading = ref(false)
-const invitesError = ref<string | null>(null)
 
-function mapFriendResponse(friend: FriendResponse): Friend {
-	return {
-		id: friend.id,
-		username: friend.username,
-		email: friend.email,
-		isOnline: friend.isOnline,
-		lastSeen: friend.lastSeen,
-		friendshipCreatedAt: friend.friendshipCreatedAt,
-		createdAt: friend.createdAt
-	}
-}
+const typingUsersByChat = computed(() => {
+	return typingUsersComposable.updateTypingUsersByChat(chatsComposable.chats.value)
+})
 
-async function fetchFriendsData() {
-	try {
-		friendsLoading.value = true
-		friendsError.value = null
+const socketHandlers = useSocketHandlers(
+	chatsComposable.chats,
+	friendsComposable.friends,
+	chatsComposable.selectedChatId,
+	currentUserId,
+	typingUsersComposable,
+	messagesComposable,
+	chatsComposable,
+	friendsComposable,
+	reactionsComposable,
+	handleScrollToBottom
+)
 
-		const res = await fetchFriendsFromService()
-		const raw = res?.data
-		const friendsList: FriendResponse[] = Array.isArray(raw?.friends) ? raw.friends : []
-
-		friends.value = friendsList.map(mapFriendResponse)
-	} catch (err: any) {
-		friendsError.value = err?.message || 'Failed to fetch friends list'
-		if (friendsError.value) {
-			toastError(friendsError.value)
-		}
-	} finally {
-		friendsLoading.value = false
-	}
-}
-
-async function fetchInvitesData() {
-	try {
-		invitesLoading.value = true
-		invitesError.value = null
-
-		const res = await fetchInvitesFromService()
-		const raw = res?.data
-
-		invites.value = {
-			sentInvites: Array.isArray(raw?.sentInvites) ? raw.sentInvites : [],
-			receivedInvites: Array.isArray(raw?.receivedInvites) ? raw.receivedInvites : [],
-			totalSent: raw?.totalSent ?? 0,
-			totalReceived: raw?.totalReceived ?? 0,
-			totalPending: raw?.totalPending ?? 0
-		}
-	} catch (err: any) {
-		invitesError.value = err?.message || 'Failed to fetch invitations'
-		if (invitesError.value) {
-			toastError(invitesError.value)
-		}
-	} finally {
-		invitesLoading.value = false
-	}
-}
-
-function handleViewModeChange(mode: ViewMode) {
-	viewMode.value = mode
+function handleViewModeChange(mode: 'chats' | 'friends') {
+	viewModeComposable.setViewMode(mode)
 	if (mode === 'friends') {
-		friendsSubView.value = 'list'
-		fetchFriendsData()
-		fetchInvitesData()
+		friendsComposable.fetchFriends()
+		invitesComposable.fetchInvites()
 	}
 }
 
 function handleFriendsSubViewChange(subView: 'list' | 'add' | 'invites') {
-	friendsSubView.value = subView
+	viewModeComposable.setFriendsSubView(subView)
+
 	if (subView === 'invites') {
-		fetchInvitesData()
-	}
-}
-
-async function handleAddFriend(username: string) {
-	if (!username.trim()) {
-		toastError('Please provide a username')
-		return
-	}
-
-	try {
-		await sendFriendInvite(username.trim())
-		toastSuccess(`Invitation sent to ${username}`)
-		await fetchInvitesData()
-	} catch (err: any) {
-		const errorMessage =
-			err?.response?._data?.message || err?.message || 'Failed to send invitation'
-		toastError(errorMessage)
-	}
-}
-
-async function handleRemoveFriend(friendId: string | number) {
-	const friend = friends.value.find((f) => String(f.id) === String(friendId))
-	if (!friend) return
-
-	try {
-		await deleteFriendFromService(String(friendId))
-		toastSuccess(`${friend.username} has been removed from friends`)
-		await fetchFriendsData()
-	} catch (err: any) {
-		const errorMessage =
-			err?.response?._data?.message || err?.message || 'Failed to remove friend'
-		toastError(errorMessage)
-	}
-}
-
-async function handleAcceptInvite(inviteId: string) {
-	try {
-		await acceptInvite(inviteId)
-		toastSuccess('Invitation has been accepted')
-		await fetchFriendsData()
-		await fetchInvitesData()
-	} catch (err: any) {
-		const errorMessage =
-			err?.response?._data?.message ||
-			err?.message ||
-			'Failed to accept invitation'
-		toastError(errorMessage)
-	}
-}
-
-async function handleRejectInvite(inviteId: string) {
-	try {
-		await rejectInvite(inviteId)
-		toastSuccess('Invitation has been rejected')
-		await fetchInvitesData()
-	} catch (err: any) {
-		const errorMessage =
-			err?.response?._data?.message || err?.message || 'Failed to reject invitation'
-		toastError(errorMessage)
+		invitesComposable.fetchInvites()
 	}
 }
 
 function handleStartChat(friendId: string | number) {
-	const friend = friends.value.find((f) => String(f.id) === String(friendId))
+	const friend = friendsComposable.findFriendById(friendId)
 	if (!friend) return
 
-	viewMode.value = 'chats'
+	viewModeComposable.setViewMode('chats')
 
-	const existingChat = chats.value
+	const existingChat = chatsComposable.chats.value
 		.filter((chat) => chat.isGroup == false)
-		.find((c) => c.otherUser.id === friend.id)
+		.find((c) => String(c.otherUser.id) === String(friend.id))
 
 	if (existingChat) {
 		handleSelectChat(existingChat.id)
 		return
 	}
 
-	toastError('Nie znaleziono czatu z tym znajomym')
-}
-
-function mapMessageFromBackend(messageData: any): Message {
-	const id =
-		typeof messageData.id === 'string'
-			? Number(messageData.id) || messageData.id
-			: messageData.id
-	const chatId =
-		typeof messageData.chatId === 'string'
-			? Number(messageData.chatId) || messageData.chatId
-			: messageData.chatId
-	const senderId =
-		typeof messageData.senderId === 'string'
-			? Number(messageData.senderId) || messageData.senderId
-			: messageData.senderId
-
-	return {
-		id,
-		chatId,
-		senderId,
-		senderUsername: messageData.senderUsername,
-		content: messageData.content,
-		createdAt:
-			typeof messageData.createdAt === 'string'
-				? messageData.createdAt
-				: messageData.createdAt.toISOString(),
-		reactions: messageData.reactions?.map((r: any) => ({
-			emoji: r.emoji,
-			userIds: r.userIds.map((uid: any) =>
-				typeof uid === 'string' ? Number(uid) || uid : uid
-			),
-			username: r.username || ''
-		}))
-	}
-}
-
-function handleNewMessage(data: { chatId: string; message: any }) {
-	const chatId =
-		typeof data.chatId === 'string' ? Number(data.chatId) || data.chatId : data.chatId
-	const chat = chats.value.find((c) => String(c.id) === String(chatId))
-
-	if (!chat) {
-		fetchChats()
-		return
-	}
-
-	const mappedMessage = mapMessageFromBackend(data.message)
-
-	if (!chat.messages.find((m) => String(m.id) === String(mappedMessage.id))) {
-		chat.messages.push(mappedMessage)
-		chat.lastMessage = mappedMessage
-
-		if (selectedChatId.value !== chat.id) {
-			chat.unreadCount++
-		}
-
-		if (selectedChatId.value === chat.id) {
-			nextTick(() => handleScrollToBottom())
-		}
-	}
-}
-
-function handleMessageDeleted(data: { chatId: string; messageId: string }) {
-	const chatId =
-		typeof data.chatId === 'string' ? Number(data.chatId) || data.chatId : data.chatId
-	const chat = chats.value.find((c) => String(c.id) === String(chatId))
-	if (!chat) return
-
-	chat.messages = chat.messages.filter((m) => String(m.id) !== String(data.messageId))
-
-	const lastMessage = chat.messages[chat.messages.length - 1]
-	if (lastMessage) {
-		chat.lastMessage = lastMessage
-	} else {
-		chat.lastMessage = null as any
-	}
-}
-
-function handleReactionAdded(data: {
-	chatId: string
-	messageId: string
-	reaction: { emoji: string; userId: string; username: string }
-}) {
-	const chatId =
-		typeof data.chatId === 'string' ? Number(data.chatId) || data.chatId : data.chatId
-	const chat = chats.value.find((c) => String(c.id) === String(chatId))
-	if (!chat) return
-
-	const message = chat.messages.find((m) => String(m.id) === String(data.messageId))
-	if (!message) return
-
-	if (!message.reactions) {
-		message.reactions = []
-	}
-
-	const userId =
-		typeof data.reaction.userId === 'string'
-			? Number(data.reaction.userId) || data.reaction.userId
-			: data.reaction.userId
-	const existingReaction = message.reactions.find((r) => r.emoji === data.reaction.emoji)
-
-	if (existingReaction) {
-		if (!existingReaction.userIds.some((id) => String(id) === String(userId))) {
-			existingReaction.userIds.push(userId)
-		}
-	} else {
-		message.reactions.push({
-			emoji: data.reaction.emoji,
-			userIds: [userId],
-			username: data.reaction.username
-		})
-	}
-}
-
-function handleReactionRemoved(data: {
-	chatId: string
-	messageId: string
-	reaction: { emoji: string; userId: string }
-}) {
-	const chatId =
-		typeof data.chatId === 'string' ? Number(data.chatId) || data.chatId : data.chatId
-	const chat = chats.value.find((c) => String(c.id) === String(chatId))
-	if (!chat) return
-
-	const message = chat.messages.find((m) => String(m.id) === String(data.messageId))
-	if (!message || !message.reactions) return
-
-	const userId =
-		typeof data.reaction.userId === 'string'
-			? Number(data.reaction.userId) || data.reaction.userId
-			: data.reaction.userId
-	const existingReaction = message.reactions.find((r) => r.emoji === data.reaction.emoji)
-
-	if (existingReaction) {
-		existingReaction.userIds = existingReaction.userIds.filter(
-			(id) => String(id) !== String(userId)
-		)
-
-		if (existingReaction.userIds.length === 0) {
-			message.reactions = message.reactions.filter((r) => r.emoji !== data.reaction.emoji)
-		}
-	}
-}
-
-function handleTypingStart(data: { chatId: string; userId: string; username: string }) {
-	const chatId = String(data.chatId)
-	const userId =
-		typeof data.userId === 'string' ? Number(data.userId) || data.userId : data.userId
-
-	if (String(userId) === String(currentUserId.value)) return
-
-	if (!typingUsers[chatId]) {
-		typingUsers[chatId] = new Map()
-	}
-	typingUsers[chatId].set(userId, data.username)
-}
-
-function handleTypingStop(data: { chatId: string; userId: string }) {
-	const chatId = String(data.chatId)
-	const userId =
-		typeof data.userId === 'string' ? Number(data.userId) || data.userId : data.userId
-
-	if (String(userId) === String(currentUserId.value)) return
-
-	if (typingUsers[chatId]) {
-		typingUsers[chatId].delete(userId)
-	}
-}
-
-function createSystemMessage(
-	chatId: number | string,
-	systemType: 'member:added' | 'member:removed' | 'chat:created' | 'chat:updated',
-	systemData: {
-		userId?: string | number
-		username?: string
-		chatId?: string | number
-		updates?: any
-	}
-): Message {
-	const timestamp = Date.now()
-	const numericChatId = typeof chatId === 'string' ? Number(chatId) || 0 : chatId
-	return {
-		id: -timestamp,
-		chatId: numericChatId,
-		senderId: 0,
-		senderUsername: 'System',
-		content: '',
-		createdAt: new Date().toISOString(),
-		isSystem: true,
-		systemType,
-		systemData
-	}
-}
-
-function handleMessageUpdated(data: { chatId: string; message: any }) {
-	const chatId =
-		typeof data.chatId === 'string' ? Number(data.chatId) || data.chatId : data.chatId
-	const chat = chats.value.find((c) => String(c.id) === String(chatId))
-	if (!chat) return
-
-	const mappedMessage = mapMessageFromBackend(data.message)
-	const messageIndex = chat.messages.findIndex((m) => String(m.id) === String(mappedMessage.id))
-
-	if (messageIndex !== -1) {
-		chat.messages[messageIndex] = mappedMessage
-
-		if (chat.lastMessage && String(chat.lastMessage.id) === String(mappedMessage.id)) {
-			chat.lastMessage = mappedMessage
-		}
-	}
-}
-
-function handleMessageRead(data: {
-	chatId: string
-	messageId: string
-	reader: { userId: string; username: string; readAt: Date }
-}) {
-	const chatId =
-		typeof data.chatId === 'string' ? Number(data.chatId) || data.chatId : data.chatId
-	const chat = chats.value.find((c) => String(c.id) === String(chatId))
-	if (!chat) return
-}
-
-function handleUserStatus(data: { userId: string; isOnline: boolean; lastSeen?: Date }) {
-	const userId =
-		typeof data.userId === 'string' ? Number(data.userId) || data.userId : data.userId
-
-	const friend = friends.value.find((f) => String(f.id) === String(userId))
-	if (friend) {
-		friend.isOnline = data.isOnline
-		if (data.lastSeen) {
-			friend.lastSeen = data.lastSeen.toISOString()
-		}
-	}
-}
-
-function handleChatCreated(_data: { chat: any }) {
-	fetchChats()
-}
-
-function handleChatUpdatedFromSocket(data: { chatId: string; updates: any }) {
-	const chatId =
-		typeof data.chatId === 'string' ? Number(data.chatId) || data.chatId : data.chatId
-	const chat = chats.value.find((c) => String(c.id) === String(chatId))
-	if (!chat) return
-
-	if (data.updates.name) {
-		chat.name = data.updates.name
-	}
-
-	const systemMessage = createSystemMessage(chatId, 'chat:updated', {
-		chatId,
-		updates: data.updates
-	})
-	chat.messages.push(systemMessage)
-
-	if (selectedChatId.value === chat.id) {
-		nextTick(() => handleScrollToBottom())
-	}
-}
-
-function handleMemberAdded(data: { chatId: string; member: any }) {
-	const chatId =
-		typeof data.chatId === 'string' ? Number(data.chatId) || data.chatId : data.chatId
-	const chat = chats.value.find((c) => String(c.id) === String(chatId))
-	if (!chat) return
-
-	const memberId =
-		typeof data.member.userId === 'string'
-			? Number(data.member.userId) || data.member.userId
-			: data.member.userId
-	const username = data.member.username || data.member.user?.username || 'Unknown user'
-
-	const systemMessage = createSystemMessage(chatId, 'member:added', {
-		userId: memberId,
-		username,
-		chatId
-	})
-	chat.messages.push(systemMessage)
-
-	if (selectedChatId.value === chat.id) {
-		nextTick(() => handleScrollToBottom())
-	}
-}
-
-function handleMemberRemoved(data: { chatId: string; userId: string }) {
-	const chatId =
-		typeof data.chatId === 'string' ? Number(data.chatId) || data.chatId : data.chatId
-	const chat = chats.value.find((c) => String(c.id) === String(chatId))
-	if (!chat) return
-
-	const userId =
-		typeof data.userId === 'string' ? Number(data.userId) || data.userId : data.userId
-
-	let username = 'Unknown user'
-	if (chat.otherUser && String(chat.otherUser.id) === String(userId)) {
-		username = chat.otherUser.username
-	} else {
-		const friend = friends.value.find((f) => String(f.id) === String(userId))
-		if (friend) {
-			username = friend.username
-		}
-	}
-
-	const systemMessage = createSystemMessage(chatId, 'member:removed', {
-		userId,
-		username,
-		chatId
-	})
-	chat.messages.push(systemMessage)
-
-	if (selectedChatId.value === chat.id) {
-		nextTick(() => handleScrollToBottom())
-	}
-}
-
-let typingTimeout: NodeJS.Timeout | null = null
-let isTyping = false
-
-function handleTypingInput() {
-	if (!selectedChatId.value) return
-
-	const chatId = String(selectedChatId.value)
-
-	if (!isTyping) {
-		emit('typing:start', { chatId })
-		isTyping = true
-	}
-
-	if (typingTimeout) {
-		clearTimeout(typingTimeout)
-	}
-
-	typingTimeout = setTimeout(() => {
-		if (isTyping) {
-			emit('typing:stop', { chatId })
-			isTyping = false
-		}
-		typingTimeout = null
-	}, 3000)
-}
-
-function handleMessageSent() {
-	if (!selectedChatId.value) return
-
-	const chatId = String(selectedChatId.value)
-
-	if (isTyping) {
-		emit('typing:stop', { chatId })
-		isTyping = false
-	}
-
-	if (typingTimeout) {
-		clearTimeout(typingTimeout)
-		typingTimeout = null
-	}
-}
-
-function setupWebSocketListeners() {
-	on('message:new', handleNewMessage)
-	on('message:updated', handleMessageUpdated)
-	on('message:deleted', handleMessageDeleted)
-	on('message:read', handleMessageRead)
-	on('reaction:added', handleReactionAdded)
-	on('reaction:removed', handleReactionRemoved)
-	on('typing:start', handleTypingStart)
-	on('typing:stop', handleTypingStop)
-	on('user:status', handleUserStatus)
-	on('chat:created', handleChatCreated)
-	on('chat:updated', handleChatUpdatedFromSocket)
-	on('member:added', handleMemberAdded)
-	on('member:removed', handleMemberRemoved)
-}
-
-function cleanupWebSocketListeners() {
-	off('message:new', handleNewMessage)
-	off('message:updated', handleMessageUpdated)
-	off('message:deleted', handleMessageDeleted)
-	off('message:read', handleMessageRead)
-	off('reaction:added', handleReactionAdded)
-	off('reaction:removed', handleReactionRemoved)
-	off('typing:start', handleTypingStart)
-	off('typing:stop', handleTypingStop)
-	off('user:status', handleUserStatus)
-	off('chat:created', handleChatCreated)
-	off('chat:updated', handleChatUpdatedFromSocket)
-	off('member:added', handleMemberAdded)
-	off('member:removed', handleMemberRemoved)
-}
-
-onMounted(async () => {
-	connect()
-	setupWebSocketListeners()
-
-	await fetchChats()
-
-	if (selectedChatId.value !== null) return
-
-	const firstChat = chats.value.at(0)
-
-	if (!firstChat) return
-
-	selectedChatId.value = firstChat.id
-
-	await fetchMessages(firstChat.id, false)
-	nextTick(() => handleScrollToBottom())
-})
-
-const currentTypingUsers = computed(() => {
-	if (!selectedChatId.value) return []
-	const chatId = String(selectedChatId.value)
-	const users = typingUsers[chatId]
-	return users ? Array.from(users.values()) : []
-})
-
-const typingUsersByChat = computed(() => {
-	const result: Record<number, string[]> = {}
-	chats.value.forEach((chat) => {
-		const chatId = String(chat.id)
-		const users = typingUsers[chatId]
-		if (users && users.size > 0) {
-			result[chat.id] = Array.from(users.values())
-		}
-	})
-	return result
-})
-
-onUnmounted(() => {
-	if (typingTimeout) {
-		clearTimeout(typingTimeout)
-	}
-	cleanupWebSocketListeners()
-	disconnect()
-})
-
-const filteredChats = computed(() => {
-	const query = searchQuery.value.trim().toLowerCase()
-
-	if (query.length === 0) return chats.value
-
-	return chats.value.filter((c) => c.name.toLowerCase().includes(query))
-})
-
-const selectedChat = computed<Chat | null>(() => {
-	if (selectedChatId.value === null) return null
-
-	return chats.value.find((c) => c.id === selectedChatId.value) ?? null
-})
-
-async function fetchChats() {
-	try {
-		chatsLoading.value = true
-		chatsError.value = null
-
-		const res = (await fetchChatsFromService()) as ApiResponse<ChatsResponse>
-		const raw = res?.data
-		const list: any[] = Array.isArray(raw?.chats) ? raw.chats : []
-
-		chats.value = list.map((chat) => ({
-			...chat,
-			name: String(chat?.name ?? chat?.title ?? 'Czat'),
-			lastMessage: chat?.lastMessage,
-			unreadCount: Number.isFinite(chat?.unreadCount) ? Number(chat.unreadCount) : 0,
-			messages: Array.isArray(chat?.messages) ? chat.messages : [],
-			members: Array.isArray(chat?.members) ? chat.members : undefined,
-			currentUserRole: chat?.currentUserRole || chat?.memberRole || undefined
-		}))
-	} catch (err: any) {
-		chatsError.value = err?.message || 'Failed to fetch chats list'
-
-		toastError(chatsError.value || 'Error')
-	} finally {
-		chatsLoading.value = false
-	}
-}
-
-function ensureChatState(chatId: number) {
-	if (messagesState[chatId]) return
-
-	messagesState[chatId] = { limit: 50, offset: 0, loading: false, error: null, hasMore: true }
-}
-
-function getChatState(chatId: number) {
-	ensureChatState(chatId)
-
-	return messagesState[chatId] as {
-		limit: number
-		offset: number
-		loading: boolean
-		error: string | null
-		hasMore: boolean
-	}
-}
-
-async function fetchMessages(chatId: number, append: boolean) {
-	const state = getChatState(chatId)
-
-	if (state.loading) return
-
-	try {
-		state.loading = true
-		state.error = null
-
-		if (!append) {
-			state.offset = 0
-		}
-
-		const res = await fetchMessagesFromService(chatId, state.limit, state.offset)
-
-		const raw = res?.data
-		const items: any[] = Array.isArray(raw)
-			? raw
-			: Array.isArray(raw?.items)
-				? raw.items
-				: Array.isArray(raw?.messages)
-					? raw.messages
-					: []
-		const chat = chats.value.find((c) => c.id === chatId)
-		if (!chat) return
-		if (append) {
-			chat.messages = [...chat.messages, ...items]
-		} else {
-			chat.messages = items
-		}
-		state.offset = chat.messages.length
-		state.hasMore = items.length >= state.limit
-
-		if (items.length > 0) {
-			const lastMsg = items[items.length - 1]
-			if (lastMsg) {
-				chat.lastMessage = lastMsg
-			}
-		}
-	} catch (err: any) {
-		state.error = err?.message || 'Failed to fetch messages'
-		toastError(state.error || 'Error')
-	} finally {
-		state.loading = false
-	}
+	toastError('Chat not found with this friend')
 }
 
 function handleSelectChat(chatId: number) {
-	if (selectedChatId.value === chatId) return
-	selectedChatId.value = chatId
-	const chat = chats.value.find((c) => c.id === chatId)
-	if (chat) chat.unreadCount = 0
-	fetchMessages(chatId, false)
+	if (chatsComposable.selectedChatId.value === chatId) return
+	chatsComposable.selectChat(chatId)
+	messagesComposable.fetchMessages(chatId, false)
 	nextTick(() => handleScrollToBottom())
 	isActionsPanelOpen.value = false
 }
 
 function handleChatUpdated(data: { members: any[]; currentUserRole?: any }) {
-	const chat = selectedChat.value
+	const chat = chatsComposable.selectedChat.value
 	if (!chat) return
 
 	chat.members = data.members
@@ -795,63 +124,58 @@ function handleChatUpdated(data: { members: any[]; currentUserRole?: any }) {
 	}
 }
 
-async function handleSendMessage() {
-	const chat = selectedChat.value
-
-	if (!chat) return
-
-	const text = newMessageText.value.trim()
-
-	if (text.length === 0) return
-
-	handleMessageSent()
-
-	try {
-		const res = await sendMessageToService(chat.id, text)
-		const saved = res.data as unknown as Message
-
-		const exists = chat.messages.find((m) => String(m.id) === String(saved.id))
-		if (!exists) {
-			chat.messages.push(saved)
-			chat.lastMessage = saved as Message
-		}
-
-		newMessageText.value = ''
-		nextTick(() => handleScrollToBottom())
-	} catch (err: any) {
-		toastError(err?.message || 'Failed to send message')
-	}
-}
-
 function handleLoadMore() {
-	const chatId = selectedChatId.value
+	const chatId = chatsComposable.selectedChatId.value
 	if (chatId === null) return
-	const state = getChatState(chatId)
+	const state = messagesComposable.getChatState(chatId)
 	if (!state.hasMore) return
-	fetchMessages(chatId, true)
+	messagesComposable.fetchMessages(chatId, true)
 }
 
 function handleScrollToBottom() {
 	chatPanelRef.value?.scrollToBottom?.()
 }
 
-async function handleDeleteMessage(messageId: string | number) {
-	const chat = selectedChat.value
+async function handleAddFriend(username: string) {
+	await friendsComposable.addFriend(username)
+	await invitesComposable.fetchInvites()
+}
+
+async function handleRemoveFriend(friendId: string | number) {
+	await friendsComposable.removeFriend(friendId)
+}
+
+async function handleAcceptInvite(inviteId: string) {
+	await invitesComposable.acceptInvite(inviteId)
+	await friendsComposable.fetchFriends()
+	await invitesComposable.fetchInvites()
+}
+
+async function handleRejectInvite(inviteId: string) {
+	await invitesComposable.rejectInvite(inviteId)
+	await invitesComposable.fetchInvites()
+}
+
+async function handleSendMessage() {
+	const chat = chatsComposable.selectedChat.value
+
 	if (!chat) return
 
-	try {
-		await deleteMessageFromService(messageId)
-		chat.messages = chat.messages.filter((m) => String(m.id) !== String(messageId))
+	const text = messagesComposable.newMessageText.value.trim()
 
-		const lastMessage = chat.messages[chat.messages.length - 1]
-		if (lastMessage) {
-			chat.lastMessage = lastMessage
-		} else {
-			chat.lastMessage = null as any
-		}
-	} catch (err: any) {
-		toastError(err?.message || 'Failed to delete message')
-	}
+	if (text.length === 0) return
+
+	typingUsersComposable.handleMessageSent(chat.id, emit)
+
+	await messagesComposable.sendMessage(chat.id, text)
+	nextTick(() => handleScrollToBottom())
+}
+
+async function handleDeleteMessage(messageId: string | number) {
+	const chat = chatsComposable.selectedChat.value
+	if (!chat) return
+
+	await messagesComposable.deleteMessage(chat.id, messageId)
 }
 
 function handleReactionUpdated(
@@ -859,65 +183,63 @@ function handleReactionUpdated(
 	emoji: string,
 	action: 'add' | 'remove'
 ) {
-	const chat = selectedChat.value
-	if (!chat) return
-
-	const message = chat.messages.find((m) => String(m.id) === String(messageId))
-	if (!message) return
-
-	if (!message.reactions) {
-		message.reactions = []
-	}
-
-	if (action === 'add') {
-		const existingReaction = message.reactions.find((r) => r.emoji === emoji)
-
-		if (existingReaction) {
-			if (!existingReaction.userIds.includes(currentUserId.value)) {
-				existingReaction.userIds.push(currentUserId.value)
-			}
-		} else {
-			message.reactions.push({
-				emoji,
-				userIds: [currentUserId.value],
-				username: user.value?.username || ''
-			})
-		}
-	} else {
-		const existingReaction = message.reactions.find((r) => r.emoji === emoji)
-
-		if (existingReaction) {
-			existingReaction.userIds = existingReaction.userIds.filter(
-				(id) => String(id) !== String(currentUserId.value)
-			)
-
-			if (existingReaction.userIds.length === 0) {
-				message.reactions = message.reactions.filter((r) => r.emoji !== emoji)
-			}
-		}
-	}
+	reactionsComposable.handleReactionUpdated(messageId, emoji, action)
 }
+
+function handleTypingInput() {
+	const chatId = chatsComposable.selectedChatId.value
+	if (!chatId) return
+	typingUsersComposable.handleTypingInput(chatId, emit)
+}
+
+onMounted(async () => {
+	connect()
+	socketHandlers.setupListeners()
+
+	await chatsComposable.fetchChats()
+
+	if (chatsComposable.selectedChatId.value !== null) return
+
+	const firstChat = chatsComposable.chats.value[0]
+
+	if (!firstChat) return
+
+	chatsComposable.selectChat(firstChat.id)
+
+	await messagesComposable.fetchMessages(firstChat.id, false)
+	nextTick(() => handleScrollToBottom())
+})
+
+onUnmounted(() => {
+	typingUsersComposable.cleanup()
+	socketHandlers.cleanupListeners()
+	disconnect()
+})
 </script>
 
 <template>
 	<div class="h-screen w-screen bg-slate-50">
 		<div class="h-full w-full">
 			<div class="h-full flex bg-white">
-				<aside class="w-full md:w-96 h-dvh border-gray-200 flex flex-col p-4 bg-gray">
+				<aside class="w-full md:max-w-96 h-dvh border-gray-200 flex flex-col p-4 bg-gray">
 					<div class="flex flex-col rounded-lg bg-white h-full">
 						<div
 							class="p-4 border-b border-gray-200 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 rounded-t-[1.125rem]"
 						>
 							<div class="flex items-center justify-between mb-3">
 								<h1 class="text-xl font-semibold text-slate-900">
-									{{ viewMode === 'chats' ? 'Messages' : 'Friends' }}
+									{{
+										viewModeComposable.viewMode.value === 'chats'
+											? 'Messages'
+											: 'Friends'
+									}}
 								</h1>
 								<div class="flex gap-1">
 									<button
 										type="button"
 										:class="[
 											'px-3 py-1.5 text-xs font-medium rounded-lg transition-colors',
-											viewMode === 'chats'
+											viewModeComposable.viewMode.value === 'chats'
 												? 'bg-blue-500 text-white'
 												: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
 										]"
@@ -933,7 +255,7 @@ function handleReactionUpdated(
 										type="button"
 										:class="[
 											'px-3 py-1.5 text-xs font-medium rounded-lg transition-colors',
-											viewMode === 'friends'
+											viewModeComposable.viewMode.value === 'friends'
 												? 'bg-blue-500 text-white'
 												: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
 										]"
@@ -948,13 +270,13 @@ function handleReactionUpdated(
 								</div>
 							</div>
 
-							<template v-if="viewMode === 'friends'">
+							<template v-if="viewModeComposable.viewMode.value === 'friends'">
 								<div class="flex gap-2 mb-3">
 									<button
 										type="button"
 										:class="[
 											'flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors',
-											friendsSubView === 'list'
+											viewModeComposable.friendsSubView.value === 'list'
 												? 'bg-blue-500 text-white'
 												: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
 										]"
@@ -970,7 +292,7 @@ function handleReactionUpdated(
 										type="button"
 										:class="[
 											'flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors relative',
-											friendsSubView === 'invites'
+											viewModeComposable.friendsSubView.value === 'invites'
 												? 'bg-blue-500 text-white'
 												: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
 										]"
@@ -984,13 +306,13 @@ function handleReactionUpdated(
 									>
 										Invitations
 										<span
-											v-if="invites.totalPending > 0"
+											v-if="invitesComposable.invites.value.totalPending > 0"
 											class="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center"
 										>
 											{{
-												invites.totalPending > 9
+												invitesComposable.invites.value.totalPending > 9
 													? '9+'
-													: invites.totalPending
+													: invitesComposable.invites.value.totalPending
 											}}
 										</span>
 									</button>
@@ -998,7 +320,7 @@ function handleReactionUpdated(
 										type="button"
 										:class="[
 											'flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors',
-											friendsSubView === 'add'
+											viewModeComposable.friendsSubView.value === 'add'
 												? 'bg-blue-500 text-white'
 												: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
 										]"
@@ -1013,59 +335,84 @@ function handleReactionUpdated(
 								</div>
 							</template>
 
-							<template v-if="viewMode === 'chats'">
+							<template v-if="viewModeComposable.viewMode.value === 'chats'">
 								<label for="chat-search" class="sr-only">Search chat</label>
 								<input
 									id="chat-search"
-									v-model="searchQuery"
+									v-model="chatsComposable.searchQuery"
 									type="text"
 									placeholder="Search..."
 								/>
 							</template>
 						</div>
 
-						<template v-if="viewMode === 'chats'">
-							<div v-if="chatsLoading" class="p-4 text-sm text-slate-600">
+						<template v-if="viewModeComposable.viewMode.value === 'chats'">
+							<div
+								v-if="chatsComposable.chatsLoading.value"
+								class="p-4 text-sm text-slate-600"
+							>
 								Loading chats...
 							</div>
-							<div v-else-if="chatsError" class="p-4 text-sm text-red-600">
-								{{ chatsError }}
+							<div
+								v-else-if="chatsComposable.chatsError.value"
+								class="p-4 text-sm text-red-600"
+							>
+								{{ chatsComposable.chatsError.value }}
 							</div>
 							<ChatList
 								v-else
-								:chats="filteredChats"
-								:selected-chat-id="selectedChatId?.toString() ?? null"
+								:chats="chatsComposable.filteredChats.value"
+								:selected-chat-id="
+									chatsComposable.selectedChatId.value?.toString() ?? null
+								"
 								:typing-users-by-chat="typingUsersByChat"
 								@select-chat="handleSelectChat"
 							/>
 						</template>
 
-						<template v-else-if="viewMode === 'friends'">
-							<div v-if="friendsSubView === 'list'" class="h-full">
-								<div v-if="friendsLoading" class="p-4 text-sm text-slate-600">
+						<template v-else-if="viewModeComposable.viewMode.value === 'friends'">
+							<div
+								v-if="viewModeComposable.friendsSubView.value === 'list'"
+								class="h-full"
+							>
+								<div
+									v-if="friendsComposable.friendsLoading.value"
+									class="p-4 text-sm text-slate-600"
+								>
 									Loading friends...
 								</div>
-								<div v-else-if="friendsError" class="p-4 text-sm text-red-600">
-									{{ friendsError }}
+								<div
+									v-else-if="friendsComposable.friendsError.value"
+									class="p-4 text-sm text-red-600"
+								>
+									{{ friendsComposable.friendsError.value }}
 								</div>
 								<FriendsList
 									v-else
-									:friends="friends"
+									:friends="friendsComposable.friends.value"
 									@remove-friend="handleRemoveFriend"
 									@start-chat="handleStartChat"
 								/>
 							</div>
-							<div v-else-if="friendsSubView === 'invites'">
-								<div v-if="invitesLoading" class="p-4 text-sm text-slate-600">
+							<div v-else-if="viewModeComposable.friendsSubView.value === 'invites'">
+								<div
+									v-if="invitesComposable.invitesLoading.value"
+									class="p-4 text-sm text-slate-600"
+								>
 									Loading invitations...
 								</div>
-								<div v-else-if="invitesError" class="p-4 text-sm text-red-600">
-									{{ invitesError }}
+								<div
+									v-else-if="invitesComposable.invitesError.value"
+									class="p-4 text-sm text-red-600"
+								>
+									{{ invitesComposable.invitesError.value }}
 								</div>
 								<InvitesPanel
 									v-else
-									:sent-invites="invites.sentInvites"
-									:received-invites="invites.receivedInvites"
+									:sent-invites="invitesComposable.invites.value.sentInvites"
+									:received-invites="
+										invitesComposable.invites.value.receivedInvites
+									"
 									@accept-invite="handleAcceptInvite"
 									@reject-invite="handleRejectInvite"
 								/>
@@ -1079,30 +426,44 @@ function handleReactionUpdated(
 					<div class="flex-1 flex flex-col min-h-0 w-full h-full">
 						<ChatPanel
 							ref="chatPanelRef"
-							:selected-chat="selectedChat"
+							:selected-chat="chatsComposable.selectedChat.value"
 							:current-user-id="currentUserId"
 							:typing-users="currentTypingUsers"
 							:can-load-more="
-								selectedChat ? messagesState[selectedChat.id]?.hasMore : false
+								chatsComposable.selectedChat.value
+									? messagesComposable.messagesState[
+											chatsComposable.selectedChat.value.id
+										]?.hasMore
+									: false
 							"
 							:is-loading-more="
-								selectedChat ? messagesState[selectedChat.id]?.loading : false
+								chatsComposable.selectedChat.value
+									? messagesComposable.messagesState[
+											chatsComposable.selectedChat.value.id
+										]?.loading
+									: false
 							"
 							@load-more="handleLoadMore"
 							@delete-message="handleDeleteMessage"
 							@reaction-updated="handleReactionUpdated"
 							@toggle-actions="isActionsPanelOpen = !isActionsPanelOpen"
 						/>
-						<template v-if="selectedChat">
+						<template v-if="chatsComposable.selectedChat.value">
 							<MessageForm
-								v-model="newMessageText"
+								:model-value="messagesComposable.newMessageText.value"
+								@update:model-value="
+									(val: string) => (messagesComposable.newMessageText.value = val)
+								"
 								@submit="handleSendMessage"
 								@typing="handleTypingInput"
 							/>
 						</template>
 					</div>
 
-					<section v-if="!selectedChat" class="md:hidden flex-1 flex flex-col">
+					<section
+						v-if="!chatsComposable.selectedChat.value"
+						class="md:hidden flex-1 flex flex-col"
+					>
 						<div class="flex-1 flex items-center justify-center text-gray-500">
 							Select a chat from the list on the left
 						</div>
@@ -1112,7 +473,7 @@ function handleReactionUpdated(
 				<ChatActionsPanel
 					v-if="currentChat"
 					:chat="currentChat"
-					:current-user-id
+					:current-user-id="currentUserId"
 					@chat-updated="handleChatUpdated"
 				/>
 			</div>

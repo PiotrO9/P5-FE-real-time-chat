@@ -1,0 +1,187 @@
+<script setup lang="ts">
+import type { ChatMember, Role } from '~/types/ChatsApi'
+import Icon from '../Icon.vue'
+import ChatInitial from './ChatInitial.vue'
+
+interface Props {
+	member: ChatMember
+	currentUserId: number | string
+	isOwner: boolean
+	openRoleMenuId?: string | null
+	isUpdatingRole?: string | null
+	isRemovingUser?: string | null
+}
+
+interface Emits {
+	(e: 'toggle-role-menu', memberId: string, event?: Event): void
+	(e: 'change-role', memberId: string, newRole: Role): void
+	(e: 'remove-user', userId: string): void
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	openRoleMenuId: null,
+	isUpdatingRole: null,
+	isRemovingUser: null
+})
+
+const emit = defineEmits<Emits>()
+
+function getRoleLabel(role: Role): string {
+	switch (role) {
+		case 'OWNER':
+			return 'Owner'
+		case 'MODERATOR':
+			return 'Moderator'
+		case 'MEMBER':
+			return 'Member'
+		default:
+			return 'Member'
+	}
+}
+
+function getRoleColor(role: Role): string {
+	switch (role) {
+		case 'OWNER':
+			return 'bg-purple-100 text-purple-700 border-purple-300'
+		case 'MODERATOR':
+			return 'bg-blue-100 text-blue-700 border-blue-300'
+		case 'MEMBER':
+			return 'bg-gray-100 text-gray-700 border-gray-300'
+		default:
+			return 'bg-gray-100 text-gray-700 border-gray-300'
+	}
+}
+
+function getAvailableRoles(currentRole: Role): Role[] {
+	if (currentRole === 'OWNER') {
+		return []
+	}
+
+	return ['MEMBER', 'MODERATOR']
+}
+
+function handleToggleRoleMenu(event?: Event) {
+	if (event) {
+		event.stopPropagation()
+		event.preventDefault()
+	}
+	emit('toggle-role-menu', String(props.member.id), event)
+}
+
+function handleChangeRole(newRole: Role) {
+	emit('change-role', String(props.member.id), newRole)
+}
+
+function handleRemoveUser() {
+	emit('remove-user', String(props.member.id))
+}
+
+const isMenuOpen = computed(() => props.openRoleMenuId === String(props.member.id))
+const isCurrentUser = computed(() => String(props.member.id) === String(props.currentUserId))
+</script>
+
+<template>
+	<div
+		class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 transition-colors"
+	>
+		<div class="flex items-center gap-2 flex-1 min-w-0">
+			<ChatInitial :chat-initial="member.username.charAt(0).toUpperCase()" />
+
+			<div class="min-w-0 flex-1">
+				<p class="text-sm font-medium text-gray-900 truncate">
+					{{ member.username }}
+				</p>
+				<div class="flex items-center gap-2 mt-0.5">
+					<div v-if="isOwner" class="role-menu-container relative">
+						<button
+							v-if="member.role !== 'OWNER'"
+							type="button"
+							tabindex="0"
+							:aria-label="`Change role of ${member.username}`"
+							:disabled="isUpdatingRole === String(member.id)"
+							:style="{ pointerEvents: 'auto', zIndex: 100 }"
+							:class="[
+								'px-2 py-0.5 text-xs font-medium rounded border cursor-pointer transition-colors',
+								getRoleColor(member.role),
+								isUpdatingRole === String(member.id)
+									? 'opacity-50 cursor-not-allowed'
+									: 'hover:opacity-80'
+							]"
+							@mousedown.stop="handleToggleRoleMenu"
+							@click.stop="handleToggleRoleMenu"
+							@keydown.enter.stop="handleToggleRoleMenu"
+						>
+							{{ getRoleLabel(member.role) }}
+						</button>
+						<span
+							v-else
+							:class="[
+								'px-2 py-0.5 text-xs font-medium rounded border',
+								getRoleColor(member.role)
+							]"
+						>
+							{{ getRoleLabel(member.role) }}
+						</span>
+						<div
+							v-if="isMenuOpen && member.role !== 'OWNER'"
+							class="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-32"
+						>
+							<button
+								v-for="role in getAvailableRoles(member.role)"
+								:key="role"
+								type="button"
+								tabindex="0"
+								:aria-label="`Set role to ${getRoleLabel(role)}`"
+								:disabled="
+									isUpdatingRole === String(member.id) || member.role === role
+								"
+								:class="[
+									'w-full text-left px-3 py-2 text-sm transition-colors',
+									member.role === role
+										? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+										: 'hover:bg-gray-50 text-gray-900',
+									isUpdatingRole === String(member.id)
+										? 'opacity-50 cursor-not-allowed'
+										: ''
+								]"
+								@click.stop="handleChangeRole(role)"
+								@keydown.enter.stop="handleChangeRole(role)"
+							>
+								{{ getRoleLabel(role) }}
+							</button>
+						</div>
+					</div>
+					<span
+						v-else
+						:class="[
+							'px-2 py-0.5 text-xs font-medium rounded border',
+							getRoleColor(member.role)
+						]"
+					>
+						{{ getRoleLabel(member.role) }}
+					</span>
+					<span
+						v-if="member.isOnline"
+						class="h-1.5 w-1.5 rounded-full bg-green-500"
+						aria-label="Online"
+					></span>
+				</div>
+			</div>
+		</div>
+		<div v-if="isOwner" class="flex items-center gap-1">
+			<button
+				v-if="!isCurrentUser"
+				type="button"
+				tabindex="0"
+				:aria-label="`Remove ${member.username} from chat`"
+				:disabled="isRemovingUser === String(member.id)"
+				class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+				@click="handleRemoveUser"
+				@keydown.enter="handleRemoveUser"
+			>
+				<Icon name="bin" class="h-4 w-4" />
+			</button>
+		</div>
+	</div>
+</template>
+

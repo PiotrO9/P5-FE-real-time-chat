@@ -1,6 +1,7 @@
 export type UUID = string
 
 export type Role = 'OWNER' | 'MODERATOR' | 'MEMBER'
+export type ChatListItem = GroupChatItem | DirectChatItem
 
 export interface ChatMember {
 	id: UUID
@@ -52,8 +53,6 @@ export interface DirectChatItem {
 	unreadCount: number
 	otherUser: OtherUser
 }
-
-export type ChatListItem = GroupChatItem | DirectChatItem
 
 export interface ChatsResponse {
 	chats: ChatListItem[]
