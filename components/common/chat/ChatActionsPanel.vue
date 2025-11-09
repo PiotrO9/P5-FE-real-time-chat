@@ -20,6 +20,8 @@ interface Emits {
 	(e: 'chat-updated', data: { members: ChatMember[]; currentUserRole?: Role }): void
 }
 
+const chatStore = useChatStore()
+
 const props = defineProps<Props>()
 
 const { success: toastSuccess, error: toastError } = useToast()
@@ -78,7 +80,6 @@ async function fetchChatDetails() {
 		const data = res?.data
 
 		if (data) {
-			// Emituj event do rodzica, żeby zaktualizował chat
 			emit('chat-updated', {
 				members: data.members || [],
 				currentUserRole: data.currentUserRole || data.memberRole
@@ -97,7 +98,6 @@ async function handleAddUser() {
 		return
 	}
 
-	// Znajdź użytkownika w znajomych
 	const friend = friends.value.find(
 		(f) => f.username.toLowerCase() === addUserUsername.value.trim().toLowerCase()
 	)
@@ -186,7 +186,7 @@ const availableFriends = computed(() => {
 })
 
 function handleToggleState() {
-	isOpen.value = !isOpen.value
+	chatStore.closeChatDetails()
 }
 
 watch(isOpen, (newValue) => {
@@ -202,12 +202,9 @@ const emit = defineEmits<Emits>()
 </script>
 
 <template>
-	<Transition name="slide">
-		<aside
-			v-if="isOpen && chat && isGroupChat"
-			class="w-full md:w-80 border-l border-gray-200 bg-white flex flex-col"
-		>
-			<div class="p-4 border-b border-gray-200 bg-white/80 backdrop-blur">
+	<aside v-if="chat && isGroupChat" class="md:min-w-96 bg-white flex flex-col">
+		<div class="flex flex-col p-4 bg-gray flex-1">
+			<div class="p-4 border-b border-gray-200 bg-white backdrop-blur rounded-t-[1.125rem]">
 				<div class="flex items-center justify-between mb-2">
 					<h2 class="text-lg font-semibold text-gray-900">Akcje czatu</h2>
 					<button
@@ -219,7 +216,7 @@ const emit = defineEmits<Emits>()
 						@keydown.enter="handleToggleState"
 						@keydown.space.prevent="handleToggleState"
 					>
-						<Icon name="remove" class="h-5 w-5 text-gray-600" />
+						<Icon name="remove" class="size-5 text-gray-600" />
 					</button>
 				</div>
 				<p class="text-sm text-gray-600">
@@ -227,7 +224,7 @@ const emit = defineEmits<Emits>()
 				</p>
 			</div>
 
-			<div class="flex-1 overflow-y-auto">
+			<div class="flex-1 overflow-y-auto bg-white rounded-b-[1.125rem]">
 				<template v-if="isOwner">
 					<div class="p-4 border-b border-gray-200">
 						<h3 class="text-sm font-semibold text-gray-900 mb-3">Dodaj użytkownika</h3>
@@ -238,7 +235,6 @@ const emit = defineEmits<Emits>()
 								v-model="addUserUsername"
 								type="text"
 								placeholder="Wpisz nazwę użytkownika"
-								class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
 								@keydown.enter="handleAddUser"
 							/>
 							<button
@@ -379,18 +375,6 @@ const emit = defineEmits<Emits>()
 					</div>
 				</template>
 			</div>
-		</aside>
-	</Transition>
+		</div>
+	</aside>
 </template>
-
-<style scoped>
-.slide-enter-active,
-.slide-leave-active {
-	transition: transform 0.3s ease;
-}
-
-.slide-enter-from,
-.slide-leave-to {
-	transform: translateX(100%);
-}
-</style>

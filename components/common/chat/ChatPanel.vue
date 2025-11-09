@@ -4,6 +4,18 @@ import ChatHeader from '../../common/chat/ChatHeader.vue'
 import MessageList from '../../common/message/MessageList.vue'
 import LoadMoreButton from '../../common/LoadMoreButton.vue'
 import EmptyState from '../../common/EmptyState.vue'
+import Typing from '../Typing.vue'
+
+interface Emits {
+	(e: 'load-more' | 'toggle-actions'): void
+	(e: 'delete-message', messageId: string | number): void
+	(
+		e: 'reaction-updated',
+		messageId: string | number,
+		emoji: string,
+		action: 'add' | 'remove'
+	): void
+}
 
 interface Props {
 	selectedChat: Chat | null
@@ -12,14 +24,18 @@ interface Props {
 	typingUsers?: string[]
 }
 
+const chatStore = useChatStore()
+
 const props = defineProps<Props>()
+const emit = defineEmits<Emits>()
+
+const messagesContainerRef = ref<HTMLDivElement | null>(null)
 
 const selectedChat = computed(() => props.selectedChat)
 const canLoadMore = computed(() => props.canLoadMore ?? false)
 const isLoadingMore = computed(() => props.isLoadingMore ?? false)
 
 const hasMessages = computed(() => (selectedChat.value?.messages.length ?? 0) > 0)
-const chatName = computed(() => selectedChat.value?.name ?? 'Czat')
 const messages = computed(() => selectedChat.value?.messages ?? [])
 
 const typingText = computed(() => {
@@ -34,26 +50,19 @@ const typingText = computed(() => {
 	return `${props.typingUsers[0]} i ${props.typingUsers.length - 1} innych piszą...`
 })
 
-const messagesContainerRef = ref<HTMLDivElement | null>(null)
+watch(
+	() => selectedChat,
+	() => {
+		chatStore.closeChatDetails()
+	},
+	{ deep: true }
+)
 
 function scrollToBottom() {
 	const el = messagesContainerRef.value
 	if (!el) return
 	el.scrollTop = el.scrollHeight
 }
-
-interface Emits {
-	(e: 'load-more' | 'toggle-actions'): void
-	(e: 'delete-message', messageId: string | number): void
-	(
-		e: 'reaction-updated',
-		messageId: string | number,
-		emoji: string,
-		action: 'add' | 'remove'
-	): void
-}
-
-const emit = defineEmits<Emits>()
 
 function handleToggleActions() {
 	emit('toggle-actions')
@@ -80,11 +89,7 @@ defineExpose({ scrollToBottom })
 
 <template>
 	<section v-if="selectedChat" class="hidden md:flex flex-1 flex-col min-h-0 h-full">
-		<ChatHeader
-			:chat-name="chatName"
-			:is-group-chat="selectedChat.isGroup"
-			@toggle-actions="handleToggleActions"
-		/>
+		<ChatHeader :selected-chat />
 
 		<div
 			ref="messagesContainerRef"
@@ -106,32 +111,7 @@ defineExpose({ scrollToBottom })
 			/>
 		</div>
 
-		<!-- Wskaźnik pisania - na dole, poza kontenerem scrollującym -->
-		<div v-if="typingText" class="px-4 md:px-6 py-2 bg-gray-50 border-t border-gray-200">
-			<div class="flex items-center gap-3">
-				<!-- Bąbelek wiadomości z animacją -->
-				<div
-					class="inline-flex items-center gap-1.5 bg-white rounded-2xl rounded-tl-sm px-4 py-2.5 shadow-sm border border-gray-200"
-				>
-					<!-- Animowane kropki w stylu Messengera -->
-					<div class="flex items-center gap-1 px-1">
-						<span
-							class="w-1.5 h-1.5 bg-gray-500 rounded-full typing-dot"
-							style="animation-delay: 0ms"
-						></span>
-						<span
-							class="w-1.5 h-1.5 bg-gray-500 rounded-full typing-dot"
-							style="animation-delay: 150ms"
-						></span>
-						<span
-							class="w-1.5 h-1.5 bg-gray-500 rounded-full typing-dot"
-							style="animation-delay: 300ms"
-						></span>
-					</div>
-					<span class="text-sm text-gray-600 font-medium">{{ typingText }}</span>
-				</div>
-			</div>
-		</div>
+		<Typing v-if="typingText" :typing-text />
 	</section>
 
 	<section v-else class="md:hidden flex-1 flex flex-col">

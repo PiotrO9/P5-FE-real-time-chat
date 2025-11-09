@@ -119,8 +119,8 @@ defineExpose({
 		ref="reactionsContainerRef"
 		class="absolute top-1/2 -translate-y-1/2 flex flex-col gap-2 bg-white rounded-2xl p-2 shadow-xl border border-gray-200 z-20 w-64 max-h-80 overflow-y-auto"
 		:class="{
-			'left-full ml-2': position === 'left',
-			'right-full mr-2': position === 'right'
+			'left-0 -translate-y-[120%]': position === 'left',
+			'right-0 -translate-y-[120%]': position === 'right'
 		}"
 		@mouseenter="handleReactionPickerMouseEnter"
 		@mouseleave="handleReactionPickerMouseLeave"

@@ -46,7 +46,6 @@ function handleSubmit() {
 			:tabindex="0"
 			:rows="1"
 			:placeholder="'Napisz wiadomość...'"
-			class="flex-1 resize-none px-3 py-2 border border-gray-300 rounded-lg focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-transparent bg-white"
 			:value="props.modelValue"
 			@input="handleInput"
 			@keydown="handleKeyDown"

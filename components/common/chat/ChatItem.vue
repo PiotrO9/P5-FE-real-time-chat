@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { Chat } from '~/types/Chat'
-import UnreadMessagesCount from './UnreadMessages.vue'
 import UnreadMessages from './UnreadMessages.vue'
-import ChatItemActionsMenu from './ChatItemActionsMenu.vue'
+import ChatInitial from './ChatInitial.vue'
+import ActionsMenu from '../ActionsMenu.vue'
 
 interface Props {
 	chat: Chat
@@ -78,11 +78,7 @@ function handleKeyDown(event: KeyboardEvent) {
 			@click="handleClick"
 			@keydown="handleKeyDown"
 		>
-			<div
-				class="h-10 w-10 bg-blue-100 flex items-center justify-center text-blue-600 font-bold rounded"
-			>
-				{{ chatInitial }}
-			</div>
+			<ChatInitial :chat-initial />
 			<div class="min-w-0 flex-1 flex flex-col">
 				<div class="flex items-center justify-between gap-2 min-w-0">
 					<p class="font-medium text-slate-900 truncate min-w-0">
@@ -115,7 +111,7 @@ function handleKeyDown(event: KeyboardEvent) {
 					{{ displayMessage }}
 				</p>
 			</div>
-			<ChatItemActionsMenu />
+			<ActionsMenu classes="chat-item-action-menu" />
 			<UnreadMessages :unread-count :has-unread variant="simple" />
 		</div>
 	</li>
@@ -123,6 +119,10 @@ function handleKeyDown(event: KeyboardEvent) {
 
 <style scoped>
 li {
+	&:deep(.chat-item-action-menu) {
+		display: none;
+	}
+
 	&:hover {
 		&:deep(.chat-item-action-menu) {
 			display: flex;

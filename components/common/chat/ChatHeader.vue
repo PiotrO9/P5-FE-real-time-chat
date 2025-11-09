@@ -1,24 +1,28 @@
 <script setup lang="ts">
-import Icon from '../Icon.vue'
+import type { Chat } from '~/types/Chat'
+import ActionsMenu from '../ActionsMenu.vue'
+import ChatInitial from './ChatInitial.vue'
 
 interface Props {
-	chatName: string
-	isGroupChat?: boolean
+	selectedChat: Chat | null
 }
 
-const props = defineProps<Props>()
+const chatStore = useChatStore()
 
-interface Emits {
-	(e: 'toggle-actions'): void
-}
+const { selectedChat } = defineProps<Props>()
 
-const emit = defineEmits<Emits>()
-
-const chatInitial = computed(() => (props.chatName ?? '').charAt(0) || '?')
-const displayName = computed(() => props.chatName ?? 'Czat')
+const isGroup = computed(() => selectedChat?.isGroup)
+const chatInitial = computed(() => {
+	return isGroup.value
+		? (selectedChat?.name[0] ?? '?')
+		: (selectedChat?.otherUser.username[0] ?? '?')
+})
+const displayName = computed(() => selectedChat?.name ?? 'Czat')
 
 function handleToggleActions() {
-	emit('toggle-actions')
+	if (!selectedChat) return
+
+	chatStore.openChatDetails(selectedChat)
 }
 </script>
 
@@ -27,26 +31,16 @@ function handleToggleActions() {
 		class="border-b rounded-t-[1.125rem] border-gray-200 px-6 py-4 flex items-center justify-between bg-white backdrop-blur supports-[backdrop-filter]:bg-white"
 	>
 		<div class="flex items-center gap-3">
-			<div
-				class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold"
-			>
-				{{ chatInitial }}
-			</div>
+			<ChatInitial :chat-initial />
 			<h2 class="text-lg font-semibold text-gray-900">
 				{{ displayName }}
 			</h2>
 		</div>
-		<button
-			v-if="isGroupChat"
-			type="button"
-			tabindex="0"
-			aria-label="Otwórz panel akcji czatu"
-			class="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+		<ActionsMenu
+			v-if="isGroup"
 			@click="handleToggleActions"
 			@keydown.enter="handleToggleActions"
 			@keydown.space.prevent="handleToggleActions"
-		>
-			<Icon name="context-menu-dots" class="h-5 w-5 text-gray-600" />
-		</button>
+		/>
 	</div>
 </template>

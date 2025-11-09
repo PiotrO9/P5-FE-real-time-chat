@@ -27,12 +27,13 @@ import type { FriendResponse, Invite } from '~/types/FriendsApi'
 import { useSocket } from '~/composables/useSocket'
 
 const { error: toastError, success: toastSuccess } = useToast()
-const { user } = useAuth()
 const { connect, disconnect, on, off, emit } = useSocket()
+const { user } = useAuth()
+const chatStore = useChatStore()
 
 const currentUserId = computed(() => (user.value as any)?.id ?? 0)
+const currentChat = computed(() => chatStore.currentChatDetails)
 
-// Stan przechowujący kto aktualnie pisze (chatId -> Map<userId, username>)
 const typingUsers = reactive<Record<string, Map<string | number, string>>>({})
 
 type ViewMode = 'chats' | 'friends'
@@ -227,9 +228,7 @@ function handleStartChat(friendId: string | number) {
 	toastError('Nie znaleziono czatu z tym znajomym')
 }
 
-// Funkcje do obsługi eventów WebSocket
 function mapMessageFromBackend(messageData: any): Message {
-	// Mapuj ID z string na number jeśli potrzeba
 	const id =
 		typeof messageData.id === 'string'
 			? Number(messageData.id) || messageData.id
@@ -269,24 +268,20 @@ function handleNewMessage(data: { chatId: string; message: any }) {
 	const chat = chats.value.find((c) => String(c.id) === String(chatId))
 
 	if (!chat) {
-		// Jeśli nie ma czatu, odśwież listę czatów
 		fetchChats()
 		return
 	}
 
 	const mappedMessage = mapMessageFromBackend(data.message)
 
-	// Sprawdź czy wiadomość już nie istnieje (zapobieganie duplikatom)
 	if (!chat.messages.find((m) => String(m.id) === String(mappedMessage.id))) {
 		chat.messages.push(mappedMessage)
 		chat.lastMessage = mappedMessage
 
-		// Jeśli to nie jest aktualnie wybrany czat, zwiększ unreadCount
 		if (selectedChatId.value !== chat.id) {
 			chat.unreadCount++
 		}
 
-		// Jeśli to aktualnie wybrany czat, przewiń na dół
 		if (selectedChatId.value === chat.id) {
 			nextTick(() => handleScrollToBottom())
 		}
@@ -301,7 +296,6 @@ function handleMessageDeleted(data: { chatId: string; messageId: string }) {
 
 	chat.messages = chat.messages.filter((m) => String(m.id) !== String(data.messageId))
 
-	// Zaktualizuj lastMessage
 	const lastMessage = chat.messages[chat.messages.length - 1]
 	if (lastMessage) {
 		chat.lastMessage = lastMessage
@@ -334,7 +328,6 @@ function handleReactionAdded(data: {
 	const existingReaction = message.reactions.find((r) => r.emoji === data.reaction.emoji)
 
 	if (existingReaction) {
-		// Sprawdź czy użytkownik już nie dodał tej reakcji
 		if (!existingReaction.userIds.some((id) => String(id) === String(userId))) {
 			existingReaction.userIds.push(userId)
 		}
@@ -371,7 +364,6 @@ function handleReactionRemoved(data: {
 			(id) => String(id) !== String(userId)
 		)
 
-		// Jeśli nie ma już żadnych użytkowników z tą reakcją, usuń reakcję
 		if (existingReaction.userIds.length === 0) {
 			message.reactions = message.reactions.filter((r) => r.emoji !== data.reaction.emoji)
 		}
@@ -383,7 +375,6 @@ function handleTypingStart(data: { chatId: string; userId: string; username: str
 	const userId =
 		typeof data.userId === 'string' ? Number(data.userId) || data.userId : data.userId
 
-	// Ignoruj własne eventy typing
 	if (String(userId) === String(currentUserId.value)) return
 
 	if (!typingUsers[chatId]) {
@@ -397,16 +388,13 @@ function handleTypingStop(data: { chatId: string; userId: string }) {
 	const userId =
 		typeof data.userId === 'string' ? Number(data.userId) || data.userId : data.userId
 
-	// Ignoruj własne eventy typing
 	if (String(userId) === String(currentUserId.value)) return
 
 	if (typingUsers[chatId]) {
 		typingUsers[chatId].delete(userId)
-		// Nie usuwamy klucza - zostawiamy pusty Map, computed zwróci pustą tablicę
 	}
 }
 
-// Funkcja pomocnicza do tworzenia systemowych wiadomości
 function createSystemMessage(
 	chatId: number | string,
 	systemType: 'member:added' | 'member:removed' | 'chat:created' | 'chat:updated',
@@ -420,7 +408,7 @@ function createSystemMessage(
 	const timestamp = Date.now()
 	const numericChatId = typeof chatId === 'string' ? Number(chatId) || 0 : chatId
 	return {
-		id: -timestamp, // Ujemne ID dla systemowych wiadomości
+		id: -timestamp,
 		chatId: numericChatId,
 		senderId: 0,
 		senderUsername: 'System',
@@ -443,7 +431,7 @@ function handleMessageUpdated(data: { chatId: string; message: any }) {
 
 	if (messageIndex !== -1) {
 		chat.messages[messageIndex] = mappedMessage
-		// Zaktualizuj lastMessage jeśli to była ostatnia wiadomość
+
 		if (chat.lastMessage && String(chat.lastMessage.id) === String(mappedMessage.id)) {
 			chat.lastMessage = mappedMessage
 		}
@@ -459,17 +447,12 @@ function handleMessageRead(data: {
 		typeof data.chatId === 'string' ? Number(data.chatId) || data.chatId : data.chatId
 	const chat = chats.value.find((c) => String(c.id) === String(chatId))
 	if (!chat) return
-
-	// Można tutaj dodać logikę do śledzenia przeczytanych wiadomości
-	// Na razie tylko logujemy
-	console.log('Message read:', data)
 }
 
 function handleUserStatus(data: { userId: string; isOnline: boolean; lastSeen?: Date }) {
 	const userId =
 		typeof data.userId === 'string' ? Number(data.userId) || data.userId : data.userId
 
-	// Aktualizuj status użytkownika w liście znajomych
 	const friend = friends.value.find((f) => String(f.id) === String(userId))
 	if (friend) {
 		friend.isOnline = data.isOnline
@@ -478,16 +461,13 @@ function handleUserStatus(data: { userId: string; isOnline: boolean; lastSeen?: 
 		}
 	}
 
-	// Aktualizuj status w czatach
-	chats.value.forEach((chat) => {
-		if (chat.otherUser && String(chat.otherUser.id) === String(userId)) {
-			// Można dodać logikę aktualizacji statusu w czacie
-		}
-	})
+	// chats.value.forEach((chat) => {
+	// 	if (chat.otherUser && String(chat.otherUser.id) === String(userId)) {
+	// 	}
+	// })
 }
 
 function handleChatCreated(_data: { chat: any }) {
-	// Odśwież listę czatów
 	fetchChats()
 }
 
@@ -497,12 +477,10 @@ function handleChatUpdatedFromSocket(data: { chatId: string; updates: any }) {
 	const chat = chats.value.find((c) => String(c.id) === String(chatId))
 	if (!chat) return
 
-	// Aktualizuj dane czatu
 	if (data.updates.name) {
 		chat.name = data.updates.name
 	}
 
-	// Dodaj systemową wiadomość o aktualizacji czatu
 	const systemMessage = createSystemMessage(chatId, 'chat:updated', {
 		chatId,
 		updates: data.updates
@@ -526,7 +504,6 @@ function handleMemberAdded(data: { chatId: string; member: any }) {
 			: data.member.userId
 	const username = data.member.username || data.member.user?.username || 'Nieznany użytkownik'
 
-	// Dodaj systemową wiadomość o dołączeniu członka
 	const systemMessage = createSystemMessage(chatId, 'member:added', {
 		userId: memberId,
 		username,
@@ -548,7 +525,6 @@ function handleMemberRemoved(data: { chatId: string; userId: string }) {
 	const userId =
 		typeof data.userId === 'string' ? Number(data.userId) || data.userId : data.userId
 
-	// Pobierz username z czatu lub znajomych
 	let username = 'Nieznany użytkownik'
 	if (chat.otherUser && String(chat.otherUser.id) === String(userId)) {
 		username = chat.otherUser.username
@@ -559,7 +535,6 @@ function handleMemberRemoved(data: { chatId: string; userId: string }) {
 		}
 	}
 
-	// Dodaj systemową wiadomość o opuszczeniu członka
 	const systemMessage = createSystemMessage(chatId, 'member:removed', {
 		userId,
 		username,
@@ -572,7 +547,6 @@ function handleMemberRemoved(data: { chatId: string; userId: string }) {
 	}
 }
 
-// Funkcje do wysyłania eventów typing
 let typingTimeout: NodeJS.Timeout | null = null
 let isTyping = false
 
@@ -581,18 +555,15 @@ function handleTypingInput() {
 
 	const chatId = String(selectedChatId.value)
 
-	// Wyślij typing:start jeśli jeszcze nie wysłaliśmy
 	if (!isTyping) {
 		emit('typing:start', { chatId })
 		isTyping = true
 	}
 
-	// Reset timeout
 	if (typingTimeout) {
 		clearTimeout(typingTimeout)
 	}
 
-	// Wyślij typing:stop po 3 sekundach bez pisania
 	typingTimeout = setTimeout(() => {
 		if (isTyping) {
 			emit('typing:stop', { chatId })
@@ -607,7 +578,6 @@ function handleMessageSent() {
 
 	const chatId = String(selectedChatId.value)
 
-	// Wyślij typing:stop gdy wysyłamy wiadomość
 	if (isTyping) {
 		emit('typing:stop', { chatId })
 		isTyping = false
@@ -652,7 +622,6 @@ function cleanupWebSocketListeners() {
 }
 
 onMounted(async () => {
-	// Połącz z WebSocket
 	connect()
 	setupWebSocketListeners()
 
@@ -670,7 +639,6 @@ onMounted(async () => {
 	nextTick(() => handleScrollToBottom())
 })
 
-// Computed dla aktualnego czatu - lista użytkowników piszących
 const currentTypingUsers = computed(() => {
 	if (!selectedChatId.value) return []
 	const chatId = String(selectedChatId.value)
@@ -678,7 +646,6 @@ const currentTypingUsers = computed(() => {
 	return users ? Array.from(users.values()) : []
 })
 
-// Computed dla wszystkich czatów - mapa chatId -> lista użytkowników piszących
 const typingUsersByChat = computed(() => {
 	const result: Record<number, string[]> = {}
 	chats.value.forEach((chat) => {
@@ -812,7 +779,6 @@ function handleSelectChat(chatId: number) {
 	if (chat) chat.unreadCount = 0
 	fetchMessages(chatId, false)
 	nextTick(() => handleScrollToBottom())
-	// Zamknij panel akcji przy zmianie czatu
 	isActionsPanelOpen.value = false
 }
 
@@ -820,7 +786,6 @@ function handleChatUpdated(data: { members: any[]; currentUserRole?: any }) {
 	const chat = selectedChat.value
 	if (!chat) return
 
-	// Zaktualizuj członków i rolę użytkownika
 	chat.members = data.members
 	if (data.currentUserRole) {
 		chat.currentUserRole = data.currentUserRole
@@ -836,13 +801,12 @@ async function handleSendMessage() {
 
 	if (text.length === 0) return
 
-	handleMessageSent() // Wyślij typing:stop
+	handleMessageSent()
 
 	try {
 		const res = await sendMessageToService(chat.id, text)
 		const saved = res.data as unknown as Message
 
-		// Sprawdź czy wiadomość już nie została dodana przez WebSocket
 		const exists = chat.messages.find((m) => String(m.id) === String(saved.id))
 		if (!exists) {
 			chat.messages.push(saved)
@@ -1053,7 +1017,6 @@ function handleReactionUpdated(
 									v-model="searchQuery"
 									type="text"
 									placeholder="Szukaj..."
-									class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 								/>
 							</template>
 						</div>
@@ -1109,7 +1072,7 @@ function handleReactionUpdated(
 					</div>
 				</aside>
 
-				<div class="p-4 pl-0 w-full bg-gray">
+				<div :class="['w-full py-4 bg-gray']">
 					<div class="flex-1 flex flex-col min-h-0 w-full h-full">
 						<ChatPanel
 							ref="chatPanelRef"
@@ -1136,19 +1099,14 @@ function handleReactionUpdated(
 						</template>
 					</div>
 
-					<ChatActionsPanel
-						v-model="isActionsPanelOpen"
-						:chat="selectedChat"
-						:current-user-id="currentUserId"
-						@chat-updated="handleChatUpdated"
-					/>
-
 					<section v-if="!selectedChat" class="md:hidden flex-1 flex flex-col">
 						<div class="flex-1 flex items-center justify-center text-gray-500">
 							Wybierz czat z listy po lewej
 						</div>
 					</section>
 				</div>
+
+				<ChatActionsPanel v-if="currentChat" :chat="currentChat" :current-user-id />
 			</div>
 		</div>
 	</div>
