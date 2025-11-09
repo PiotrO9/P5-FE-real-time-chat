@@ -6,12 +6,13 @@ interface Props {
 	receivedInvites: Invite[]
 }
 
-const props = defineProps<Props>()
+interface Emits {
+	(e: 'accept-invite', inviteId: string): void
+	(e: 'reject-invite', inviteId: string): void
+}
 
-const emit = defineEmits<{
-	'accept-invite': [inviteId: string]
-	'reject-invite': [inviteId: string]
-}>()
+const props = defineProps<Props>()
+const emit = defineEmits<Emits>()
 
 const sentInvites = computed(() => props.sentInvites ?? [])
 const receivedInvites = computed(() => props.receivedInvites ?? [])
@@ -46,7 +47,7 @@ function getInitials(username: string): string {
 
 function formatDate(dateString: string): string {
 	const date = new Date(dateString)
-	return date.toLocaleDateString('pl-PL', {
+	return date.toLocaleDateString('en-US', {
 		day: 'numeric',
 		month: 'short',
 		hour: '2-digit',
@@ -70,11 +71,11 @@ function getStatusBadgeClass(status: string): string {
 function getStatusText(status: string): string {
 	switch (status) {
 		case 'PENDING':
-			return 'Oczekujące'
+			return 'Pending'
 		case 'ACCEPTED':
-			return 'Zaakceptowane'
+			return 'Accepted'
 		case 'REJECTED':
-			return 'Odrzucone'
+			return 'Rejected'
 		default:
 			return status
 	}
@@ -88,25 +89,25 @@ function getStatusText(status: string): string {
 				v-if="receivedInvites.length === 0 && sentInvites.length === 0"
 				class="p-8 text-center"
 			>
-				<p class="text-gray-500 text-sm">Brak zaproszeń</p>
+				<p class="text-gray-500 text-sm">No invitations</p>
 			</div>
 
 			<div v-else class="divide-y divide-gray-200">
 				<div v-if="receivedInvites.length > 0" class="pb-4">
 					<h3 class="px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-50">
-						Otrzymane zaproszenia ({{ receivedInvites.length }})
+						Received invitations ({{ receivedInvites.length }})
 					</h3>
 					<ul
 						class="divide-y divide-gray-100"
 						role="listbox"
-						aria-label="Lista otrzymanych zaproszeń"
+						aria-label="Received invitations list"
 					>
 						<li
 							v-for="invite in receivedInvites"
 							:key="invite.id"
 							class="px-4 py-3 hover:bg-gray-50 transition-colors"
 							role="option"
-							:aria-label="`Zaproszenie od ${invite.sender?.username}`"
+							:aria-label="`Invitation from ${invite.sender?.username}`"
 						>
 							<div class="flex items-center justify-between gap-3">
 								<div class="flex items-center gap-3 flex-1 min-w-0">
@@ -141,21 +142,21 @@ function getStatusText(status: string): string {
 											type="button"
 											class="px-3 py-1.5 bg-green-500 text-white text-xs font-medium rounded-lg hover:bg-green-600 transition-colors"
 											tabindex="0"
-											aria-label="Zaakceptuj zaproszenie"
+											aria-label="Accept invitation"
 											@click="handleAccept(invite.id)"
 											@keydown="handleKeyDown($event, 'accept', invite.id)"
 										>
-											Akceptuj
+											Accept
 										</button>
 										<button
 											type="button"
 											class="px-3 py-1.5 bg-red-500 text-white text-xs font-medium rounded-lg hover:bg-red-600 transition-colors"
 											tabindex="0"
-											aria-label="Odrzuć zaproszenie"
+											aria-label="Reject invitation"
 											@click="handleReject(invite.id)"
 											@keydown="handleKeyDown($event, 'reject', invite.id)"
 										>
-											Odrzuć
+											Reject
 										</button>
 									</template>
 								</div>
@@ -166,19 +167,19 @@ function getStatusText(status: string): string {
 
 				<div v-if="sentInvites.length > 0" class="pt-4">
 					<h3 class="px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-50">
-						Wysłane zaproszenia ({{ sentInvites.length }})
+						Sent invitations ({{ sentInvites.length }})
 					</h3>
 					<ul
 						class="divide-y divide-gray-100"
 						role="listbox"
-						aria-label="Lista wysłanych zaproszeń"
+						aria-label="Sent invitations list"
 					>
 						<li
 							v-for="invite in sentInvites"
 							:key="invite.id"
 							class="px-4 py-3 hover:bg-gray-50 transition-colors"
 							role="option"
-							:aria-label="`Zaproszenie do ${invite.receiver?.username}`"
+							:aria-label="`Invitation to ${invite.receiver?.username}`"
 						>
 							<div class="flex items-center justify-between gap-3">
 								<div class="flex items-center gap-3 flex-1 min-w-0">

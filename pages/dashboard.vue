@@ -101,7 +101,7 @@ async function fetchFriendsData() {
 
 		friends.value = friendsList.map(mapFriendResponse)
 	} catch (err: any) {
-		friendsError.value = err?.message || 'Nie udało się pobrać listy znajomych'
+		friendsError.value = err?.message || 'Failed to fetch friends list'
 		if (friendsError.value) {
 			toastError(friendsError.value)
 		}
@@ -126,7 +126,7 @@ async function fetchInvitesData() {
 			totalPending: raw?.totalPending ?? 0
 		}
 	} catch (err: any) {
-		invitesError.value = err?.message || 'Nie udało się pobrać zaproszeń'
+		invitesError.value = err?.message || 'Failed to fetch invitations'
 		if (invitesError.value) {
 			toastError(invitesError.value)
 		}
@@ -153,17 +153,17 @@ function handleFriendsSubViewChange(subView: 'list' | 'add' | 'invites') {
 
 async function handleAddFriend(username: string) {
 	if (!username.trim()) {
-		toastError('Podaj nazwę użytkownika')
+		toastError('Please provide a username')
 		return
 	}
 
 	try {
 		await sendFriendInvite(username.trim())
-		toastSuccess(`Zaproszenie zostało wysłane do ${username}`)
+		toastSuccess(`Invitation sent to ${username}`)
 		await fetchInvitesData()
 	} catch (err: any) {
 		const errorMessage =
-			err?.response?._data?.message || err?.message || 'Nie udało się wysłać zaproszenia'
+			err?.response?._data?.message || err?.message || 'Failed to send invitation'
 		toastError(errorMessage)
 	}
 }
@@ -174,11 +174,11 @@ async function handleRemoveFriend(friendId: string | number) {
 
 	try {
 		await deleteFriendFromService(String(friendId))
-		toastSuccess(`${friend.username} został usunięty z znajomych`)
+		toastSuccess(`${friend.username} has been removed from friends`)
 		await fetchFriendsData()
 	} catch (err: any) {
 		const errorMessage =
-			err?.response?._data?.message || err?.message || 'Nie udało się usunąć znajomego'
+			err?.response?._data?.message || err?.message || 'Failed to remove friend'
 		toastError(errorMessage)
 	}
 }
@@ -186,14 +186,14 @@ async function handleRemoveFriend(friendId: string | number) {
 async function handleAcceptInvite(inviteId: string) {
 	try {
 		await acceptInvite(inviteId)
-		toastSuccess('Zaproszenie zostało zaakceptowane')
+		toastSuccess('Invitation has been accepted')
 		await fetchFriendsData()
 		await fetchInvitesData()
 	} catch (err: any) {
 		const errorMessage =
 			err?.response?._data?.message ||
 			err?.message ||
-			'Nie udało się zaakceptować zaproszenia'
+			'Failed to accept invitation'
 		toastError(errorMessage)
 	}
 }
@@ -201,11 +201,11 @@ async function handleAcceptInvite(inviteId: string) {
 async function handleRejectInvite(inviteId: string) {
 	try {
 		await rejectInvite(inviteId)
-		toastSuccess('Zaproszenie zostało odrzucone')
+		toastSuccess('Invitation has been rejected')
 		await fetchInvitesData()
 	} catch (err: any) {
 		const errorMessage =
-			err?.response?._data?.message || err?.message || 'Nie udało się odrzucić zaproszenia'
+			err?.response?._data?.message || err?.message || 'Failed to reject invitation'
 		toastError(errorMessage)
 	}
 }
@@ -460,11 +460,6 @@ function handleUserStatus(data: { userId: string; isOnline: boolean; lastSeen?: 
 			friend.lastSeen = data.lastSeen.toISOString()
 		}
 	}
-
-	// chats.value.forEach((chat) => {
-	// 	if (chat.otherUser && String(chat.otherUser.id) === String(userId)) {
-	// 	}
-	// })
 }
 
 function handleChatCreated(_data: { chat: any }) {
@@ -502,7 +497,7 @@ function handleMemberAdded(data: { chatId: string; member: any }) {
 		typeof data.member.userId === 'string'
 			? Number(data.member.userId) || data.member.userId
 			: data.member.userId
-	const username = data.member.username || data.member.user?.username || 'Nieznany użytkownik'
+	const username = data.member.username || data.member.user?.username || 'Unknown user'
 
 	const systemMessage = createSystemMessage(chatId, 'member:added', {
 		userId: memberId,
@@ -525,7 +520,7 @@ function handleMemberRemoved(data: { chatId: string; userId: string }) {
 	const userId =
 		typeof data.userId === 'string' ? Number(data.userId) || data.userId : data.userId
 
-	let username = 'Nieznany użytkownik'
+	let username = 'Unknown user'
 	if (chat.otherUser && String(chat.otherUser.id) === String(userId)) {
 		username = chat.otherUser.username
 	} else {
@@ -699,9 +694,9 @@ async function fetchChats() {
 			currentUserRole: chat?.currentUserRole || chat?.memberRole || undefined
 		}))
 	} catch (err: any) {
-		chatsError.value = err?.message || 'Nie udało się pobrać listy czatów'
+		chatsError.value = err?.message || 'Failed to fetch chats list'
 
-		toastError(chatsError.value || 'Błąd')
+		toastError(chatsError.value || 'Error')
 	} finally {
 		chatsLoading.value = false
 	}
@@ -765,8 +760,8 @@ async function fetchMessages(chatId: number, append: boolean) {
 			}
 		}
 	} catch (err: any) {
-		state.error = err?.message || 'Nie udało się pobrać wiadomości'
-		toastError(state.error || 'Błąd')
+		state.error = err?.message || 'Failed to fetch messages'
+		toastError(state.error || 'Error')
 	} finally {
 		state.loading = false
 	}
@@ -789,6 +784,14 @@ function handleChatUpdated(data: { members: any[]; currentUserRole?: any }) {
 	chat.members = data.members
 	if (data.currentUserRole) {
 		chat.currentUserRole = data.currentUserRole
+	}
+
+	const storeChat = chatStore.currentChatDetails
+	if (storeChat && String(storeChat.id) === String(chat.id)) {
+		storeChat.members = data.members
+		if (data.currentUserRole) {
+			storeChat.currentUserRole = data.currentUserRole
+		}
 	}
 }
 
@@ -816,7 +819,7 @@ async function handleSendMessage() {
 		newMessageText.value = ''
 		nextTick(() => handleScrollToBottom())
 	} catch (err: any) {
-		toastError(err?.message || 'Nie udało się wysłać wiadomości')
+		toastError(err?.message || 'Failed to send message')
 	}
 }
 
@@ -847,7 +850,7 @@ async function handleDeleteMessage(messageId: string | number) {
 			chat.lastMessage = null as any
 		}
 	} catch (err: any) {
-		toastError(err?.message || 'Nie udało się usunąć wiadomości')
+		toastError(err?.message || 'Failed to delete message')
 	}
 }
 
@@ -907,7 +910,7 @@ function handleReactionUpdated(
 						>
 							<div class="flex items-center justify-between mb-3">
 								<h1 class="text-xl font-semibold text-slate-900">
-									{{ viewMode === 'chats' ? 'Wiadomości' : 'Znajomi' }}
+									{{ viewMode === 'chats' ? 'Messages' : 'Friends' }}
 								</h1>
 								<div class="flex gap-1">
 									<button
@@ -919,12 +922,12 @@ function handleReactionUpdated(
 												: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
 										]"
 										tabindex="0"
-										aria-label="Widok czatów"
+										aria-label="Chats view"
 										@click="handleViewModeChange('chats')"
 										@keydown.enter="handleViewModeChange('chats')"
 										@keydown.space.prevent="handleViewModeChange('chats')"
 									>
-										Czaty
+										Chats
 									</button>
 									<button
 										type="button"
@@ -935,12 +938,12 @@ function handleReactionUpdated(
 												: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
 										]"
 										tabindex="0"
-										aria-label="Widok znajomych"
+										aria-label="Friends view"
 										@click="handleViewModeChange('friends')"
 										@keydown.enter="handleViewModeChange('friends')"
 										@keydown.space.prevent="handleViewModeChange('friends')"
 									>
-										Znajomi
+										Friends
 									</button>
 								</div>
 							</div>
@@ -956,12 +959,12 @@ function handleReactionUpdated(
 												: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
 										]"
 										tabindex="0"
-										aria-label="Lista znajomych"
+										aria-label="Friends list"
 										@click="handleFriendsSubViewChange('list')"
 										@keydown.enter="handleFriendsSubViewChange('list')"
 										@keydown.space.prevent="handleFriendsSubViewChange('list')"
 									>
-										Znajomi
+										Friends
 									</button>
 									<button
 										type="button"
@@ -972,14 +975,14 @@ function handleReactionUpdated(
 												: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
 										]"
 										tabindex="0"
-										aria-label="Zaproszenia"
+										aria-label="Invitations"
 										@click="handleFriendsSubViewChange('invites')"
 										@keydown.enter="handleFriendsSubViewChange('invites')"
 										@keydown.space.prevent="
 											handleFriendsSubViewChange('invites')
 										"
 									>
-										Zaproszenia
+										Invitations
 										<span
 											v-if="invites.totalPending > 0"
 											class="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center"
@@ -1000,30 +1003,30 @@ function handleReactionUpdated(
 												: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
 										]"
 										tabindex="0"
-										aria-label="Dodaj znajomych"
+										aria-label="Add friends"
 										@click="handleFriendsSubViewChange('add')"
 										@keydown.enter="handleFriendsSubViewChange('add')"
 										@keydown.space.prevent="handleFriendsSubViewChange('add')"
 									>
-										Dodaj
+										Add
 									</button>
 								</div>
 							</template>
 
 							<template v-if="viewMode === 'chats'">
-								<label for="chat-search" class="sr-only">Szukaj czatu</label>
+								<label for="chat-search" class="sr-only">Search chat</label>
 								<input
 									id="chat-search"
 									v-model="searchQuery"
 									type="text"
-									placeholder="Szukaj..."
+									placeholder="Search..."
 								/>
 							</template>
 						</div>
 
 						<template v-if="viewMode === 'chats'">
 							<div v-if="chatsLoading" class="p-4 text-sm text-slate-600">
-								Ładowanie czatów...
+								Loading chats...
 							</div>
 							<div v-else-if="chatsError" class="p-4 text-sm text-red-600">
 								{{ chatsError }}
@@ -1040,7 +1043,7 @@ function handleReactionUpdated(
 						<template v-else-if="viewMode === 'friends'">
 							<div v-if="friendsSubView === 'list'" class="h-full">
 								<div v-if="friendsLoading" class="p-4 text-sm text-slate-600">
-									Ładowanie znajomych...
+									Loading friends...
 								</div>
 								<div v-else-if="friendsError" class="p-4 text-sm text-red-600">
 									{{ friendsError }}
@@ -1054,7 +1057,7 @@ function handleReactionUpdated(
 							</div>
 							<div v-else-if="friendsSubView === 'invites'">
 								<div v-if="invitesLoading" class="p-4 text-sm text-slate-600">
-									Ładowanie zaproszeń...
+									Loading invitations...
 								</div>
 								<div v-else-if="invitesError" class="p-4 text-sm text-red-600">
 									{{ invitesError }}
@@ -1101,12 +1104,17 @@ function handleReactionUpdated(
 
 					<section v-if="!selectedChat" class="md:hidden flex-1 flex flex-col">
 						<div class="flex-1 flex items-center justify-center text-gray-500">
-							Wybierz czat z listy po lewej
+							Select a chat from the list on the left
 						</div>
 					</section>
 				</div>
 
-				<ChatActionsPanel v-if="currentChat" :chat="currentChat" :current-user-id />
+				<ChatActionsPanel
+					v-if="currentChat"
+					:chat="currentChat"
+					:current-user-id
+					@chat-updated="handleChatUpdated"
+				/>
 			</div>
 		</div>
 	</div>

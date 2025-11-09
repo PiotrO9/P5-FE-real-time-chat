@@ -1,5 +1,5 @@
 import type { ApiResponse } from '~/types/Api'
-import type { ChatsResponse, ChatMember } from '~/types/ChatsApi'
+import type { ChatsResponse } from '~/types/ChatsApi'
 import type { Message } from '~/types/Chat'
 import type { MessagesResponse } from '~/types/MessagesApi'
 

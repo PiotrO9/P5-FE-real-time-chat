@@ -5,5 +5,4 @@ export function createApiClient() {
 	})
 }
 
-// Export singleton instance
 export const apiFetch = createApiClient()

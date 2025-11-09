@@ -8,11 +8,12 @@ interface Props {
 	typingUsersByChat?: Record<number, string[]>
 }
 
-const props = defineProps<Props>()
-
-const emit = defineEmits<{
+interface Emits {
 	(e: 'select-chat', chatId: number): void
-}>()
+}
+
+const props = defineProps<Props>()
+const emit = defineEmits<Emits>()
 
 const chatsList = computed(() => props.chats ?? [])
 const selectedId = computed(() => props.selectedChatId ?? '')
@@ -35,10 +36,10 @@ function getTypingUsers(chatId: number): string[] {
 	<div class="flex-1 overflow-y-auto bg-white rounded-b-[1.125rem] max-h-[calc(100vh-150px)]">
 		<div v-if="chatsList.length === 0">
 			<div class="p-8 text-center">
-				<p class="text-gray-500 text-sm">Nie masz jeszcze żadnych czatów</p>
+				<p class="text-gray-500 text-sm">You don't have any chats yet</p>
 			</div>
 		</div>
-		<ul v-else class="divide-y divide-gray-100 p-2" role="listbox" aria-label="Lista czatów">
+		<ul v-else class="divide-y divide-gray-100 p-2" role="listbox" aria-label="Chat list">
 			<ChatItem
 				v-for="chat in chatsList"
 				:key="chat.id"

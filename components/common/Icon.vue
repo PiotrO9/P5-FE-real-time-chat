@@ -14,19 +14,6 @@ const props = withDefaults(defineProps<IconProps>(), {
 const svgContent = ref<string>('')
 const isLoading = ref(true)
 
-async function loadIcon(iconName: string) {
-	isLoading.value = true
-	try {
-		const iconModule = await import(`@/assets/icons/${iconName}.svg?raw`)
-		svgContent.value = iconModule.default
-	} catch (error) {
-		console.warn(`Icon "${iconName}" not found:`, error)
-		svgContent.value = ''
-	} finally {
-		isLoading.value = false
-	}
-}
-
 const processedSvg = computed(() => {
 	if (!svgContent.value) {
 		return ''
@@ -85,6 +72,19 @@ watch(
 		}
 	}
 )
+
+async function loadIcon(iconName: string) {
+	isLoading.value = true
+	try {
+		const iconModule = await import(`@/assets/icons/${iconName}.svg?raw`)
+		svgContent.value = iconModule.default
+	} catch (error) {
+		console.warn(`Icon "${iconName}" not found:`, error)
+		svgContent.value = ''
+	} finally {
+		isLoading.value = false
+	}
+}
 </script>
 
 <template>

@@ -3,16 +3,17 @@ interface Props {
 	isLoading: boolean
 }
 
-const props = defineProps<Props>()
+interface Emits {
+	(e: 'load-more'): void
+}
 
-const emit = defineEmits<{ (e: 'load-more'): void }>()
+const props = defineProps<Props>()
+const emit = defineEmits<Emits>()
 
 const isLoadingMore = computed(() => props.isLoading)
-
-const buttonText = computed(() => (isLoadingMore.value ? 'Ładowanie...' : 'Załaduj starsze'))
-
+const buttonText = computed(() => (isLoadingMore.value ? 'Loading...' : 'Load older'))
 const ariaLabel = computed(() =>
-	isLoadingMore.value ? 'Ładowanie starszych wiadomości' : 'Załaduj starsze wiadomości'
+	isLoadingMore.value ? 'Loading older messages' : 'Load older messages'
 )
 
 function handleClick() {

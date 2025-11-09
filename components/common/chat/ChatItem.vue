@@ -10,51 +10,47 @@ interface Props {
 	typingUsers?: string[]
 }
 
-const props = defineProps<Props>()
+interface Emits {
+	(e: 'select', chatId: number): void
+}
 
-const emit = defineEmits<{ (e: 'select', chatId: number): void }>()
+const props = defineProps<Props>()
+const emit = defineEmits<Emits>()
 
 const chatData = computed(() => props.chat)
 const selected = computed(() => props.isSelected)
-
 const chatInitial = computed(() => (chatData.value.name ?? '').charAt(0) || '?')
 const chatName = computed(() =>
 	chatData.value.isGroup ? chatData.value.name : chatData.value.otherUser.username
 )
 const lastMessage = computed(() => chatData.value.lastMessage?.content || '')
 const unreadCount = computed(() => Number(chatData.value.unreadCount))
-
 const typingUsers = computed(() => props.typingUsers ?? [])
 const hasTypingUsers = computed(() => typingUsers.value.length > 0)
-
 const typingText = computed(() => {
 	if (!hasTypingUsers.value) return null
 
 	if (typingUsers.value.length === 1) {
-		return `${typingUsers.value[0]} pisze...`
+		return `${typingUsers.value[0]} is typing...`
 	}
 	if (typingUsers.value.length === 2) {
-		return `${typingUsers.value[0]} i ${typingUsers.value[1]} piszą...`
+		return `${typingUsers.value[0]} and ${typingUsers.value[1]} are typing...`
 	}
-	return `${typingUsers.value[0]} i ${typingUsers.value.length - 1} innych piszą...`
+	return `${typingUsers.value[0]} and ${typingUsers.value.length - 1} others are typing...`
 })
-
 const displayMessage = computed(() => {
 	if (hasTypingUsers.value && typingText.value) {
 		return typingText.value
 	}
-	return lastMessage.value || 'Brak wiadomości'
+	return lastMessage.value || 'No messages'
 })
-
 const hasUnread = computed(() => Number(chatData.value.unreadCount) > 0)
-
 const itemClasses = computed(() => {
 	const base =
 		'flex items-center gap-3 px-4 py-3 hover:bg-slate-50 focus-visible:bg-slate-50 outline-none rounded-[0.625rem]'
 	return selected.value ? `${base} bg-blue-50` : base
 })
-
-const ariaLabel = computed(() => `Otwórz czat: ${chatName.value}`)
+const ariaLabel = computed(() => `Open chat: ${chatName.value}`)
 
 function handleClick() {
 	emit('select', chatData.value.id)

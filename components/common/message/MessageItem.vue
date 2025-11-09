@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import type { Message, Reaction } from '~/types/Chat'
+import { addReaction, removeReaction } from '~/services/chatService'
 import Dialog from '~/components/common/Dialog.vue'
 import EmojiTooltip from '~/components/common/emoji/EmojiTooltip.vue'
-import { addReaction, removeReaction } from '~/services/chatService'
 import Icon from '../Icon.vue'
+
+interface GroupedReaction {
+	userIds: (string | number)[]
+	reactions: Reaction[]
+}
 
 interface Props {
 	message: Message
 }
-
-const props = defineProps<Props>()
 
 interface Emits {
 	(e: 'delete', messageId: string | number): void
@@ -21,59 +24,45 @@ interface Emits {
 	): void
 }
 
-const emit = defineEmits<Emits>()
-
-const message = computed(() => props.message)
-
 const { user } = useAuth()
-const currentUserId = computed(() => user.value?.id ?? 0)
 
-const isOwnMessage = computed(() => message.value.senderId === currentUserId.value)
+const props = defineProps<Props>()
+const emit = defineEmits<Emits>()
 
 const showDeleteButton = ref(false)
 const isFocused = ref(false)
 const isDeleting = ref(false)
 const showDeleteDialog = ref(false)
 const justClosedDialog = ref(false)
-
 const isReacting = ref(false)
 const emojiTooltipRef = ref<InstanceType<typeof EmojiTooltip> | null>(null)
+const deleteButtonRef = ref<HTMLButtonElement | null>(null)
+const isButtonFocused = ref(false)
 
+const message = computed(() => props.message)
+const currentUserId = computed(() => user.value?.id ?? 0)
+const isOwnMessage = computed(() => message.value.senderId === currentUserId.value)
 const senderDisplayName = computed(() => {
 	if (isOwnMessage.value) {
-		return message.value.senderUsername || 'Ty'
+		return message.value.senderUsername || 'You'
 	}
-	return message.value.senderUsername || 'Nieznany'
+	return message.value.senderUsername || 'Unknown'
 })
-
 const formattedTime = computed(() => {
 	return new Date(message.value.createdAt).toLocaleTimeString([], {
 		hour: '2-digit',
 		minute: '2-digit'
 	})
 })
-
 const avatarInitial = computed(() => {
 	const name = message.value.senderUsername || '?'
 	return name.charAt(0).toUpperCase()
 })
-
 const messageContent = computed(() => message.value.content)
-
 const shouldShowDeleteButton = computed(() => {
 	return isOwnMessage.value && !isDeleting.value && (showDeleteButton.value || isFocused.value)
 })
-
-const deleteButtonRef = ref<HTMLButtonElement | null>(null)
-const isButtonFocused = ref(false)
-
 const reactions = computed(() => message.value.reactions || [])
-
-interface GroupedReaction {
-	userIds: (string | number)[]
-	reactions: Reaction[]
-}
-
 const groupedReactions = computed<Record<string, GroupedReaction>>(() => {
 	const groups: Record<string, GroupedReaction> = {}
 	reactions.value.forEach((reaction) => {
@@ -97,9 +86,7 @@ const groupedReactions = computed<Record<string, GroupedReaction>>(() => {
 	})
 	return groups
 })
-
 const hasReactions = computed(() => reactions.value.length > 0)
-
 const userReactions = computed(() => {
 	return reactions.value.filter((r) =>
 		r.userIds.some((userId) => String(userId) === String(currentUserId.value))
@@ -159,9 +146,7 @@ function handleConfirmDelete() {
 	emit('delete', String(message.value.id))
 }
 
-function handleCancelDelete() {
-	// handleDialogUpdate zostanie wywołane przez @update:open
-}
+function handleCancelDelete() {}
 
 function resetDialogState() {
 	justClosedDialog.value = true
@@ -196,8 +181,19 @@ function handleMessageMouseLeave() {
 	emojiTooltipRef.value?.hideTooltip()
 }
 
-function handleTooltipShowChange(_show: boolean) {
-	// Można użyć tego do dodatkowej logiki jeśli potrzeba
+function handleTooltipShowChange(_show: boolean) {}
+
+function handleReactionBadgeClick(emoji: string, event: Event) {
+	event.stopPropagation()
+	handleReactionClick(emoji)
+}
+
+function handleReactionBadgeKeyDown(event: KeyboardEvent, emoji: string) {
+	if (event.key === 'Enter' || event.key === ' ') {
+		event.preventDefault()
+		event.stopPropagation()
+		handleReactionClick(emoji)
+	}
 }
 
 async function handleReactionClick(emoji: string) {
@@ -224,22 +220,9 @@ async function handleReactionClick(emoji: string) {
 			emit('reaction-updated', message.value.id, emoji, 'add')
 		}
 	} catch (error) {
-		console.error('Błąd podczas obsługi reakcji:', error)
+		console.error('Error handling reaction:', error)
 	} finally {
 		isReacting.value = false
-	}
-}
-
-function handleReactionBadgeClick(emoji: string, event: Event) {
-	event.stopPropagation()
-	handleReactionClick(emoji)
-}
-
-function handleReactionBadgeKeyDown(event: KeyboardEvent, emoji: string) {
-	if (event.key === 'Enter' || event.key === ' ') {
-		event.preventDefault()
-		event.stopPropagation()
-		handleReactionClick(emoji)
 	}
 }
 </script>
@@ -249,7 +232,7 @@ function handleReactionBadgeKeyDown(event: KeyboardEvent, emoji: string) {
 		<div v-if="!isOwnMessage" class="flex items-start gap-2 max-w-[85%] relative">
 			<div
 				class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold flex-shrink-0"
-				:aria-label="`Awatar ${senderDisplayName}`"
+				:aria-label="`Avatar ${senderDisplayName}`"
 			>
 				{{ avatarInitial }}
 			</div>
@@ -264,7 +247,7 @@ function handleReactionBadgeKeyDown(event: KeyboardEvent, emoji: string) {
 				>
 					<div
 						class="max-w-full rounded-2xl px-4 py-2 text-sm shadow-sm bg-white text-gray-900 border border-gray-200 rounded-bl-none"
-						:aria-label="`Wiadomość od ${senderDisplayName}`"
+						:aria-label="`Message from ${senderDisplayName}`"
 					>
 						<p class="whitespace-pre-wrap break-words">{{ messageContent }}</p>
 						<p class="mt-1 text-[10px] opacity-70">
@@ -278,7 +261,7 @@ function handleReactionBadgeKeyDown(event: KeyboardEvent, emoji: string) {
 							:key="emoji"
 							type="button"
 							tabindex="0"
-							:aria-label="`${getReactionCount(emoji)} reakcji ${emoji}, kliknij aby ${hasUserReaction(emoji) ? 'usunąć' : 'dodać'} reakcję`"
+							:aria-label="`${getReactionCount(emoji)} reactions ${emoji}, click to ${hasUserReaction(emoji) ? 'remove' : 'add'} reaction`"
 							class="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-gray-100 hover:bg-gray-200 border border-gray-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
 							:class="{
 								'bg-blue-100 border-blue-300': hasUserReaction(emoji)
@@ -324,14 +307,14 @@ function handleReactionBadgeKeyDown(event: KeyboardEvent, emoji: string) {
 				<div
 					class="relative rounded-2xl px-4 py-2 text-sm shadow-sm bg-blue-600 text-white rounded-br-none"
 					:class="{ 'opacity-50': isDeleting }"
-					:aria-label="isDeleting ? 'Usuwanie wiadomości...' : 'Wiadomość od Ciebie'"
+					:aria-label="isDeleting ? 'Deleting message...' : 'Message from you'"
 				>
 					<button
 						v-if="isOwnMessage && !isDeleting"
 						ref="deleteButtonRef"
 						type="button"
 						tabindex="0"
-						aria-label="Usuń wiadomość"
+						aria-label="Delete message"
 						class="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-red-500 hover:bg-red-600 active:bg-red-700 text-white flex items-center justify-center transition-all duration-150 shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 z-10"
 						:class="{
 							'opacity-100': shouldShowDeleteButton || isButtonFocused,
@@ -345,7 +328,7 @@ function handleReactionBadgeKeyDown(event: KeyboardEvent, emoji: string) {
 						<Icon name="bin" class="h-3.5 w-3.5" />
 					</button>
 					<p v-if="isDeleting" class="whitespace-pre-wrap break-words italic">
-						Usuwanie...
+						Deleting...
 					</p>
 					<template v-else>
 						<p class="whitespace-pre-wrap break-words">{{ messageContent }}</p>
@@ -390,10 +373,10 @@ function handleReactionBadgeKeyDown(event: KeyboardEvent, emoji: string) {
 
 		<Dialog
 			:open="showDeleteDialog"
-			title="Usuń wiadomość"
-			message="Czy na pewno chcesz usunąć tę wiadomość? Tej operacji nie można cofnąć."
-			confirm-text="Usuń"
-			cancel-text="Anuluj"
+			title="Delete message"
+			message="Are you sure you want to delete this message? This operation cannot be undone."
+			confirm-text="Delete"
+			cancel-text="Cancel"
 			@update:open="handleDialogUpdate"
 			@confirm="handleConfirmDelete"
 			@cancel="handleCancelDelete"

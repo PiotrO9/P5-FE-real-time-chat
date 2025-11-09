@@ -5,12 +5,13 @@ interface Props {
 	friends: Friend[]
 }
 
-const props = defineProps<Props>()
+interface Emits {
+	(e: 'remove-friend', friendId: string | number): void
+	(e: 'start-chat', friendId: string | number): void
+}
 
-const emit = defineEmits<{
-	'remove-friend': [friendId: string | number]
-	'start-chat': [friendId: string | number]
-}>()
+const props = defineProps<Props>()
+const emit = defineEmits<Emits>()
 
 const friendsList = computed(() => props.friends ?? [])
 
@@ -40,18 +41,18 @@ function getInitials(username: string): string {
 }
 
 function formatLastSeen(lastSeen?: string): string {
-	if (!lastSeen) return 'Nigdy'
+	if (!lastSeen) return 'Never'
 
 	const date = new Date(lastSeen)
 	const now = new Date()
 	const diffMs = now.getTime() - date.getTime()
 	const diffMins = Math.floor(diffMs / 60000)
 
-	if (diffMins < 1) return 'Teraz'
-	if (diffMins < 60) return `${diffMins} min temu`
-	if (diffMins < 1440) return `${Math.floor(diffMins / 60)} godz. temu`
+	if (diffMins < 1) return 'Now'
+	if (diffMins < 60) return `${diffMins} min ago`
+	if (diffMins < 1440) return `${Math.floor(diffMins / 60)} hrs ago`
 
-	return date.toLocaleDateString('pl-PL', {
+	return date.toLocaleDateString('en-US', {
 		day: 'numeric',
 		month: 'short'
 	})
@@ -61,17 +62,17 @@ function formatLastSeen(lastSeen?: string): string {
 <template>
 	<div class="flex-1 overflow-y-auto bg-white rounded-b-[1.125rem] max-h-[calc(100vh-150px)]">
 		<div v-if="friendsList.length === 0" class="p-8 text-center">
-			<p class="text-gray-500 text-sm">Nie masz jeszcze żadnych znajomych</p>
-			<p class="text-gray-400 text-xs mt-2">Dodaj znajomych, aby zacząć czatować</p>
+			<p class="text-gray-500 text-sm">You don't have any friends yet</p>
+			<p class="text-gray-400 text-xs mt-2">Add friends to start chatting</p>
 		</div>
-		<ul v-else class="divide-y divide-gray-100" role="listbox" aria-label="Lista znajomych">
+		<ul v-else class="divide-y divide-gray-100" role="listbox" aria-label="Friends list">
 			<li
 				v-for="friend in friendsList"
 				:key="friend.id"
 				class="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors"
 				tabindex="0"
 				role="option"
-				:aria-label="`Znajomy ${friend.username}`"
+				:aria-label="`Friend ${friend.username}`"
 				@click="handleStartChat(friend.id)"
 				@keydown="handleKeyDown($event, friend.id)"
 			>
@@ -97,7 +98,7 @@ function formatLastSeen(lastSeen?: string): string {
 								type="button"
 								class="ml-2 p-1 text-gray-400 hover:text-red-500 transition-colors rounded"
 								tabindex="0"
-								aria-label="Usuń znajomego"
+								aria-label="Remove friend"
 								@click.stop="handleRemoveFriend(friend.id, $event)"
 								@keydown.enter.stop="handleRemoveFriend(friend.id, $event)"
 								@keydown.space.stop="handleRemoveFriend(friend.id, $event)"
@@ -109,7 +110,7 @@ function formatLastSeen(lastSeen?: string): string {
 							{{
 								friend.isOnline
 									? 'Online'
-									: `Ostatnio aktywny: ${formatLastSeen(friend.lastSeen)}`
+									: `Last active: ${formatLastSeen(friend.lastSeen)}`
 							}}
 						</p>
 					</div>

@@ -4,10 +4,8 @@ import { io } from 'socket.io-client'
 export default defineNuxtPlugin(() => {
 	const config = useRuntimeConfig()
 
-	// Ustaw adres swojego backendu WebSocket
 	const socketUrl = config.public.socketUrl || 'http://localhost:3000'
 
-	// Funkcja do pobrania tokenu z cookies
 	function getTokenFromCookies(): string | null {
 		if (typeof document === 'undefined') return null
 
@@ -17,17 +15,15 @@ export default defineNuxtPlugin(() => {
 	}
 
 	const socket: Socket = io(socketUrl, {
-		autoConnect: false, // Ręczne połączenie
+		autoConnect: false,
 		transports: ['websocket', 'polling'],
-		withCredentials: true, // Wysyłaj cookies
+		withCredentials: true,
 		auth: (cb) => {
-			// Przekaż token w auth jeśli jest dostępny
 			const token = getTokenFromCookies()
 			cb({ token: token || undefined })
 		}
 	})
 
-	// Event handlers
 	socket.on('connect', () => {
 		console.log('WebSocket połączony:', socket.id)
 	})

@@ -10,27 +10,26 @@ const props = defineProps<Props>()
 const message = computed(() => props.message)
 const systemType = computed(() => message.value.systemType as SystemMessageType)
 const systemData = computed(() => message.value.systemData)
+const systemText = computed(() => getSystemMessageText())
 
 function getSystemMessageText(): string {
 	if (!systemType.value || !systemData.value) return ''
 
-	const username = systemData.value.username || 'Nieznany użytkownik'
+	const username = systemData.value.username || 'Unknown user'
 
 	switch (systemType.value) {
 		case 'member:added':
-			return `${username} dołączył do czatu`
+			return `${username} joined the chat`
 		case 'member:removed':
-			return `${username} opuścił czat`
+			return `${username} left the chat`
 		case 'chat:created':
-			return 'Czat został utworzony'
+			return 'Chat was created'
 		case 'chat:updated':
-			return 'Czat został zaktualizowany'
+			return 'Chat was updated'
 		default:
 			return ''
 	}
 }
-
-const systemText = computed(() => getSystemMessageText())
 </script>
 
 <template>

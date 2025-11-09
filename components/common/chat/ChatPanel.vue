@@ -6,6 +6,13 @@ import LoadMoreButton from '../../common/LoadMoreButton.vue'
 import EmptyState from '../../common/EmptyState.vue'
 import Typing from '../Typing.vue'
 
+interface Props {
+	selectedChat: Chat | null
+	canLoadMore?: boolean
+	isLoadingMore?: boolean
+	typingUsers?: string[]
+}
+
 interface Emits {
 	(e: 'load-more' | 'toggle-actions'): void
 	(e: 'delete-message', messageId: string | number): void
@@ -15,13 +22,6 @@ interface Emits {
 		emoji: string,
 		action: 'add' | 'remove'
 	): void
-}
-
-interface Props {
-	selectedChat: Chat | null
-	canLoadMore?: boolean
-	isLoadingMore?: boolean
-	typingUsers?: string[]
 }
 
 const chatStore = useChatStore()
@@ -34,20 +34,18 @@ const messagesContainerRef = ref<HTMLDivElement | null>(null)
 const selectedChat = computed(() => props.selectedChat)
 const canLoadMore = computed(() => props.canLoadMore ?? false)
 const isLoadingMore = computed(() => props.isLoadingMore ?? false)
-
 const hasMessages = computed(() => (selectedChat.value?.messages.length ?? 0) > 0)
 const messages = computed(() => selectedChat.value?.messages ?? [])
-
 const typingText = computed(() => {
 	if (!props.typingUsers || props.typingUsers.length === 0) return null
 
 	if (props.typingUsers.length === 1) {
-		return `${props.typingUsers[0]} pisze...`
+		return `${props.typingUsers[0]} is typing...`
 	}
 	if (props.typingUsers.length === 2) {
-		return `${props.typingUsers[0]} i ${props.typingUsers[1]} piszą...`
+		return `${props.typingUsers[0]} and ${props.typingUsers[1]} are typing...`
 	}
-	return `${props.typingUsers[0]} i ${props.typingUsers.length - 1} innych piszą...`
+	return `${props.typingUsers[0]} and ${props.typingUsers.length - 1} others are typing...`
 })
 
 watch(
@@ -116,7 +114,7 @@ defineExpose({ scrollToBottom })
 
 	<section v-else class="md:hidden flex-1 flex flex-col">
 		<div class="flex-1 flex items-center justify-center text-gray-500">
-			Wybierz czat z listy po lewej
+			Select a chat from the list on the left
 		</div>
 	</section>
 </template>

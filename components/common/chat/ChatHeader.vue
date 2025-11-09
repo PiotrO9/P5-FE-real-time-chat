@@ -14,8 +14,8 @@ const { selectedChat } = defineProps<Props>()
 const isGroup = computed(() => selectedChat?.isGroup)
 const chatInitial = computed(() => {
 	return isGroup.value
-		? (selectedChat?.name[0] ?? '?')
-		: (selectedChat?.otherUser.username[0] ?? '?')
+		? (selectedChat?.name[0]?.toUpperCase() ?? '?')
+		: (selectedChat?.otherUser.username[0]?.toUpperCase() ?? '?')
 })
 const displayName = computed(() => selectedChat?.name ?? 'Czat')
 

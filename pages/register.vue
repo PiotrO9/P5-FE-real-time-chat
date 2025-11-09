@@ -1,10 +1,15 @@
 <script setup lang="ts">
+const { register, loading, error } = useAuth()
+
 const email = ref('')
 const username = ref('')
 const password = ref('')
 const confirmPassword = ref('')
-const { register, loading, error } = useAuth()
 const localError = ref<string | null>(null)
+
+function getDisplayError(): string | null {
+	return localError.value || error.value
+}
 
 async function handleSubmit(event: Event) {
 	event.preventDefault()
@@ -30,10 +35,6 @@ async function handleSubmit(event: Event) {
 	} catch (err) {
 		console.error('Registration failed:', err)
 	}
-}
-
-function getDisplayError(): string | null {
-	return localError.value || error.value
 }
 </script>
 

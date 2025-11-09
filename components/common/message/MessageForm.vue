@@ -3,13 +3,13 @@ interface Props {
 	modelValue: string
 }
 
-const props = defineProps<Props>()
-
-const emit = defineEmits<{
+interface Emits {
 	(e: 'update:modelValue', value: string): void
-	(e: 'submit'): void
-	(e: 'typing'): void
-}>()
+	(e: 'submit' | 'typing'): void
+}
+
+const props = defineProps<Props>()
+const emit = defineEmits<Emits>()
 
 function handleInput(event: Event) {
 	const target = event.target as HTMLTextAreaElement | null
@@ -39,13 +39,13 @@ function handleSubmit() {
 		class="border-t border-gray-200 md:px-3 py-3 flex items-end gap-3 bg-white rounded-b-[1.125rem]"
 		@submit.prevent="handleSubmit"
 	>
-		<label for="message" class="sr-only">Wiadomość</label>
+		<label for="message" class="sr-only">Message</label>
 		<textarea
 			id="message"
-			:aria-label="'Wiadomość'"
+			:aria-label="'Message'"
 			:tabindex="0"
 			:rows="1"
-			:placeholder="'Napisz wiadomość...'"
+			:placeholder="'Type a message...'"
 			:value="props.modelValue"
 			@input="handleInput"
 			@keydown="handleKeyDown"
@@ -53,9 +53,9 @@ function handleSubmit() {
 		<button
 			type="submit"
 			class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
-			aria-label="Wyślij wiadomość"
+			aria-label="Send message"
 		>
-			Wyślij
+			Send
 		</button>
 	</form>
 </template>

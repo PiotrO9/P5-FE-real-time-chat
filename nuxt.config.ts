@@ -1,4 +1,3 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
 	compatibilityDate: '2024-04-03',
 	devtools: { enabled: true },
@@ -11,7 +10,7 @@ export default defineNuxtConfig({
 
 	typescript: {
 		strict: true,
-		typeCheck: false // Disable type check during build for better performance
+		typeCheck: false
 	},
 
 	css: ['~/assets/css/tailwind.css'],

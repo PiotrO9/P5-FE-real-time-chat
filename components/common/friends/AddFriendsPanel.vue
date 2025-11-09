@@ -1,7 +1,9 @@
 <script setup lang="ts">
-const emit = defineEmits<{
+interface Emits {
 	(e: 'add-friend', username: string): void
-}>()
+}
+
+const emit = defineEmits<Emits>()
 
 const username = ref('')
 const isSubmitting = ref(false)
@@ -33,14 +35,14 @@ function handleKeyDown(event: KeyboardEvent) {
 	<div class="flex flex-col h-full">
 		<div class="p-4 border-b border-gray-200">
 			<label for="username-input" class="block text-sm font-medium text-gray-700 mb-2">
-				Dodaj znajomego
+				Add friend
 			</label>
 			<div class="flex gap-2">
 				<input
 					id="username-input"
 					v-model="username"
 					type="text"
-					placeholder="Wpisz nazwę użytkownika..."
+					placeholder="Enter username..."
 					:disabled="isSubmitting"
 					@keydown="handleKeyDown"
 				/>
@@ -48,26 +50,26 @@ function handleKeyDown(event: KeyboardEvent) {
 					type="button"
 					class="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
 					tabindex="0"
-					aria-label="Wyślij zaproszenie"
+					aria-label="Send invitation"
 					:disabled="!username.trim() || isSubmitting"
 					@click="handleSubmit"
 				>
-					Wyślij
+					Send
 				</button>
 			</div>
 			<p class="mt-2 text-xs text-gray-500">
-				Wpisz nazwę użytkownika, do którego chcesz wysłać zaproszenie do znajomych.
+				Enter the username of the person you want to send a friend invitation to.
 			</p>
 		</div>
 
 		<div class="flex-1 overflow-y-auto p-4">
 			<div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-				<h4 class="text-sm font-semibold text-blue-900 mb-2">Jak to działa?</h4>
+				<h4 class="text-sm font-semibold text-blue-900 mb-2">How it works?</h4>
 				<ul class="text-xs text-blue-800 space-y-1 list-disc list-inside">
-					<li>Wpisz nazwę użytkownika (username) osoby, którą chcesz dodać</li>
-					<li>Zostanie wysłane zaproszenie do znajomych</li>
-					<li>Osoba otrzyma zaproszenie i będzie mogła je zaakceptować lub odrzucić</li>
-					<li>Po akceptacji znajdziesz ją w liście swoich znajomych</li>
+					<li>Enter the username of the person you want to add</li>
+					<li>A friend invitation will be sent</li>
+					<li>The person will receive the invitation and can accept or reject it</li>
+					<li>After acceptance, you'll find them in your friends list</li>
 				</ul>
 			</div>
 		</div>

@@ -15,13 +15,12 @@ interface Props {
 	position: 'left' | 'right'
 }
 
-const props = defineProps<Props>()
-
 interface Emits {
 	(e: 'reaction-click', emoji: string): void
 	(e: 'show-change', show: boolean): void
 }
 
+const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const showReactionPicker = ref(false)
@@ -133,7 +132,7 @@ defineExpose({
 					:key="emoji"
 					type="button"
 					tabindex="0"
-					:aria-label="`Dodaj reakcję ${emoji}`"
+					:aria-label="`Add reaction ${emoji}`"
 					class="w-8 h-8 flex items-center justify-center text-lg transition-transform rounded-full hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
 					:class="{
 						'bg-blue-50': hasUserReaction(emoji),

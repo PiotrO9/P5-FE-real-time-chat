@@ -16,18 +16,18 @@ interface Emits {
 const props = withDefaults(defineProps<Props>(), {
 	title: '',
 	message: '',
-	confirmText: 'Potwierdź',
-	cancelText: 'Anuluj'
+	confirmText: 'Confirm',
+	cancelText: 'Cancel'
 })
 
 const emit = defineEmits<Emits>()
 const slots = useSlots()
 
+const dialogRef = ref<HTMLDialogElement | null>(null)
+
 const hasHeaderSlot = computed(() => !!slots.header)
 const hasDefaultSlot = computed(() => !!slots.default)
 const hasFooterSlot = computed(() => !!slots.footer)
-
-const dialogRef = ref<HTMLDialogElement | null>(null)
 
 watch(
 	() => props.open,
