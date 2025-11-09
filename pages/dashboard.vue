@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import ChatList from '~/components/common/chat/ChatList.vue'
 import ChatPanel from '~/components/common/chat/ChatPanel.vue'
+import ChatActionsPanel from '~/components/common/chat/ChatActionsPanel.vue'
 import MessageForm from '~/components/common/message/MessageForm.vue'
 import FriendsList from '~/components/common/friends/FriendsList.vue'
 import AddFriendsPanel from '~/components/common/friends/AddFriendsPanel.vue'
@@ -43,6 +44,7 @@ const searchQuery = ref('')
 const selectedChatId = ref<number | null>(null)
 const newMessageText = ref('')
 const chatPanelRef = ref<any>(null)
+const isActionsPanelOpen = ref(false)
 
 const chats = ref<Chat[]>([])
 const chatsLoading = ref(false)
@@ -489,7 +491,7 @@ function handleChatCreated(_data: { chat: any }) {
 	fetchChats()
 }
 
-function handleChatUpdated(data: { chatId: string; updates: any }) {
+function handleChatUpdatedFromSocket(data: { chatId: string; updates: any }) {
 	const chatId =
 		typeof data.chatId === 'string' ? Number(data.chatId) || data.chatId : data.chatId
 	const chat = chats.value.find((c) => String(c.id) === String(chatId))
@@ -628,7 +630,7 @@ function setupWebSocketListeners() {
 	on('typing:stop', handleTypingStop)
 	on('user:status', handleUserStatus)
 	on('chat:created', handleChatCreated)
-	on('chat:updated', handleChatUpdated)
+	on('chat:updated', handleChatUpdatedFromSocket)
 	on('member:added', handleMemberAdded)
 	on('member:removed', handleMemberRemoved)
 }
@@ -644,7 +646,7 @@ function cleanupWebSocketListeners() {
 	off('typing:stop', handleTypingStop)
 	off('user:status', handleUserStatus)
 	off('chat:created', handleChatCreated)
-	off('chat:updated', handleChatUpdated)
+	off('chat:updated', handleChatUpdatedFromSocket)
 	off('member:added', handleMemberAdded)
 	off('member:removed', handleMemberRemoved)
 }
@@ -725,7 +727,9 @@ async function fetchChats() {
 			name: String(chat?.name ?? chat?.title ?? 'Czat'),
 			lastMessage: chat?.lastMessage,
 			unreadCount: Number.isFinite(chat?.unreadCount) ? Number(chat.unreadCount) : 0,
-			messages: Array.isArray(chat?.messages) ? chat.messages : []
+			messages: Array.isArray(chat?.messages) ? chat.messages : [],
+			members: Array.isArray(chat?.members) ? chat.members : undefined,
+			currentUserRole: chat?.currentUserRole || chat?.memberRole || undefined
 		}))
 	} catch (err: any) {
 		chatsError.value = err?.message || 'Nie udało się pobrać listy czatów'
@@ -808,6 +812,19 @@ function handleSelectChat(chatId: number) {
 	if (chat) chat.unreadCount = 0
 	fetchMessages(chatId, false)
 	nextTick(() => handleScrollToBottom())
+	// Zamknij panel akcji przy zmianie czatu
+	isActionsPanelOpen.value = false
+}
+
+function handleChatUpdated(data: { members: any[]; currentUserRole?: any }) {
+	const chat = selectedChat.value
+	if (!chat) return
+
+	// Zaktualizuj członków i rolę użytkownika
+	chat.members = data.members
+	if (data.currentUserRole) {
+		chat.currentUserRole = data.currentUserRole
+	}
 }
 
 async function handleSendMessage() {
@@ -1099,6 +1116,7 @@ function handleReactionUpdated(
 						@load-more="handleLoadMore"
 						@delete-message="handleDeleteMessage"
 						@reaction-updated="handleReactionUpdated"
+						@toggle-actions="isActionsPanelOpen = !isActionsPanelOpen"
 					/>
 					<template v-if="selectedChat">
 						<MessageForm
@@ -1108,6 +1126,14 @@ function handleReactionUpdated(
 						/>
 					</template>
 				</div>
+
+				<!-- Panel akcji czatu -->
+				<ChatActionsPanel
+					v-model="isActionsPanelOpen"
+					:chat="selectedChat"
+					:current-user-id="currentUserId"
+					@chat-updated="handleChatUpdated"
+				/>
 
 				<section v-if="!selectedChat" class="md:hidden flex-1 flex flex-col">
 					<div class="flex-1 flex items-center justify-center text-gray-500">

@@ -43,7 +43,7 @@ function scrollToBottom() {
 }
 
 interface Emits {
-	(e: 'load-more'): void
+	(e: 'load-more' | 'toggle-actions'): void
 	(e: 'delete-message', messageId: string | number): void
 	(
 		e: 'reaction-updated',
@@ -54,6 +54,10 @@ interface Emits {
 }
 
 const emit = defineEmits<Emits>()
+
+function handleToggleActions() {
+	emit('toggle-actions')
+}
 
 function handleLoadMore() {
 	emit('load-more')
@@ -76,7 +80,11 @@ defineExpose({ scrollToBottom })
 
 <template>
 	<section v-if="selectedChat" class="hidden md:flex flex-1 flex-col min-h-0">
-		<ChatHeader :chat-name="chatName" />
+		<ChatHeader
+			:chat-name="chatName"
+			:is-group-chat="selectedChat.isGroup"
+			@toggle-actions="handleToggleActions"
+		/>
 
 		<div
 			ref="messagesContainerRef"

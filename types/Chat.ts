@@ -1,3 +1,5 @@
+import type { ChatMember, Role } from './ChatsApi'
+
 export interface User {
 	username: string
 	email: string
@@ -42,6 +44,8 @@ export type Chat = {
 	otherUser: User
 	unreadCount: number
 	messages: Message[]
+	members?: ChatMember[]
+	currentUserRole?: Role
 }
 
 export interface Friend {

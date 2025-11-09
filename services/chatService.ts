@@ -1,10 +1,14 @@
 import type { ApiResponse } from '~/types/Api'
-import type { ChatsResponse } from '~/types/ChatsApi'
+import type { ChatsResponse, ChatMember } from '~/types/ChatsApi'
 import type { Message } from '~/types/Chat'
 import type { MessagesResponse } from '~/types/MessagesApi'
 
 export async function fetchChats() {
 	return await useApi<ApiResponse<ChatsResponse>>('GET', '/api/chats')
+}
+
+export async function fetchChatDetails(chatId: number | string) {
+	return await useApi<ApiResponse<any>>('GET', `/api/chats/${chatId}`)
 }
 
 export async function fetchMessages(chatId: number, limit: number, offset: number) {
@@ -35,4 +39,26 @@ export async function removeReaction(messageId: string | number, emoji: string) 
 		'DELETE',
 		`/api/messages/${messageId}/reactions/${emoji}`
 	)
+}
+
+export async function addChatMembers(chatId: number | string, userIds: string[]) {
+	return await useApi<ApiResponse<void>>('POST', `/api/chats/${chatId}/members`, {
+		userIds
+	})
+}
+
+export async function removeChatMembers(chatId: number | string, userIds: string[]) {
+	return await useApi<ApiResponse<void>>('DELETE', `/api/chats/${chatId}/members`, {
+		userIds
+	})
+}
+
+export async function updateChatMemberRole(
+	chatId: number | string,
+	userId: string,
+	role: 'USER' | 'MODERATOR' | 'OWNER'
+) {
+	return await useApi<ApiResponse<void>>('PATCH', `/api/chats/${chatId}/members/${userId}/role`, {
+		role
+	})
 }
