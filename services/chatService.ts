@@ -1,5 +1,5 @@
 import type { ApiResponse } from '~/types/Api'
-import type { ChatsResponse, Role } from '~/types/ChatsApi'
+import type { ChatsResponse } from '~/types/ChatsApi'
 import type { Message } from '~/types/Chat'
 import type { MessagesResponse } from '~/types/MessagesApi'
 
@@ -7,18 +7,18 @@ export async function fetchChats() {
 	return await useApi<ApiResponse<ChatsResponse>>('GET', '/api/chats')
 }
 
-export async function fetchChatDetails(chatId: number | string) {
+export async function fetchChatDetails(chatId: string | string) {
 	return await useApi<ApiResponse<any>>('GET', `/api/chats/${chatId}`)
 }
 
-export async function fetchMessages(chatId: number, limit: number, offset: number) {
+export async function fetchMessages(chatId: string, limit: number, offset: number) {
 	return await useApi<ApiResponse<MessagesResponse>>(
 		'GET',
 		`/api/messages/${chatId}/messages?limit=${limit}&offset=${offset}`
 	)
 }
 
-export async function sendMessage(chatId: number, content: string) {
+export async function sendMessage(chatId: string, content: string) {
 	return await useApi<ApiResponse<Message>>('POST', `/api/messages/${chatId}/messages`, {
 		content
 	})
@@ -61,4 +61,16 @@ export async function updateChatMemberRole(
 	return await useApi<ApiResponse<void>>('PATCH', `/api/chats/${chatId}/members/${userId}/role`, {
 		role
 	})
+}
+
+export async function pinMessage(chatId: number | string, messageId: string | number) {
+	return await useApi<ApiResponse<Message>>('POST', `/api/chats/${chatId}/pin/${messageId}`)
+}
+
+export async function unpinMessage(chatId: number | string, messageId: string | number) {
+	return await useApi<ApiResponse<Message>>('DELETE', `/api/chats/${chatId}/unpin/${messageId}`)
+}
+
+export async function fetchPinnedMessages(chatId: number | string) {
+	return await useApi<ApiResponse<MessagesResponse>>('GET', `/api/chats/${chatId}/pinned`)
 }

@@ -1,0 +1,51 @@
+---
+description: 'Project-wide coding standards for Nuxt 3 + TailwindCSS + TypeScript'
+ruleType: Always
+---
+
+# Project: Nuxt 3 + TailwindCSS + TypeScript
+
+## Stack overview
+
+- Framework: Nuxt 3
+- Styling: TailwindCSS + project CSS variables
+- Language: TypeScript
+- Component API: Vue 3 Composition API (`<script setup>`)
+
+## Component file structure
+
+Every `.vue` file must follow this order:
+
+1. `<script setup lang="ts">`
+2. `<template>`
+3. `<style scoped lang="postcss">`
+   Use TailwindCSS in `<template>`, ensure custom CSS variables where needed. Style section must always be last.
+
+## `<script setup>` section order
+
+Within `<script setup>` maintain this sequence:
+
+1. Imports (external libs → internal modules)
+2. `defineProps()`
+3. `defineEmits()`
+4. Type/Interface declarations (TS)
+5. Module-level constants / config
+6. Reactive state (`ref()`, `reactive()`)
+7. Computed properties
+8. Functions / methods / event handlers
+9. Watchers (`watch()`, `watchEffect()`)
+10. Lifecycle hooks (`onMounted()`, `onUnmounted()`, etc.)
+11. `expose()` (if applicable)
+
+Use section-separating comments:
+
+```ts
+// 👉 Imports
+// 👉 Props & Emits
+// 👉 Type Definitions
+// 👉 State
+// 👉 Computed
+// 👉 Methods
+// 👉 Watchers
+// 👉 Lifecycle
+```

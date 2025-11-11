@@ -7,12 +7,12 @@ import {
 import { getErrorMessage } from '~/utils/errorHelpers'
 import { useToast } from './useToast'
 
-export function useMessages(chats: Ref<Chat[]>, selectedChatId: Ref<number | null>) {
+export function useMessages(chats: Ref<Chat[]>, _selectedChatId: Ref<string | null>) {
 	const { error: toastError } = useToast()
 
 	const messagesState = reactive<
 		Record<
-			number,
+			string,
 			{
 				limit: number
 				offset: number
@@ -25,7 +25,7 @@ export function useMessages(chats: Ref<Chat[]>, selectedChatId: Ref<number | nul
 
 	const newMessageText = ref('')
 
-	function ensureChatState(chatId: number) {
+	function ensureChatState(chatId: string) {
 		if (messagesState[chatId]) return
 
 		messagesState[chatId] = {
@@ -37,7 +37,7 @@ export function useMessages(chats: Ref<Chat[]>, selectedChatId: Ref<number | nul
 		}
 	}
 
-	function getChatState(chatId: number) {
+	function getChatState(chatId: string) {
 		ensureChatState(chatId)
 
 		return messagesState[chatId] as {
@@ -49,7 +49,7 @@ export function useMessages(chats: Ref<Chat[]>, selectedChatId: Ref<number | nul
 		}
 	}
 
-	async function fetchMessages(chatId: number, append: boolean) {
+	async function fetchMessages(chatId: string, append: boolean) {
 		const state = getChatState(chatId)
 
 		if (state.loading) return
@@ -72,7 +72,7 @@ export function useMessages(chats: Ref<Chat[]>, selectedChatId: Ref<number | nul
 					: Array.isArray(raw?.messages)
 						? raw.messages
 						: []
-			const chat = chats.value.find((c) => c.id === chatId)
+			const chat = chats.value.find((c) => String(c.id) === String(chatId))
 			if (!chat) return
 			if (append) {
 				chat.messages = [...chat.messages, ...items]
@@ -96,7 +96,7 @@ export function useMessages(chats: Ref<Chat[]>, selectedChatId: Ref<number | nul
 		}
 	}
 
-	async function sendMessage(chatId: number, content: string) {
+	async function sendMessage(chatId: string, content: string) {
 		try {
 			const res = await sendMessageToService(chatId, content)
 			const saved = res.data as unknown as Message
@@ -116,8 +116,8 @@ export function useMessages(chats: Ref<Chat[]>, selectedChatId: Ref<number | nul
 		}
 	}
 
-	async function deleteMessage(chatId: number, messageId: string | number) {
-		const chat = chats.value.find((c) => c.id === chatId)
+	async function deleteMessage(chatId: string, messageId: string | number) {
+		const chat = chats.value.find((c) => String(c.id) === String(chatId))
 		if (!chat) return
 
 		try {
@@ -139,8 +139,8 @@ export function useMessages(chats: Ref<Chat[]>, selectedChatId: Ref<number | nul
 		}
 	}
 
-	function addMessage(chatId: number, message: Message) {
-		const chat = chats.value.find((c) => c.id === chatId)
+	function addMessage(chatId: string, message: Message) {
+		const chat = chats.value.find((c) => String(c.id) === String(chatId))
 		if (!chat) return false
 
 		const exists = chat.messages.find((m) => String(m.id) === String(message.id))
@@ -152,23 +152,34 @@ export function useMessages(chats: Ref<Chat[]>, selectedChatId: Ref<number | nul
 		return false
 	}
 
-	function updateMessage(chatId: number, message: Message) {
-		const chat = chats.value.find((c) => c.id === chatId)
+	function updateMessage(chatId: string, message: Message) {
+		const chat = chats.value.find((c) => String(c.id) === String(chatId))
 		if (!chat) return
 
 		const messageIndex = chat.messages.findIndex((m) => String(m.id) === String(message.id))
 
 		if (messageIndex !== -1) {
-			chat.messages[messageIndex] = message
+			const existingMessage = chat.messages[messageIndex]
+			if (existingMessage) {
+				existingMessage.isPinned = message.isPinned ?? false
+				existingMessage.pinnedBy = message.pinnedBy
+				existingMessage.pinnedAt = message.pinnedAt
+				existingMessage.content = message.content
+				existingMessage.senderUsername = message.senderUsername
+				existingMessage.reactions = message.reactions
+				existingMessage.createdAt = message.createdAt
+			}
 
 			if (chat.lastMessage && String(chat.lastMessage.id) === String(message.id)) {
-				chat.lastMessage = message
+				chat.lastMessage.isPinned = message.isPinned ?? false
+				chat.lastMessage.pinnedBy = message.pinnedBy
+				chat.lastMessage.pinnedAt = message.pinnedAt
 			}
 		}
 	}
 
-	function removeMessage(chatId: number, messageId: string | number) {
-		const chat = chats.value.find((c) => c.id === chatId)
+	function removeMessage(chatId: string, messageId: string | number) {
+		const chat = chats.value.find((c) => String(c.id) === String(chatId))
 		if (!chat) return
 
 		chat.messages = chat.messages.filter((m) => String(m.id) !== String(messageId))

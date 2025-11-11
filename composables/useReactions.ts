@@ -2,7 +2,7 @@ import type { Chat } from '~/types/Chat'
 
 export function useReactions(
 	chats: Ref<Chat[]>,
-	selectedChatId: Ref<number | null>,
+	selectedChatId: Ref<string | null>,
 	currentUserId: Ref<number>,
 	user: Ref<any>
 ) {
@@ -11,7 +11,7 @@ export function useReactions(
 		emoji: string,
 		action: 'add' | 'remove'
 	) {
-		const chat = chats.value.find((c) => c.id === selectedChatId.value)
+		const chat = chats.value.find((c) => String(c.id) === String(selectedChatId.value))
 		if (!chat) return
 
 		const message = chat.messages.find((m) => String(m.id) === String(messageId))
@@ -51,13 +51,13 @@ export function useReactions(
 	}
 
 	function addReactionToMessage(
-		chatId: number,
+		chatId: string,
 		messageId: string | number,
 		emoji: string,
 		userId: string | number,
 		username: string
 	) {
-		const chat = chats.value.find((c) => c.id === chatId)
+		const chat = chats.value.find((c) => String(c.id) === String(chatId))
 		if (!chat) return
 
 		const message = chat.messages.find((m) => String(m.id) === String(messageId))
@@ -83,12 +83,12 @@ export function useReactions(
 	}
 
 	function removeReactionFromMessage(
-		chatId: number,
+		chatId: string,
 		messageId: string | number,
 		emoji: string,
 		userId: string | number
 	) {
-		const chat = chats.value.find((c) => c.id === chatId)
+		const chat = chats.value.find((c) => String(c.id) === String(chatId))
 		if (!chat) return
 
 		const message = chat.messages.find((m) => String(m.id) === String(messageId))

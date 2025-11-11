@@ -11,7 +11,7 @@ interface Props {
 }
 
 interface Emits {
-	(e: 'select', chatId: number): void
+	(e: 'select', chatId: string): void
 }
 
 const props = defineProps<Props>()

@@ -18,7 +18,7 @@ export type SystemMessageType = 'member:added' | 'member:removed' | 'chat:create
 
 export type Message = {
 	id: number
-	chatId: number
+	chatId: string
 	senderId: number
 	senderUsername: string
 	content: string
@@ -29,14 +29,20 @@ export type Message = {
 	systemData?: {
 		userId?: string | number
 		username?: string
-		chatId?: string | number
+		chatId?: string
 		updates?: any
 	}
+	isPinned?: boolean
+	pinnedBy?: {
+		id: number | string
+		username: string
+	}
+	pinnedAt?: string
 }
 
 export type Chat = {
 	createdAt: string
-	id: number
+	id: string
 	isGroup: boolean
 	lastMessage: Message
 	name: string

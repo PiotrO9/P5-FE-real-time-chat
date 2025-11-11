@@ -5,6 +5,7 @@ import MessageList from '../../common/message/MessageList.vue'
 import LoadMoreButton from '../../common/LoadMoreButton.vue'
 import EmptyState from '../../common/EmptyState.vue'
 import Typing from '../Typing.vue'
+import PinnedMessagePreview from '../../common/message/PinnedMessagePreview.vue'
 
 interface Props {
 	selectedChat: Chat | null
@@ -14,7 +15,7 @@ interface Props {
 }
 
 interface Emits {
-	(e: 'load-more' | 'toggle-actions'): void
+	(e: 'load-more' | 'toggle-actions' | 'open-pinned-messages'): void
 	(e: 'delete-message', messageId: string | number): void
 	(
 		e: 'reaction-updated',
@@ -22,6 +23,7 @@ interface Emits {
 		emoji: string,
 		action: 'add' | 'remove'
 	): void
+	(e: 'pin-updated', messageId: string | number, isPinned: boolean): void
 }
 
 const chatStore = useChatStore()
@@ -36,6 +38,21 @@ const canLoadMore = computed(() => props.canLoadMore ?? false)
 const isLoadingMore = computed(() => props.isLoadingMore ?? false)
 const hasMessages = computed(() => (selectedChat.value?.messages.length ?? 0) > 0)
 const messages = computed(() => selectedChat.value?.messages ?? [])
+
+const pinnedMessages = computed(() => {
+	if (!selectedChat.value) return []
+	return chatStore.getPinnedMessages(selectedChat.value.id)
+})
+
+const lastPinnedMessage = computed(() => {
+	if (pinnedMessages.value.length === 0) return null
+	const sorted = [...pinnedMessages.value].sort((a, b) => {
+		const dateA = a.pinnedAt ? new Date(a.pinnedAt).getTime() : new Date(a.createdAt).getTime()
+		const dateB = b.pinnedAt ? new Date(b.pinnedAt).getTime() : new Date(b.createdAt).getTime()
+		return dateB - dateA
+	})
+	return sorted[0]
+})
 const typingText = computed(() => {
 	if (!props.typingUsers || props.typingUsers.length === 0) return null
 
@@ -82,12 +99,27 @@ function handleReactionUpdated(
 	emit('reaction-updated', messageId, emoji, action)
 }
 
+function handlePinUpdated(messageId: string | number, isPinned: boolean) {
+	emit('pin-updated', messageId, isPinned)
+}
+
+function handleOpenPinnedMessages() {
+	emit('open-pinned-messages')
+}
+
 defineExpose({ scrollToBottom })
 </script>
 
 <template>
 	<section v-if="selectedChat" class="hidden md:flex flex-1 flex-col min-h-0 h-full">
-		<ChatHeader :selected-chat />
+		<ChatHeader :selected-chat @toggle-actions="handleToggleActions" />
+
+		<PinnedMessagePreview
+			v-if="lastPinnedMessage"
+			:message="lastPinnedMessage"
+			class="sticky top-0 z-10"
+			@click="handleOpenPinnedMessages"
+		/>
 
 		<div
 			ref="messagesContainerRef"
@@ -106,6 +138,7 @@ defineExpose({ scrollToBottom })
 				:messages="messages"
 				@delete-message="handleDeleteMessage"
 				@reaction-updated="handleReactionUpdated"
+				@pin-updated="handlePinUpdated"
 			/>
 		</div>
 

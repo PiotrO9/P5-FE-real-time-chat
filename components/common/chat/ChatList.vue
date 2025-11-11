@@ -5,11 +5,11 @@ import ChatItem from '../../common/chat/ChatItem.vue'
 interface Props {
 	chats: Chat[]
 	selectedChatId: string | null
-	typingUsersByChat?: Record<number, string[]>
+	typingUsersByChat?: Record<string, string[]>
 }
 
 interface Emits {
-	(e: 'select-chat', chatId: number): void
+	(e: 'select-chat', chatId: string): void
 }
 
 const props = defineProps<Props>()
@@ -19,15 +19,15 @@ const chatsList = computed(() => props.chats ?? [])
 const selectedId = computed(() => props.selectedChatId ?? '')
 const typingUsers = computed(() => props.typingUsersByChat ?? {})
 
-function handleSelectChat(chatId: number) {
+function handleSelectChat(chatId: string) {
 	emit('select-chat', chatId)
 }
 
-function isChatSelected(chatId: number) {
-	return selectedId.value === chatId.toString()
+function isChatSelected(chatId: string) {
+	return selectedId.value === String(chatId)
 }
 
-function getTypingUsers(chatId: number): string[] {
+function getTypingUsers(chatId: string): string[] {
 	return typingUsers.value[chatId] ?? []
 }
 </script>

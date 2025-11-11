@@ -6,7 +6,8 @@ import {
 	addChatMembers,
 	removeChatMembers,
 	fetchChatDetails as fetchChatDetailsFromService,
-	updateChatMemberRole
+	updateChatMemberRole,
+	fetchPinnedMessages
 } from '~/services/chatService'
 import { fetchFriends as fetchFriendsFromService } from '~/services/friendsService'
 import { useToast } from '~/composables/useToast'
@@ -45,6 +46,7 @@ const showConfirmDialog = ref(false)
 const selectedMemberId = ref<string | null>(null)
 const selectedNewRole = ref<Role | null>(null)
 const selectedMemberName = ref<string>('')
+const pinnedMessagesLoading = ref(false)
 
 const chat = computed(() => props.chat)
 const currentUserId = computed(() => props.currentUserId)
@@ -80,7 +82,28 @@ watch(isOpen, (newValue) => {
 	}
 	if (newValue) {
 		fetchChatDetails()
+		fetchPinnedMessagesList()
 	}
+})
+
+watch(
+	() => chatStore.pinnedMessages,
+	() => {
+		if (isOpen.value && chat.value) {
+			fetchPinnedMessagesList()
+		}
+	},
+	{ deep: true }
+)
+
+const pinnedMessagesList = computed(() => {
+	if (!chat.value) return []
+	const messages = chatStore.getPinnedMessages(chat.value.id)
+	return [...messages].sort((a, b) => {
+		const dateA = a.pinnedAt ? new Date(a.pinnedAt).getTime() : new Date(a.createdAt).getTime()
+		const dateB = b.pinnedAt ? new Date(b.pinnedAt).getTime() : new Date(b.createdAt).getTime()
+		return dateB - dateA
+	})
 })
 
 function handleAddUserClick(friend: Friend) {
@@ -155,6 +178,7 @@ function getRoleLabel(role: Role): string {
 
 function handleToggleState() {
 	chatStore.closeChatDetails()
+	isOpen.value = false
 }
 
 function handleClickOutside(event: MouseEvent) {
@@ -214,6 +238,69 @@ async function fetchChatDetails() {
 	} finally {
 		chatDetailsLoading.value = false
 	}
+}
+
+async function fetchPinnedMessagesList() {
+	if (!chat.value) return
+
+	try {
+		pinnedMessagesLoading.value = true
+		const { mapMessageFromBackend } = useMessageHelpers()
+		const res = await fetchPinnedMessages(chat.value.id)
+		const raw = res?.data
+		const pinnedItems: any[] = Array.isArray(raw?.pinnedMessages) ? raw.pinnedMessages : []
+
+		const mappedMessages = pinnedItems.map((pinnedItem) => {
+			const message = mapMessageFromBackend(pinnedItem.message)
+			return {
+				...message,
+				isPinned: true,
+				pinnedBy: pinnedItem.pinnedBy
+					? {
+							id: pinnedItem.pinnedBy.id,
+							username: pinnedItem.pinnedBy.username
+						}
+					: undefined,
+				pinnedAt: pinnedItem.pinnedAt
+					? typeof pinnedItem.pinnedAt === 'string'
+						? pinnedItem.pinnedAt
+						: pinnedItem.pinnedAt.toISOString()
+					: undefined
+			}
+		})
+		chatStore.setPinnedMessages(chat.value.id, mappedMessages)
+	} catch (err: any) {
+		console.error('Error fetching pinned messages:', err)
+	} finally {
+		pinnedMessagesLoading.value = false
+	}
+}
+
+function handlePinnedMessageClick(messageId: string | number) {
+	if (!chat.value) return
+	const message = chat.value.messages.find((m) => String(m.id) === String(messageId))
+	if (message) {
+		const messageElement = document.querySelector(`[data-message-id="${messageId}"]`)
+		if (messageElement) {
+			messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+			messageElement.classList.add('highlight-message')
+			setTimeout(() => {
+				messageElement.classList.remove('highlight-message')
+			}, 2000)
+		}
+	}
+}
+
+function formatMessageTime(createdAt: string): string {
+	return new Date(createdAt).toLocaleTimeString([], {
+		hour: '2-digit',
+		minute: '2-digit'
+	})
+}
+
+function truncateMessage(content: string, maxLength: number = 50): string {
+	if (content.length <= maxLength) return content
+	return content.substring(0, maxLength) + '...'
 }
 
 async function handleAddUser() {
@@ -315,7 +402,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-	<aside v-if="chat && isGroupChat" class="md:min-w-96 bg-white flex flex-col">
+	<aside v-if="chat && isOpen" class="md:min-w-96 bg-white flex flex-col">
 		<div class="flex flex-col p-4 bg-gray flex-1">
 			<div class="p-4 border-b border-gray-200 bg-white backdrop-blur rounded-t-[1.125rem]">
 				<div class="flex items-center justify-between mb-2">
@@ -333,12 +420,71 @@ onUnmounted(() => {
 					</button>
 				</div>
 				<p class="text-sm text-gray-600">
-					{{ isOwner ? 'Manage chat members' : 'Chat members' }}
+					{{
+						isGroupChat
+							? isOwner
+								? 'Manage chat members'
+								: 'Chat members'
+							: 'Chat details'
+					}}
 				</p>
 			</div>
 
 			<div class="flex-1 overflow-y-auto bg-white rounded-b-[1.125rem]">
-				<template v-if="isOwner">
+				<div class="p-4 border-b border-gray-200">
+					<h3 class="text-sm font-semibold text-gray-900 mb-3">
+						Przypięte wiadomości ({{ pinnedMessagesList.length }})
+					</h3>
+					<div v-if="pinnedMessagesLoading" class="text-sm text-gray-600">
+						Ładowanie...
+					</div>
+					<div v-else-if="pinnedMessagesList.length === 0" class="text-sm text-gray-500">
+						Brak przypiętych wiadomości
+					</div>
+					<div v-else class="space-y-2 max-h-96 overflow-y-auto">
+						<button
+							v-for="pinnedMessage in pinnedMessagesList"
+							:key="pinnedMessage.id"
+							type="button"
+							tabindex="0"
+							:aria-label="`Przejdź do wiadomości od ${pinnedMessage.senderUsername}`"
+							class="w-full text-left px-3 py-2.5 text-xs rounded-lg hover:bg-gray-100 transition-colors border border-gray-200"
+							@click="handlePinnedMessageClick(pinnedMessage.id)"
+							@keydown.enter="handlePinnedMessageClick(pinnedMessage.id)"
+						>
+							<div class="flex items-start justify-between gap-2">
+								<div class="flex-1 min-w-0">
+									<div class="flex items-center gap-2 mb-1">
+										<p class="font-medium text-gray-900">
+											{{ pinnedMessage.senderUsername }}
+										</p>
+										<span
+											v-if="pinnedMessage.pinnedBy"
+											class="text-gray-400 text-[10px]"
+										>
+											przypięte przez {{ pinnedMessage.pinnedBy.username }}
+										</span>
+									</div>
+									<p class="text-gray-600 line-clamp-2 mb-1">
+										{{ truncateMessage(pinnedMessage.content) }}
+									</p>
+									<div class="flex items-center gap-2 text-gray-400">
+										<p class="text-[10px]">
+											{{ formatMessageTime(pinnedMessage.createdAt) }}
+										</p>
+										<span v-if="pinnedMessage.pinnedAt" class="text-[10px]">
+											• przypięte
+											{{ formatMessageTime(pinnedMessage.pinnedAt) }}
+										</span>
+									</div>
+								</div>
+								<span class="text-xs flex-shrink-0">📌</span>
+							</div>
+						</button>
+					</div>
+				</div>
+
+				<template v-if="isGroupChat && isOwner">
 					<div class="p-4 border-b border-gray-200">
 						<h3 class="text-sm font-semibold text-gray-900 mb-3">Add user</h3>
 						<div class="space-y-2">
@@ -412,7 +558,7 @@ onUnmounted(() => {
 					</div>
 				</template>
 
-				<template v-else>
+				<template v-else-if="isGroupChat">
 					<div class="p-4">
 						<h3 class="text-sm font-semibold text-gray-900 mb-3">
 							Members ({{ members.length }})

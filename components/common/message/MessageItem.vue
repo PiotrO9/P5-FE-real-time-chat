@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import type { Message, Reaction } from '~/types/Chat'
-import { addReaction, removeReaction } from '~/services/chatService'
+import { addReaction, removeReaction, pinMessage, unpinMessage } from '~/services/chatService'
 import Dialog from '~/components/common/Dialog.vue'
 import EmojiTooltip from '~/components/common/emoji/EmojiTooltip.vue'
 import Icon from '../Icon.vue'
+import { useChatStore } from '~/stores/chatStore'
+import { useToast } from '~/composables/useToast'
+import { useMessageHelpers } from '~/composables/useMessageHelpers'
 
 interface GroupedReaction {
 	userIds: (string | number)[]
@@ -22,19 +25,24 @@ interface Emits {
 		emoji: string,
 		action: 'add' | 'remove'
 	): void
+	(e: 'pin-updated', messageId: string | number, isPinned: boolean): void
 }
 
 const { user } = useAuth()
+const chatStore = useChatStore()
+const { error: toastError } = useToast()
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const showDeleteButton = ref(false)
+const showPinButtonFlag = ref(false)
 const isFocused = ref(false)
 const isDeleting = ref(false)
 const showDeleteDialog = ref(false)
 const justClosedDialog = ref(false)
 const isReacting = ref(false)
+const isPinning = ref(false)
 const emojiTooltipRef = ref<InstanceType<typeof EmojiTooltip> | null>(null)
 const deleteButtonRef = ref<HTMLButtonElement | null>(null)
 const isButtonFocused = ref(false)
@@ -92,6 +100,13 @@ const userReactions = computed(() => {
 		r.userIds.some((userId) => String(userId) === String(currentUserId.value))
 	)
 })
+const isPinned = computed(() => message.value.isPinned ?? false)
+const showPinButton = computed(() => {
+	return (
+		!isDeleting.value &&
+		(showPinButtonFlag.value || isFocused.value || isButtonFocused.value || isPinned.value)
+	)
+})
 
 function hasUserReaction(emoji: string): boolean {
 	const reactionGroup = groupedReactions.value[emoji]
@@ -110,13 +125,15 @@ function getReactionCount(emoji: string): number {
 }
 
 function handleFocus() {
-	if (isOwnMessage.value && !isDeleting.value) {
+	if (!isDeleting.value) {
 		isFocused.value = true
+		showPinButtonFlag.value = true
 	}
 }
 
 function handleBlur() {
 	isFocused.value = false
+	showPinButtonFlag.value = false
 }
 
 function handleButtonFocus() {
@@ -127,6 +144,7 @@ function handleButtonFocus() {
 function handleButtonBlur() {
 	isFocused.value = false
 	isButtonFocused.value = false
+	showPinButtonFlag.value = false
 }
 
 function handleDeleteClick() {
@@ -172,12 +190,14 @@ function handleMessageMouseEnter() {
 		if (isOwnMessage.value) {
 			showDeleteButton.value = true
 		}
+		showPinButtonFlag.value = true
 		emojiTooltipRef.value?.showTooltip()
 	}
 }
 
 function handleMessageMouseLeave() {
 	showDeleteButton.value = false
+	showPinButtonFlag.value = false
 	emojiTooltipRef.value?.hideTooltip()
 }
 
@@ -219,16 +239,82 @@ async function handleReactionClick(emoji: string) {
 			await addReaction(message.value.id, emoji)
 			emit('reaction-updated', message.value.id, emoji, 'add')
 		}
-	} catch (error) {
-		console.error('Error handling reaction:', error)
+	} catch {
 	} finally {
 		isReacting.value = false
+	}
+}
+
+async function handlePinClick() {
+	if (isPinning.value || isDeleting.value) return
+
+	const chatId = message.value.chatId
+	const shouldUnpin = message.value.isPinned === true
+
+	try {
+		isPinning.value = true
+
+		if (shouldUnpin) {
+			await unpinMessage(chatId, message.value.id)
+			chatStore.removePinnedMessage(chatId, message.value.id)
+			message.value.isPinned = false
+			message.value.pinnedBy = undefined
+			message.value.pinnedAt = undefined
+			emit('pin-updated', message.value.id, false)
+		} else {
+			if (message.value.isPinned === true) {
+				return
+			}
+
+			const res = await pinMessage(chatId, message.value.id)
+			const { mapMessageFromBackend } = useMessageHelpers()
+
+			if (res?.data) {
+				const pinnedData = res.data
+				if (pinnedData.message) {
+					const mappedMessage = mapMessageFromBackend(pinnedData.message)
+					message.value.isPinned = mappedMessage.isPinned ?? true
+					message.value.pinnedBy = mappedMessage.pinnedBy
+					message.value.pinnedAt = mappedMessage.pinnedAt
+					const pinnedMessageForStore = {
+						...message.value,
+						isPinned: mappedMessage.isPinned ?? true,
+						pinnedBy: mappedMessage.pinnedBy,
+						pinnedAt: mappedMessage.pinnedAt
+					}
+					chatStore.addPinnedMessage(chatId, pinnedMessageForStore)
+				} else {
+					message.value.isPinned = true
+					chatStore.addPinnedMessage(chatId, message.value)
+				}
+			} else {
+				message.value.isPinned = true
+				chatStore.addPinnedMessage(chatId, message.value)
+			}
+			emit('pin-updated', message.value.id, true)
+		}
+	} catch (error: any) {
+		const errorMessage = error?.response?._data?.message || error?.message
+		toastError(errorMessage || 'Nie udało się zaktualizować przypięcia')
+	} finally {
+		isPinning.value = false
+	}
+}
+
+function handlePinKeyDown(event: KeyboardEvent) {
+	if (event.key === 'Enter' || event.key === ' ') {
+		event.preventDefault()
+		handlePinClick()
 	}
 }
 </script>
 
 <template>
-	<div class="w-full flex group" :class="isOwnMessage ? 'justify-end' : 'justify-start'">
+	<div
+		class="w-full flex group"
+		:class="isOwnMessage ? 'justify-end' : 'justify-start'"
+		:data-message-id="message.id"
+	>
 		<div v-if="!isOwnMessage" class="flex items-start gap-2 max-w-[85%] relative">
 			<div
 				class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold flex-shrink-0"
@@ -246,9 +332,31 @@ async function handleReactionClick(emoji: string) {
 					@mouseleave="handleMessageMouseLeave"
 				>
 					<div
-						class="max-w-full rounded-2xl px-4 py-2 text-sm shadow-sm bg-white text-gray-900 border border-gray-200 rounded-bl-none"
-						:aria-label="`Message from ${senderDisplayName}`"
+						class="max-w-full rounded-2xl px-4 py-2 text-sm shadow-sm text-gray-900 border rounded-bl-none relative"
+						:class="{
+							'bg-white border-gray-200': !isPinned,
+							'bg-yellow-50 border-yellow-300': isPinned
+						}"
+						:aria-label="`Message from ${senderDisplayName}${isPinned ? ' (przypięta)' : ''}`"
 					>
+						<button
+							v-if="showPinButton || isPinned"
+							type="button"
+							tabindex="0"
+							:aria-label="isPinned ? 'Odepnij wiadomość' : 'Przypnij wiadomość'"
+							class="absolute -top-2 -right-2 h-6 w-6 rounded-full flex items-center justify-center transition-all duration-150 shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 z-10"
+							:class="{
+								'opacity-100': showPinButton || isPinned,
+								'opacity-0': !showPinButton && !isPinned,
+								'bg-yellow-100 hover:bg-yellow-200 text-yellow-700': isPinned,
+								'bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700':
+									!isPinned
+							}"
+							@click.stop="handlePinClick"
+							@keydown="handlePinKeyDown"
+						>
+							<span class="text-xs">📌</span>
+						</button>
 						<p class="whitespace-pre-wrap break-words">{{ messageContent }}</p>
 						<p class="mt-1 text-[10px] opacity-70">
 							{{ formattedTime }}
@@ -305,10 +413,36 @@ async function handleReactionClick(emoji: string) {
 			</p>
 			<div class="relative">
 				<div
-					class="relative rounded-2xl px-4 py-2 text-sm shadow-sm bg-blue-600 text-white rounded-br-none"
-					:class="{ 'opacity-50': isDeleting }"
-					:aria-label="isDeleting ? 'Deleting message...' : 'Message from you'"
+					class="relative rounded-2xl px-4 py-2 text-sm shadow-sm rounded-br-none"
+					:class="{
+						'opacity-50': isDeleting,
+						'bg-blue-600 text-white': !isPinned,
+						'bg-yellow-500 text-white': isPinned
+					}"
+					:aria-label="
+						isDeleting
+							? 'Deleting message...'
+							: `Message from you${isPinned ? ' (przypięta)' : ''}`
+					"
 				>
+					<button
+						v-if="showPinButton || isPinned"
+						type="button"
+						tabindex="0"
+						:aria-label="isPinned ? 'Odepnij wiadomość' : 'Przypnij wiadomość'"
+						class="absolute -top-2 -left-2 h-6 w-6 rounded-full flex items-center justify-center transition-all duration-150 shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 z-10"
+						:class="{
+							'opacity-100': showPinButton || isPinned,
+							'opacity-0': !showPinButton && !isPinned,
+							'bg-yellow-100 hover:bg-yellow-200 text-yellow-700': isPinned,
+							'bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700':
+								!isPinned
+						}"
+						@click.stop="handlePinClick"
+						@keydown="handlePinKeyDown"
+					>
+						<span class="text-xs">📌</span>
+					</button>
 					<button
 						v-if="isOwnMessage && !isDeleting"
 						ref="deleteButtonRef"

@@ -6,13 +6,13 @@ export function useTypingUsers(currentUserId: Ref<number>) {
 	let isTyping = false
 
 	const typingUsersByChat = computed(() => {
-		const result: Record<number, string[]> = {}
+		const result: Record<string, string[]> = {}
 		return result
 	})
 
-	function getTypingUsers(chatId: number | null): string[] {
+	function getTypingUsers(chatId: string | null): string[] {
 		if (!chatId) return []
-		const chatIdStr = toString(chatId)
+		const chatIdStr = String(chatId)
 		const users = typingUsers[chatIdStr]
 		return users ? Array.from(users.values()) : []
 	}
@@ -40,8 +40,8 @@ export function useTypingUsers(currentUserId: Ref<number>) {
 		}
 	}
 
-	function handleTypingInput(chatId: number, emit: (event: string, data: any) => void) {
-		const chatIdStr = toString(chatId)
+	function handleTypingInput(chatId: string, emit: (event: string, data: any) => void) {
+		const chatIdStr = String(chatId)
 
 		if (!isTyping) {
 			emit('typing:start', { chatId: chatIdStr })
@@ -61,8 +61,8 @@ export function useTypingUsers(currentUserId: Ref<number>) {
 		}, 3000)
 	}
 
-	function handleMessageSent(chatId: number, emit: (event: string, data: any) => void) {
-		const chatIdStr = toString(chatId)
+	function handleMessageSent(chatId: string, emit: (event: string, data: any) => void) {
+		const chatIdStr = String(chatId)
 
 		if (isTyping) {
 			emit('typing:stop', { chatId: chatIdStr })
@@ -76,12 +76,12 @@ export function useTypingUsers(currentUserId: Ref<number>) {
 	}
 
 	function updateTypingUsersByChat(chats: any[]) {
-		const result: Record<number, string[]> = {}
+		const result: Record<string, string[]> = {}
 		chats.forEach((chat) => {
-			const chatId = toString(chat.id)
+			const chatId = String(chat.id)
 			const users = typingUsers[chatId]
 			if (users && users.size > 0) {
-				result[chat.id] = Array.from(users.values())
+				result[chatId] = Array.from(users.values())
 			}
 		})
 		return result

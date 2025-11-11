@@ -17,6 +17,8 @@ import { useReactions } from '~/composables/useReactions'
 import { useSocketHandlers } from '~/composables/useSocketHandlers'
 import { toNumber } from '~/utils/typeHelpers'
 import { useToast } from '~/composables/useToast'
+import { fetchPinnedMessages } from '~/services/chatService'
+import { useMessageHelpers } from '~/composables/useMessageHelpers'
 
 const { user } = useAuth()
 const chatStore = useChatStore()
@@ -41,6 +43,19 @@ const reactionsComposable = useReactions(
 
 const chatPanelRef = ref<any>(null)
 const isActionsPanelOpen = ref(false)
+
+const searchQuery = computed({
+	get: () => chatsComposable.searchQuery.value,
+	set: (value: string) => {
+		chatsComposable.searchQuery.value = value
+	}
+})
+
+watch(currentChat, (newChat) => {
+	if (!newChat) {
+		isActionsPanelOpen.value = false
+	}
+})
 
 const currentTypingUsers = computed(() => {
 	if (!chatsComposable.selectedChatId.value) return []
@@ -98,12 +113,44 @@ function handleStartChat(friendId: string | number) {
 	toastError('Chat not found with this friend')
 }
 
-function handleSelectChat(chatId: number) {
+async function handleSelectChat(chatId: string) {
 	if (chatsComposable.selectedChatId.value === chatId) return
 	chatsComposable.selectChat(chatId)
 	messagesComposable.fetchMessages(chatId, false)
+	await fetchPinnedMessagesForChat(chatId)
 	nextTick(() => handleScrollToBottom())
 	isActionsPanelOpen.value = false
+}
+
+async function fetchPinnedMessagesForChat(chatId: string) {
+	try {
+		const { mapMessageFromBackend } = useMessageHelpers()
+		const res = await fetchPinnedMessages(chatId)
+		const raw = res?.data
+		const pinnedItems: any[] = Array.isArray(raw?.pinnedMessages) ? raw.pinnedMessages : []
+
+		const mappedMessages = pinnedItems.map((pinnedItem) => {
+			const message = mapMessageFromBackend(pinnedItem.message)
+			return {
+				...message,
+				isPinned: true,
+				pinnedBy: pinnedItem.pinnedBy
+					? {
+							id: pinnedItem.pinnedBy.id,
+							username: pinnedItem.pinnedBy.username
+						}
+					: undefined,
+				pinnedAt: pinnedItem.pinnedAt
+					? typeof pinnedItem.pinnedAt === 'string'
+						? pinnedItem.pinnedAt
+						: pinnedItem.pinnedAt.toISOString()
+					: undefined
+			}
+		})
+		chatStore.setPinnedMessages(chatId, mappedMessages)
+	} catch (err: any) {
+		console.error('Error fetching pinned messages:', err)
+	}
 }
 
 function handleChatUpdated(data: { members: any[]; currentUserRole?: any }) {
@@ -186,6 +233,23 @@ function handleReactionUpdated(
 	reactionsComposable.handleReactionUpdated(messageId, emoji, action)
 }
 
+function handlePinUpdated(messageId: string | number, isPinned: boolean) {
+	const chat = chatsComposable.selectedChat.value
+	if (!chat) return
+
+	const message = chat.messages.find((m) => String(m.id) === String(messageId))
+	if (message) {
+		message.isPinned = isPinned
+	}
+}
+
+function handleOpenPinnedMessages() {
+	const chat = chatsComposable.selectedChat.value
+	if (!chat) return
+	chatStore.openChatDetails(chat)
+	isActionsPanelOpen.value = true
+}
+
 function handleTypingInput() {
 	const chatId = chatsComposable.selectedChatId.value
 	if (!chatId) return
@@ -207,6 +271,7 @@ onMounted(async () => {
 	chatsComposable.selectChat(firstChat.id)
 
 	await messagesComposable.fetchMessages(firstChat.id, false)
+	await fetchPinnedMessagesForChat(firstChat.id)
 	nextTick(() => handleScrollToBottom())
 })
 
@@ -339,9 +404,10 @@ onUnmounted(() => {
 								<label for="chat-search" class="sr-only">Search chat</label>
 								<input
 									id="chat-search"
-									v-model="chatsComposable.searchQuery"
+									v-model="searchQuery"
 									type="text"
 									placeholder="Search..."
+									class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 								/>
 							</template>
 						</div>
@@ -446,6 +512,8 @@ onUnmounted(() => {
 							@load-more="handleLoadMore"
 							@delete-message="handleDeleteMessage"
 							@reaction-updated="handleReactionUpdated"
+							@pin-updated="handlePinUpdated"
+							@open-pinned-messages="handleOpenPinnedMessages"
 							@toggle-actions="isActionsPanelOpen = !isActionsPanelOpen"
 						/>
 						<template v-if="chatsComposable.selectedChat.value">
@@ -472,6 +540,7 @@ onUnmounted(() => {
 
 				<ChatActionsPanel
 					v-if="currentChat"
+					v-model="isActionsPanelOpen"
 					:chat="currentChat"
 					:current-user-id="currentUserId"
 					@chat-updated="handleChatUpdated"

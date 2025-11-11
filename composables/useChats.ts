@@ -11,13 +11,13 @@ export function useChats() {
 	const chats = ref<Chat[]>([])
 	const chatsLoading = ref(false)
 	const chatsError = ref<string | null>(null)
-	const selectedChatId = ref<number | null>(null)
+	const selectedChatId = ref<string | null>(null)
 	const searchQuery = ref('')
 
 	const selectedChat = computed<Chat | null>(() => {
 		if (selectedChatId.value === null) return null
 
-		return chats.value.find((c) => c.id === selectedChatId.value) ?? null
+		return chats.value.find((c) => String(c.id) === String(selectedChatId.value)) ?? null
 	})
 
 	const filteredChats = computed(() => {
@@ -55,25 +55,25 @@ export function useChats() {
 		}
 	}
 
-	function selectChat(chatId: number) {
+	function selectChat(chatId: string) {
 		if (selectedChatId.value === chatId) return
 		selectedChatId.value = chatId
-		const chat = chats.value.find((c) => c.id === chatId)
+		const chat = chats.value.find((c) => String(c.id) === String(chatId))
 		if (chat) chat.unreadCount = 0
 	}
 
-	function findChatById(chatId: number | string): Chat | undefined {
+	function findChatById(chatId: string): Chat | undefined {
 		return chats.value.find((c) => String(c.id) === String(chatId))
 	}
 
-	function updateChat(chatId: number | string, updates: Partial<Chat>) {
+	function updateChat(chatId: string, updates: Partial<Chat>) {
 		const chat = findChatById(chatId)
 		if (chat) {
 			Object.assign(chat, updates)
 		}
 	}
 
-	function incrementUnreadCount(chatId: number | string) {
+	function incrementUnreadCount(chatId: string) {
 		const chat = findChatById(chatId)
 		if (chat && selectedChatId.value !== chat.id) {
 			chat.unreadCount++

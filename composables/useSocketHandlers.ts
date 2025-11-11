@@ -1,12 +1,14 @@
-import type { Chat } from '~/types/Chat'
+import type { Chat, Message } from '~/types/Chat'
+import { nextTick } from 'vue'
 import { useSocket } from './useSocket'
 import { useMessageHelpers } from './useMessageHelpers'
 import { toNumber } from '~/utils/typeHelpers'
+import { useChatStore } from '~/stores/chatStore'
 
 export function useSocketHandlers(
 	chats: Ref<Chat[]>,
 	friends: Ref<any[]>,
-	selectedChatId: Ref<number | null>,
+	selectedChatId: Ref<string | null>,
 	currentUserId: Ref<number>,
 	typingUsers: ReturnType<typeof import('./useTypingUsers').useTypingUsers>,
 	messages: ReturnType<typeof import('./useMessages').useMessages>,
@@ -19,7 +21,7 @@ export function useSocketHandlers(
 	const { mapMessageFromBackend, createSystemMessage } = useMessageHelpers()
 
 	function handleNewMessage(data: { chatId: string; message: any }) {
-		const chatId = toNumber(data.chatId)
+		const chatId = String(data.chatId)
 		const chat = chatsComposable.findChatById(chatId)
 
 		if (!chat) {
@@ -41,7 +43,7 @@ export function useSocketHandlers(
 	}
 
 	function handleMessageDeleted(data: { chatId: string; messageId: string }) {
-		const chatId = toNumber(data.chatId)
+		const chatId = String(data.chatId)
 		messages.removeMessage(chatId, data.messageId)
 	}
 
@@ -50,7 +52,7 @@ export function useSocketHandlers(
 		messageId: string
 		reaction: { emoji: string; userId: string; username: string }
 	}) {
-		const chatId = toNumber(data.chatId)
+		const chatId = String(data.chatId)
 		const userId = toNumber(data.reaction.userId)
 		reactions.addReactionToMessage(
 			chatId,
@@ -66,13 +68,13 @@ export function useSocketHandlers(
 		messageId: string
 		reaction: { emoji: string; userId: string }
 	}) {
-		const chatId = toNumber(data.chatId)
+		const chatId = String(data.chatId)
 		const userId = toNumber(data.reaction.userId)
 		reactions.removeReactionFromMessage(chatId, data.messageId, data.reaction.emoji, userId)
 	}
 
 	function handleMessageUpdated(data: { chatId: string; message: any }) {
-		const chatId = toNumber(data.chatId)
+		const chatId = String(data.chatId)
 		const mappedMessage = mapMessageFromBackend(data.message)
 		messages.updateMessage(chatId, mappedMessage)
 	}
@@ -87,7 +89,7 @@ export function useSocketHandlers(
 	}
 
 	function handleChatUpdatedFromSocket(data: { chatId: string; updates: any }) {
-		const chatId = toNumber(data.chatId)
+		const chatId = String(data.chatId)
 		const chat = chatsComposable.findChatById(chatId)
 		if (!chat) return
 
@@ -107,7 +109,7 @@ export function useSocketHandlers(
 	}
 
 	function handleMemberAdded(data: { chatId: string; member: any }) {
-		const chatId = toNumber(data.chatId)
+		const chatId = String(data.chatId)
 		const chat = chatsComposable.findChatById(chatId)
 		if (!chat) return
 
@@ -127,7 +129,7 @@ export function useSocketHandlers(
 	}
 
 	function handleMemberRemoved(data: { chatId: string; userId: string }) {
-		const chatId = toNumber(data.chatId)
+		const chatId = String(data.chatId)
 		const chat = chatsComposable.findChatById(chatId)
 		if (!chat) return
 
@@ -155,6 +157,86 @@ export function useSocketHandlers(
 		}
 	}
 
+	function handleMessagePinned(data: {
+		chatId: string
+		message?: any
+		pinnedMessage?: { message: any; pinnedBy?: any; pinnedAt?: string }
+	}) {
+		if (!data) return
+
+		const chatId = String(data.chatId)
+		const chat = chatsComposable.findChatById(chatId)
+		if (!chat) return
+
+		const pinnedMessageData = data.pinnedMessage
+		const messageData = pinnedMessageData?.message || data.message || data
+
+		if (!messageData || !messageData.id) {
+			return
+		}
+
+		const messageId = String(messageData.id)
+		const messageIndex = chat.messages.findIndex((m) => String(m.id) === messageId)
+
+		if (messageIndex !== -1) {
+			const message = chat.messages[messageIndex]
+
+			let pinnedAtValue: string | undefined = undefined
+			if (pinnedMessageData?.pinnedAt) {
+				if (typeof pinnedMessageData.pinnedAt === 'string') {
+					pinnedAtValue = pinnedMessageData.pinnedAt
+				} else if (
+					typeof pinnedMessageData.pinnedAt === 'object' &&
+					pinnedMessageData.pinnedAt !== null &&
+					'toISOString' in pinnedMessageData.pinnedAt
+				) {
+					pinnedAtValue = (pinnedMessageData.pinnedAt as Date).toISOString()
+				} else {
+					pinnedAtValue = String(pinnedMessageData.pinnedAt)
+				}
+			}
+
+			const updatedMessage = {
+				...message,
+				isPinned: true,
+				pinnedBy: pinnedMessageData?.pinnedBy
+					? {
+							id: pinnedMessageData.pinnedBy.id,
+							username: pinnedMessageData.pinnedBy.username
+						}
+					: undefined,
+				pinnedAt: pinnedAtValue
+			} as Message
+
+			messages.updateMessage(chatId, updatedMessage)
+
+			const chatStore = useChatStore()
+			chatStore.addPinnedMessage(chatId, updatedMessage)
+		}
+	}
+
+	function handleMessageUnpinned(data: { chatId: string; messageId: string }) {
+		const chatId = String(data.chatId)
+		const chat = chatsComposable.findChatById(chatId)
+		if (!chat) return
+
+		const messageIndex = chat.messages.findIndex((m) => String(m.id) === String(data.messageId))
+
+		if (messageIndex !== -1) {
+			const message = chat.messages[messageIndex]
+			const updatedMessage = {
+				...message,
+				isPinned: false,
+				pinnedBy: undefined,
+				pinnedAt: undefined
+			} as Message
+			messages.updateMessage(chatId, updatedMessage)
+		}
+
+		const chatStore = useChatStore()
+		chatStore.removePinnedMessage(chatId, data.messageId)
+	}
+
 	function setupListeners() {
 		on('message:new', handleNewMessage)
 		on('message:updated', handleMessageUpdated)
@@ -168,6 +250,8 @@ export function useSocketHandlers(
 		on('chat:updated', handleChatUpdatedFromSocket)
 		on('member:added', handleMemberAdded)
 		on('member:removed', handleMemberRemoved)
+		on('message:pinned', handleMessagePinned)
+		on('message:unpinned', handleMessageUnpinned)
 	}
 
 	function cleanupListeners() {
@@ -183,6 +267,8 @@ export function useSocketHandlers(
 		off('chat:updated', handleChatUpdatedFromSocket)
 		off('member:added', handleMemberAdded)
 		off('member:removed', handleMemberRemoved)
+		off('message:pinned', handleMessagePinned)
+		off('message:unpinned', handleMessageUnpinned)
 	}
 
 	return {

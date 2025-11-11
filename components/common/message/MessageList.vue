@@ -15,6 +15,7 @@ interface Emits {
 		emoji: string,
 		action: 'add' | 'remove'
 	): void
+	(e: 'pin-updated', messageId: string | number, isPinned: boolean): void
 }
 
 const props = defineProps<Props>()
@@ -33,6 +34,10 @@ function handleReactionUpdated(
 ) {
 	emit('reaction-updated', messageId, emoji, action)
 }
+
+function handlePinUpdated(messageId: string | number, isPinned: boolean) {
+	emit('pin-updated', messageId, isPinned)
+}
 </script>
 
 <template>
@@ -43,6 +48,7 @@ function handleReactionUpdated(
 			:message="message"
 			@delete="handleDeleteMessage"
 			@reaction-updated="handleReactionUpdated"
+			@pin-updated="handlePinUpdated"
 		/>
 	</template>
 </template>

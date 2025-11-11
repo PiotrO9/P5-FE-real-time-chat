@@ -7,9 +7,14 @@ interface Props {
 	selectedChat: Chat | null
 }
 
+interface Emits {
+	(e: 'toggle-actions'): void
+}
+
 const chatStore = useChatStore()
 
 const { selectedChat } = defineProps<Props>()
+const emit = defineEmits<Emits>()
 
 const isGroup = computed(() => selectedChat?.isGroup)
 const chatInitial = computed(() => {
@@ -22,7 +27,13 @@ const displayName = computed(() => selectedChat?.name ?? 'Czat')
 function handleToggleActions() {
 	if (!selectedChat) return
 
-	chatStore.openChatDetails(selectedChat)
+	const isCurrentlyOpen = chatStore.currentChatDetails?.id === selectedChat.id
+	if (isCurrentlyOpen) {
+		chatStore.closeChatDetails()
+	} else {
+		chatStore.openChatDetails(selectedChat)
+	}
+	emit('toggle-actions')
 }
 </script>
 
@@ -37,7 +48,7 @@ function handleToggleActions() {
 			</h2>
 		</div>
 		<ActionsMenu
-			v-if="isGroup"
+			v-if="selectedChat"
 			@click="handleToggleActions"
 			@keydown.enter="handleToggleActions"
 			@keydown.space.prevent="handleToggleActions"
