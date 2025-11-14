@@ -1,4 +1,3 @@
-import type { ApiResponse } from '~/types/Api'
 import type {
 	FriendsListResponse,
 	InvitesResponse,

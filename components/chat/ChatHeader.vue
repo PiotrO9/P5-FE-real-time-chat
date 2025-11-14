@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { Chat } from '~/types/Chat'
-import ActionsMenu from '../ActionsMenu.vue'
 import ChatInitial from './ChatInitial.vue'
 
 interface Props {

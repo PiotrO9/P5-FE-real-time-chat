@@ -1,5 +1,3 @@
-import { useApi } from '~/composables/useApi'
-import type { ApiResponse } from '~/types/Api'
 import type { User } from '~/types/Chat'
 
 export const useAuthStore = defineStore('auth', () => {

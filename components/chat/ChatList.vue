@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Chat } from '~/types/Chat'
-import ChatItem from '../../common/chat/ChatItem.vue'
+import ChatItem from '~/components/chat/ChatItem.vue'
 
 interface Props {
 	chats: Chat[]

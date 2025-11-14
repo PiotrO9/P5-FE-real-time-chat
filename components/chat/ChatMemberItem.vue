@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { ChatMember, Role } from '~/types/ChatsApi'
-import Icon from '../Icon.vue'
 import ChatInitial from './ChatInitial.vue'
 
 interface Props {
@@ -184,4 +183,3 @@ const isCurrentUser = computed(() => String(props.member.id) === String(props.cu
 		</div>
 	</div>
 </template>
-

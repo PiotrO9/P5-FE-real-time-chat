@@ -8,6 +8,14 @@ export default defineNuxtConfig({
 
 	modules: ['@nuxtjs/tailwindcss', '@vueuse/nuxt', '@nuxt/eslint', '@pinia/nuxt'],
 
+	components: {
+		dirs: ['~/components/ui', '~/stores']
+	},
+
+	imports: {
+		dirs: ['~/types/Api.ts']
+	},
+
 	typescript: {
 		strict: true,
 		typeCheck: false

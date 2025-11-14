@@ -3,7 +3,6 @@ import { nextTick } from 'vue'
 import { useSocket } from './useSocket'
 import { useMessageHelpers } from './useMessageHelpers'
 import { toNumber } from '~/utils/typeHelpers'
-import { useChatStore } from '~/stores/chatStore'
 
 export function useSocketHandlers(
 	chats: Ref<Chat[]>,

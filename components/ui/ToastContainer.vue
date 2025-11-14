@@ -1,20 +1,18 @@
 <script setup lang="ts">
-import Icon from './common/Icon.vue'
-
 const { toasts, removeToast } = useToast()
 
-function handleRemoveToast(id: string): void {
+function handleRemoveToast(id: string) {
 	removeToast(id)
 }
 
-function handleKeyDown(event: KeyboardEvent, id: string): void {
+function handleKeyDown(event: KeyboardEvent, id: string) {
 	if (event.key === 'Enter' || event.key === ' ') {
 		event.preventDefault()
 		handleRemoveToast(id)
 	}
 }
 
-function getToastClasses(type: string): string {
+function getToastClasses(type: string) {
 	const baseClasses =
 		'px-6 py-4 rounded-lg shadow-lg border-l-4 flex items-start gap-3 min-w-[300px] max-w-[500px]'
 
@@ -31,7 +29,7 @@ function getToastClasses(type: string): string {
 	}
 }
 
-function getIconClasses(type: string): string {
+function getIconClasses(type: string) {
 	switch (type) {
 		case 'success':
 			return 'text-green-500'

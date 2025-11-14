@@ -2,8 +2,6 @@
 import type { Chat } from '~/types/Chat'
 import UnreadMessages from './UnreadMessages.vue'
 import ChatInitial from './ChatInitial.vue'
-import ActionsMenu from '../ActionsMenu.vue'
-import { useAuth } from '~/composables/useAuth'
 
 interface Props {
 	chat: Chat

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Message } from '~/types/Chat'
-import MessageItem from '../../common/message/MessageItem.vue'
-import SystemMessage from '../../common/message/SystemMessage.vue'
+import MessageItem from '~/components/message/MessageItem.vue'
+import SystemMessage from '~/components/message/SystemMessage.vue'
 
 interface Props {
 	messages: Message[]

@@ -1,6 +1,5 @@
 import type { Chat } from '~/types/Chat'
 import type { ChatsResponse } from '~/types/ChatsApi'
-import type { ApiResponse } from '~/types/Api'
 import { fetchChats as fetchChatsFromService } from '~/services/chatService'
 import { getErrorMessage } from '~/utils/errorHelpers'
 import { useToast } from './useToast'

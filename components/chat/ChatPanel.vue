@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import type { Chat } from '~/types/Chat'
-import ChatHeader from '../../common/chat/ChatHeader.vue'
-import MessageList from '../../common/message/MessageList.vue'
-import LoadMoreButton from '../../common/LoadMoreButton.vue'
-import EmptyState from '../../common/EmptyState.vue'
-import Typing from '../Typing.vue'
-import PinnedMessagePreview from '../../common/message/PinnedMessagePreview.vue'
+import ChatHeader from '~/components/chat/ChatHeader.vue'
+import MessageList from '~/components/message/MessageList.vue'
+import PinnedMessagePreview from '~/components/message/PinnedMessagePreview.vue'
 
 interface Props {
 	selectedChat: Chat | null

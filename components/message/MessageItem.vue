@@ -7,12 +7,7 @@ import {
 	unpinMessage,
 	updateMessage as updateMessageService
 } from '~/services/chatService'
-import Dialog from '~/components/common/Dialog.vue'
-import EmojiTooltip from '~/components/common/emoji/EmojiTooltip.vue'
-import Icon from '../Icon.vue'
-import { useChatStore } from '~/stores/chatStore'
-import { useToast } from '~/composables/useToast'
-import { useMessageHelpers } from '~/composables/useMessageHelpers'
+import EmojiTooltip from '~/components/ui/EmojiTooltip.vue'
 
 interface GroupedReaction {
 	userIds: (string | number)[]

@@ -10,9 +10,6 @@ import {
 	fetchPinnedMessages
 } from '~/services/chatService'
 import { fetchFriends as fetchFriendsFromService } from '~/services/friendsService'
-import { useToast } from '~/composables/useToast'
-import Icon from '../Icon.vue'
-import Dialog from '../Dialog.vue'
 import ChatMemberItem from './ChatMemberItem.vue'
 
 interface Props {
@@ -435,9 +432,7 @@ onUnmounted(() => {
 					<h3 class="text-sm font-semibold text-gray-900 mb-3">
 						Pinned messages ({{ pinnedMessagesList.length }})
 					</h3>
-					<div v-if="pinnedMessagesLoading" class="text-sm text-gray-600">
-						Loading...
-					</div>
+					<div v-if="pinnedMessagesLoading" class="text-sm text-gray-600">Loading...</div>
 					<div v-else-if="pinnedMessagesList.length === 0" class="text-sm text-gray-500">
 						No pinned messages
 					</div>
