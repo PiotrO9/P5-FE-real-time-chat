@@ -65,7 +65,7 @@ const currentUserId = computed(() => user.value?.id ?? 0)
 const isOwnMessage = computed(() => message.value.senderId === currentUserId.value)
 const senderDisplayName = computed(() => {
 	if (isOwnMessage.value) {
-		return message.value.senderUsername || 'You'
+		return 'You'
 	}
 	return message.value.senderUsername || 'Unknown'
 })

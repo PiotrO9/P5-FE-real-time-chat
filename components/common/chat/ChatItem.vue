@@ -3,6 +3,7 @@ import type { Chat } from '~/types/Chat'
 import UnreadMessages from './UnreadMessages.vue'
 import ChatInitial from './ChatInitial.vue'
 import ActionsMenu from '../ActionsMenu.vue'
+import { useAuth } from '~/composables/useAuth'
 
 interface Props {
 	chat: Chat
@@ -17,13 +18,16 @@ interface Emits {
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
+const { user } = useAuth()
+
 const chatData = computed(() => props.chat)
 const selected = computed(() => props.isSelected)
 const chatInitial = computed(() => (chatData.value.name ?? '').charAt(0) || '?')
 const chatName = computed(() =>
 	chatData.value.isGroup ? chatData.value.name : chatData.value.otherUser.username
 )
-const lastMessage = computed(() => chatData.value.lastMessage?.content || '')
+const lastMessage = computed(() => chatData.value.lastMessage)
+const lastMessageContent = computed(() => lastMessage.value?.content || '')
 const unreadCount = computed(() => Number(chatData.value.unreadCount))
 const typingUsers = computed(() => props.typingUsers ?? [])
 const hasTypingUsers = computed(() => typingUsers.value.length > 0)
@@ -42,7 +46,16 @@ const displayMessage = computed(() => {
 	if (hasTypingUsers.value && typingText.value) {
 		return typingText.value
 	}
-	return lastMessage.value || 'No messages'
+
+	if (!lastMessageContent.value) {
+		return 'No messages'
+	}
+
+	const currentUserId = user.value?.id ?? 0
+	const isOwnMessage = String(lastMessage.value?.senderId) === String(currentUserId)
+	const senderName = isOwnMessage ? 'You' : lastMessage.value?.senderUsername || 'Unknown'
+
+	return `${senderName}: ${lastMessageContent.value}`
 })
 const hasUnread = computed(() => Number(chatData.value.unreadCount) > 0)
 const itemClasses = computed(() => {
