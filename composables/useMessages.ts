@@ -168,12 +168,17 @@ export function useMessages(chats: Ref<Chat[]>, _selectedChatId: Ref<string | nu
 				existingMessage.senderUsername = message.senderUsername
 				existingMessage.reactions = message.reactions
 				existingMessage.createdAt = message.createdAt
+				existingMessage.edited = message.edited ?? false
+				existingMessage.editedAt = message.editedAt
 			}
 
 			if (chat.lastMessage && String(chat.lastMessage.id) === String(message.id)) {
 				chat.lastMessage.isPinned = message.isPinned ?? false
 				chat.lastMessage.pinnedBy = message.pinnedBy
 				chat.lastMessage.pinnedAt = message.pinnedAt
+				chat.lastMessage.content = message.content
+				chat.lastMessage.edited = message.edited ?? false
+				chat.lastMessage.editedAt = message.editedAt
 			}
 		}
 	}

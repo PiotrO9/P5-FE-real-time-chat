@@ -37,6 +37,12 @@ export function useMessageHelpers() {
 				? typeof messageData.pinnedAt === 'string'
 					? messageData.pinnedAt
 					: messageData.pinnedAt.toISOString()
+				: undefined,
+			edited: messageData.edited ?? false,
+			editedAt: messageData.editedAt
+				? typeof messageData.editedAt === 'string'
+					? messageData.editedAt
+					: messageData.editedAt.toISOString()
 				: undefined
 		}
 	}

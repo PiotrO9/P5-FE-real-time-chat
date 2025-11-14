@@ -38,6 +38,8 @@ export type Message = {
 		username: string
 	}
 	pinnedAt?: string
+	edited?: boolean
+	editedAt?: string
 }
 
 export type Chat = {

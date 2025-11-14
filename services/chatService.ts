@@ -74,3 +74,9 @@ export async function unpinMessage(chatId: number | string, messageId: string | 
 export async function fetchPinnedMessages(chatId: number | string) {
 	return await useApi<ApiResponse<MessagesResponse>>('GET', `/api/chats/${chatId}/pinned`)
 }
+
+export async function updateMessage(messageId: string | number, content: string) {
+	return await useApi<ApiResponse<Message>>('PATCH', `/api/messages/${messageId}`, {
+		content
+	})
+}

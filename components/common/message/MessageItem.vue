@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import type { Message, Reaction } from '~/types/Chat'
-import { addReaction, removeReaction, pinMessage, unpinMessage } from '~/services/chatService'
+import {
+	addReaction,
+	removeReaction,
+	pinMessage,
+	unpinMessage,
+	updateMessage as updateMessageService
+} from '~/services/chatService'
 import Dialog from '~/components/common/Dialog.vue'
 import EmojiTooltip from '~/components/common/emoji/EmojiTooltip.vue'
 import Icon from '../Icon.vue'
@@ -36,16 +42,23 @@ const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const showDeleteButton = ref(false)
+const showEditButton = ref(false)
 const showPinButtonFlag = ref(false)
 const isFocused = ref(false)
 const isDeleting = ref(false)
+const isEditing = ref(false)
+const editContent = ref('')
+const isUpdating = ref(false)
 const showDeleteDialog = ref(false)
 const justClosedDialog = ref(false)
 const isReacting = ref(false)
 const isPinning = ref(false)
 const emojiTooltipRef = ref<InstanceType<typeof EmojiTooltip> | null>(null)
 const deleteButtonRef = ref<HTMLButtonElement | null>(null)
+const editButtonRef = ref<HTMLButtonElement | null>(null)
+const editTextareaRef = ref<HTMLTextAreaElement | null>(null)
 const isButtonFocused = ref(false)
+const isSavingEdit = ref(false)
 
 const message = computed(() => props.message)
 const currentUserId = computed(() => user.value?.id ?? 0)
@@ -68,8 +81,22 @@ const avatarInitial = computed(() => {
 })
 const messageContent = computed(() => message.value.content)
 const shouldShowDeleteButton = computed(() => {
-	return isOwnMessage.value && !isDeleting.value && (showDeleteButton.value || isFocused.value)
+	return (
+		isOwnMessage.value &&
+		!isDeleting.value &&
+		!isEditing.value &&
+		(showDeleteButton.value || isFocused.value)
+	)
 })
+const shouldShowEditButton = computed(() => {
+	return (
+		isOwnMessage.value &&
+		!isDeleting.value &&
+		!isEditing.value &&
+		(showEditButton.value || isFocused.value)
+	)
+})
+const isEdited = computed(() => message.value.edited === true || !!message.value.editedAt)
 const reactions = computed(() => message.value.reactions || [])
 const groupedReactions = computed<Record<string, GroupedReaction>>(() => {
 	const groups: Record<string, GroupedReaction> = {}
@@ -164,7 +191,9 @@ function handleConfirmDelete() {
 	emit('delete', String(message.value.id))
 }
 
-function handleCancelDelete() {}
+function handleCancelDelete() {
+	// Cancel delete action
+}
 
 function resetDialogState() {
 	justClosedDialog.value = true
@@ -186,9 +215,10 @@ function handleDialogUpdate(open: boolean) {
 }
 
 function handleMessageMouseEnter() {
-	if (!isDeleting.value) {
+	if (!isDeleting.value && !isEditing.value) {
 		if (isOwnMessage.value) {
 			showDeleteButton.value = true
+			showEditButton.value = true
 		}
 		showPinButtonFlag.value = true
 		emojiTooltipRef.value?.showTooltip()
@@ -197,11 +227,14 @@ function handleMessageMouseEnter() {
 
 function handleMessageMouseLeave() {
 	showDeleteButton.value = false
+	showEditButton.value = false
 	showPinButtonFlag.value = false
 	emojiTooltipRef.value?.hideTooltip()
 }
 
-function handleTooltipShowChange(_show: boolean) {}
+function handleTooltipShowChange(_show: boolean) {
+	// Tooltip show state changed
+}
 
 function handleReactionBadgeClick(emoji: string, event: Event) {
 	event.stopPropagation()
@@ -240,6 +273,7 @@ async function handleReactionClick(emoji: string) {
 			emit('reaction-updated', message.value.id, emoji, 'add')
 		}
 	} catch {
+		// Error handled by emit
 	} finally {
 		isReacting.value = false
 	}
@@ -307,6 +341,85 @@ function handlePinKeyDown(event: KeyboardEvent) {
 		handlePinClick()
 	}
 }
+
+function handleEditClick() {
+	if (!isOwnMessage.value || isDeleting.value || isEditing.value || justClosedDialog.value) return
+	isEditing.value = true
+	editContent.value = message.value.content
+	nextTick(() => {
+		editTextareaRef.value?.focus()
+		editTextareaRef.value?.select()
+	})
+}
+
+function handleEditKeyDown(event: KeyboardEvent) {
+	if (event.key === 'Enter' || event.key === ' ') {
+		event.preventDefault()
+		handleEditClick()
+	}
+}
+
+function handleEditButtonFocus() {
+	isFocused.value = true
+	isButtonFocused.value = true
+}
+
+function handleEditButtonBlur() {
+	isFocused.value = false
+	isButtonFocused.value = false
+	showPinButtonFlag.value = false
+}
+
+function handleCancelEdit() {
+	if (isSavingEdit.value) return
+	isEditing.value = false
+	editContent.value = ''
+}
+
+function handleEditKeyDownTextarea(event: KeyboardEvent) {
+	if (event.key === 'Escape') {
+		event.preventDefault()
+		handleCancelEdit()
+	} else if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+		event.preventDefault()
+		handleSaveEdit()
+	}
+}
+
+async function handleSaveEdit() {
+	if (
+		isUpdating.value ||
+		!editContent.value.trim() ||
+		editContent.value.trim() === message.value.content
+	) {
+		handleCancelEdit()
+		return
+	}
+
+	try {
+		isSavingEdit.value = true
+		isUpdating.value = true
+		const res = await updateMessageService(message.value.id, editContent.value.trim())
+		const { mapMessageFromBackend } = useMessageHelpers()
+
+		if (res?.data) {
+			const updatedMessage = mapMessageFromBackend(res.data)
+			// Aktualizacja lokalna - WebSocket również zaktualizuje przez handleMessageUpdated
+			message.value.content = updatedMessage.content
+			message.value.edited = updatedMessage.edited ?? true
+			message.value.editedAt = updatedMessage.editedAt
+		}
+
+		isEditing.value = false
+		editContent.value = ''
+	} catch (error: any) {
+		const errorMessage = error?.response?._data?.message || error?.message
+		toastError(errorMessage || 'Nie udało się zaktualizować wiadomości')
+	} finally {
+		isUpdating.value = false
+		isSavingEdit.value = false
+	}
+}
 </script>
 
 <template>
@@ -358,8 +471,9 @@ function handlePinKeyDown(event: KeyboardEvent) {
 							<span class="text-xs">📌</span>
 						</button>
 						<p class="whitespace-pre-wrap break-words">{{ messageContent }}</p>
-						<p class="mt-1 text-[10px] opacity-70">
+						<p class="mt-1 text-[10px] opacity-70 flex items-center gap-1">
 							{{ formattedTime }}
+							<span v-if="isEdited" class="italic opacity-60">(edytowano)</span>
 						</p>
 					</div>
 
@@ -444,7 +558,25 @@ function handlePinKeyDown(event: KeyboardEvent) {
 						<span class="text-xs">📌</span>
 					</button>
 					<button
-						v-if="isOwnMessage && !isDeleting"
+						v-if="isOwnMessage && !isDeleting && !isEditing"
+						ref="editButtonRef"
+						type="button"
+						tabindex="0"
+						aria-label="Edytuj wiadomość"
+						class="absolute -top-2 -right-8 h-6 w-6 rounded-full bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white flex items-center justify-center transition-all duration-150 shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 z-10"
+						:class="{
+							'opacity-100': shouldShowEditButton || isButtonFocused,
+							'opacity-0': !shouldShowEditButton && !isButtonFocused
+						}"
+						@click.stop="handleEditClick"
+						@keydown="handleEditKeyDown"
+						@focus="handleEditButtonFocus"
+						@blur="handleEditButtonBlur"
+					>
+						<span class="text-xs">✏️</span>
+					</button>
+					<button
+						v-if="isOwnMessage && !isDeleting && !isEditing"
 						ref="deleteButtonRef"
 						type="button"
 						tabindex="0"
@@ -464,10 +596,52 @@ function handlePinKeyDown(event: KeyboardEvent) {
 					<p v-if="isDeleting" class="whitespace-pre-wrap break-words italic">
 						Deleting...
 					</p>
+					<template v-else-if="isEditing">
+						<textarea
+							ref="editTextareaRef"
+							v-model="editContent"
+							:disabled="isUpdating"
+							class="w-full bg-transparent text-white placeholder-white/70 resize-none focus:outline-none focus:ring-0 border-none p-0 m-0"
+							rows="3"
+							aria-label="Edytuj wiadomość"
+							@keydown="handleEditKeyDownTextarea"
+							@blur="handleCancelEdit"
+						/>
+						<div class="mt-2 flex items-center gap-2 justify-end">
+							<button
+								type="button"
+								tabindex="0"
+								aria-label="Anuluj edycję"
+								class="px-3 py-1 text-xs bg-white/20 hover:bg-white/30 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-blue-600"
+								@mousedown.prevent
+								@click.stop="handleCancelEdit"
+								@keydown="(e) => e.key === 'Enter' && handleCancelEdit()"
+							>
+								Anuluj
+							</button>
+							<button
+								type="button"
+								tabindex="0"
+								aria-label="Zapisz zmiany"
+								:disabled="
+									isUpdating ||
+									!editContent.trim() ||
+									editContent.trim() === message.content
+								"
+								class="px-3 py-1 text-xs bg-white text-blue-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-blue-600"
+								@mousedown.prevent
+								@click.stop="handleSaveEdit"
+								@keydown="(e) => e.key === 'Enter' && handleSaveEdit()"
+							>
+								{{ isUpdating ? 'Zapisywanie...' : 'Zapisz' }}
+							</button>
+						</div>
+					</template>
 					<template v-else>
 						<p class="whitespace-pre-wrap break-words">{{ messageContent }}</p>
-						<p class="mt-1 text-[10px] opacity-70">
+						<p class="mt-1 text-[10px] opacity-70 flex items-center gap-1">
 							{{ formattedTime }}
+							<span v-if="isEdited" class="italic opacity-60">(edytowano)</span>
 						</p>
 					</template>
 				</div>
