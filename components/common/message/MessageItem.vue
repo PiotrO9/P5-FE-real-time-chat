@@ -41,9 +41,8 @@ const { error: toastError } = useToast()
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
-const showDeleteButton = ref(false)
-const showEditButton = ref(false)
-const showPinButtonFlag = ref(false)
+const showActionBar = ref(false)
+const showContextMenu = ref(false)
 const isFocused = ref(false)
 const isDeleting = ref(false)
 const isEditing = ref(false)
@@ -54,11 +53,12 @@ const justClosedDialog = ref(false)
 const isReacting = ref(false)
 const isPinning = ref(false)
 const emojiTooltipRef = ref<InstanceType<typeof EmojiTooltip> | null>(null)
-const deleteButtonRef = ref<HTMLButtonElement | null>(null)
-const editButtonRef = ref<HTMLButtonElement | null>(null)
 const editTextareaRef = ref<HTMLTextAreaElement | null>(null)
-const isButtonFocused = ref(false)
+const contextMenuRef = ref<HTMLDivElement | null>(null)
+const actionBarRef = ref<HTMLDivElement | null>(null)
+const emojiTooltipContainerRef = ref<HTMLDivElement | null>(null)
 const isSavingEdit = ref(false)
+const isEmojiTooltipOpen = ref(false)
 
 const message = computed(() => props.message)
 const currentUserId = computed(() => user.value?.id ?? 0)
@@ -80,22 +80,9 @@ const avatarInitial = computed(() => {
 	return name.charAt(0).toUpperCase()
 })
 const messageContent = computed(() => message.value.content)
-const shouldShowDeleteButton = computed(() => {
-	return (
-		isOwnMessage.value &&
-		!isDeleting.value &&
-		!isEditing.value &&
-		(showDeleteButton.value || isFocused.value)
-	)
-})
-const shouldShowEditButton = computed(() => {
-	return (
-		isOwnMessage.value &&
-		!isDeleting.value &&
-		!isEditing.value &&
-		(showEditButton.value || isFocused.value)
-	)
-})
+const shouldShowActionBar = computed(
+	() => !isDeleting.value && !isEditing.value && (showActionBar.value || isFocused.value)
+)
 const isEdited = computed(() => message.value.edited === true || !!message.value.editedAt)
 const reactions = computed(() => message.value.reactions || [])
 const groupedReactions = computed<Record<string, GroupedReaction>>(() => {
@@ -128,12 +115,6 @@ const userReactions = computed(() => {
 	)
 })
 const isPinned = computed(() => message.value.isPinned ?? false)
-const showPinButton = computed(() => {
-	return (
-		!isDeleting.value &&
-		(showPinButtonFlag.value || isFocused.value || isButtonFocused.value || isPinned.value)
-	)
-})
 
 function hasUserReaction(emoji: string): boolean {
 	const reactionGroup = groupedReactions.value[emoji]
@@ -154,36 +135,19 @@ function getReactionCount(emoji: string): number {
 function handleFocus() {
 	if (!isDeleting.value) {
 		isFocused.value = true
-		showPinButtonFlag.value = true
+		showActionBar.value = true
 	}
 }
 
 function handleBlur() {
 	isFocused.value = false
-	showPinButtonFlag.value = false
-}
-
-function handleButtonFocus() {
-	isFocused.value = true
-	isButtonFocused.value = true
-}
-
-function handleButtonBlur() {
-	isFocused.value = false
-	isButtonFocused.value = false
-	showPinButtonFlag.value = false
+	showActionBar.value = false
 }
 
 function handleDeleteClick() {
 	if (!isOwnMessage.value || isDeleting.value || justClosedDialog.value) return
+	showContextMenu.value = false
 	showDeleteDialog.value = true
-}
-
-function handleDeleteKeyDown(event: KeyboardEvent) {
-	if (event.key === 'Enter' || event.key === ' ') {
-		event.preventDefault()
-		handleDeleteClick()
-	}
 }
 
 function handleConfirmDelete() {
@@ -198,7 +162,7 @@ function handleCancelDelete() {
 function resetDialogState() {
 	justClosedDialog.value = true
 	isFocused.value = false
-	isButtonFocused.value = false
+	showActionBar.value = false
 
 	nextTick(() => {
 		setTimeout(() => {
@@ -216,24 +180,42 @@ function handleDialogUpdate(open: boolean) {
 
 function handleMessageMouseEnter() {
 	if (!isDeleting.value && !isEditing.value) {
-		if (isOwnMessage.value) {
-			showDeleteButton.value = true
-			showEditButton.value = true
-		}
-		showPinButtonFlag.value = true
-		emojiTooltipRef.value?.showTooltip()
+		showActionBar.value = true
 	}
 }
 
 function handleMessageMouseLeave() {
-	showDeleteButton.value = false
-	showEditButton.value = false
-	showPinButtonFlag.value = false
-	emojiTooltipRef.value?.hideTooltip()
+	if (
+		!contextMenuRef.value?.matches(':hover') &&
+		!actionBarRef.value?.matches(':hover') &&
+		!emojiTooltipContainerRef.value?.matches(':hover') &&
+		!isEmojiTooltipOpen.value &&
+		!showContextMenu.value
+	) {
+		showActionBar.value = false
+	}
 }
 
-function handleTooltipShowChange(_show: boolean) {
-	return
+function handleActionBarMouseEnter() {
+	showActionBar.value = true
+}
+
+function handleActionBarMouseLeave() {
+	if (
+		!contextMenuRef.value?.matches(':hover') &&
+		!emojiTooltipContainerRef.value?.matches(':hover') &&
+		!isEmojiTooltipOpen.value &&
+		!showContextMenu.value
+	) {
+		showActionBar.value = false
+	}
+}
+
+function handleTooltipShowChange(show: boolean) {
+	isEmojiTooltipOpen.value = show
+	if (show) {
+		showActionBar.value = true
+	}
 }
 
 function handleReactionBadgeClick(emoji: string, event: Event) {
@@ -281,6 +263,7 @@ async function handleReactionClick(emoji: string) {
 
 async function handlePinClick() {
 	if (isPinning.value || isDeleting.value) return
+	showContextMenu.value = false
 
 	const chatId = message.value.chatId
 	const shouldUnpin = message.value.isPinned === true
@@ -335,15 +318,20 @@ async function handlePinClick() {
 	}
 }
 
-function handlePinKeyDown(event: KeyboardEvent) {
+function handleContextMenuKeyDown(event: KeyboardEvent, action: 'delete' | 'pin') {
 	if (event.key === 'Enter' || event.key === ' ') {
 		event.preventDefault()
-		handlePinClick()
+		if (action === 'delete') {
+			handleDeleteClick()
+		} else if (action === 'pin') {
+			handlePinClick()
+		}
 	}
 }
 
-function handleEditClick() {
+function _handleEditClick() {
 	if (!isOwnMessage.value || isDeleting.value || isEditing.value || justClosedDialog.value) return
+	showContextMenu.value = false
 	isEditing.value = true
 	editContent.value = message.value.content
 	nextTick(() => {
@@ -352,22 +340,30 @@ function handleEditClick() {
 	})
 }
 
-function handleEditKeyDown(event: KeyboardEvent) {
-	if (event.key === 'Enter' || event.key === ' ') {
-		event.preventDefault()
-		handleEditClick()
+function handleToggleContextMenu() {
+	showContextMenu.value = !showContextMenu.value
+	if (showContextMenu.value) {
+		showActionBar.value = true
 	}
 }
 
-function handleEditButtonFocus() {
-	isFocused.value = true
-	isButtonFocused.value = true
+function handleContextMenuMouseEnter() {
+	showContextMenu.value = true
 }
 
-function handleEditButtonBlur() {
-	isFocused.value = false
-	isButtonFocused.value = false
-	showPinButtonFlag.value = false
+function handleContextMenuMouseLeave() {
+	if (!actionBarRef.value?.matches(':hover')) {
+		showContextMenu.value = false
+	}
+}
+
+function handleEmojiButtonClick() {
+	showActionBar.value = true
+	emojiTooltipRef.value?.showTooltip()
+}
+
+function handlePlaceholderButtonClick() {
+	// Placeholder - funkcjonalność zostanie dodana w przyszłości
 }
 
 function handleCancelEdit() {
@@ -434,46 +430,129 @@ async function handleSaveEdit() {
 			>
 				{{ avatarInitial }}
 			</div>
-			<div class="min-w-0 flex-1">
-				<p class="text-xs font-medium text-gray-700 mb-1">
-					{{ senderDisplayName }}
-				</p>
-				<div
-					class="relative"
-					@mouseenter="handleMessageMouseEnter"
-					@mouseleave="handleMessageMouseLeave"
-				>
+			<div class="min-w-0 flex-1 flex items-start gap-2">
+				<div class="flex-1">
+					<p class="text-xs font-medium text-gray-700 mb-1">
+						{{ senderDisplayName }}
+					</p>
 					<div
-						class="max-w-full rounded-2xl px-4 py-2 text-sm shadow-sm text-gray-900 border rounded-bl-none relative"
-						:class="{
-							'bg-white border-gray-200': !isPinned,
-							'bg-yellow-50 border-yellow-300': isPinned
-						}"
-						:aria-label="`Message from ${senderDisplayName}${isPinned ? ' (pinned)' : ''}`"
+						class="relative flex items-center gap-2"
+						@mouseenter="handleMessageMouseEnter"
+						@mouseleave="handleMessageMouseLeave"
 					>
-						<button
-							v-if="showPinButton || isPinned"
-							type="button"
-							tabindex="0"
-							:aria-label="isPinned ? 'Unpin message' : 'Pin message'"
-							class="absolute -top-2 -right-2 h-6 w-6 rounded-full flex items-center justify-center transition-all duration-150 shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 z-10"
+						<div
+							class="max-w-full rounded-2xl px-4 py-2 text-sm shadow-sm text-gray-900 border rounded-bl-none relative"
 							:class="{
-								'opacity-100': showPinButton || isPinned,
-								'opacity-0': !showPinButton && !isPinned,
-								'bg-yellow-100 hover:bg-yellow-200 text-yellow-700': isPinned,
-								'bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700':
-									!isPinned
+								'bg-white border-gray-200': !isPinned,
+								'bg-yellow-50 border-yellow-300': isPinned
 							}"
-							@click.stop="handlePinClick"
-							@keydown="handlePinKeyDown"
+							:aria-label="`Message from ${senderDisplayName}${isPinned ? ' (pinned)' : ''}`"
 						>
-							<span class="text-xs">📌</span>
-						</button>
-						<p class="whitespace-pre-wrap break-words">{{ messageContent }}</p>
-						<p class="mt-1 text-[10px] opacity-70 flex items-center gap-1">
-							{{ formattedTime }}
-							<span v-if="isEdited" class="italic opacity-60">(edited)</span>
-						</p>
+							<p class="whitespace-pre-wrap break-words">{{ messageContent }}</p>
+							<p class="mt-1 text-[10px] opacity-70 flex items-center gap-1">
+								{{ formattedTime }}
+								<span v-if="isEdited" class="italic opacity-60">(edited)</span>
+							</p>
+						</div>
+
+						<div
+							v-if="shouldShowActionBar"
+							ref="actionBarRef"
+							class="flex items-center gap-1 transition-opacity duration-200"
+							:class="{
+								'opacity-100': shouldShowActionBar,
+								'opacity-0': !shouldShowActionBar
+							}"
+							@mouseenter="handleActionBarMouseEnter"
+							@mouseleave="handleActionBarMouseLeave"
+						>
+							<div
+								ref="emojiTooltipContainerRef"
+								class="relative"
+								@mouseenter="handleActionBarMouseEnter"
+							>
+								<button
+									type="button"
+									tabindex="0"
+									aria-label="Dodaj reakcję"
+									class="h-8 w-8 rounded-full bg-white hover:bg-gray-100 border border-gray-300 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 shadow-sm"
+									@click.stop="handleEmojiButtonClick"
+									@keydown="(e) => e.key === 'Enter' && handleEmojiButtonClick()"
+								>
+									<span class="text-base">😊</span>
+								</button>
+								<EmojiTooltip
+									ref="emojiTooltipRef"
+									:message-id="message.id"
+									:current-user-id="currentUserId"
+									:grouped-reactions="groupedReactions"
+									:user-reactions="userReactions"
+									:is-deleting="isDeleting"
+									position="left"
+									@reaction-click="handleReactionClick"
+									@show-change="handleTooltipShowChange"
+								/>
+							</div>
+							<button
+								type="button"
+								tabindex="0"
+								aria-label="Opcje"
+								class="h-8 w-8 rounded-full bg-white hover:bg-gray-100 border border-gray-300 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 shadow-sm"
+								@click.stop="handlePlaceholderButtonClick"
+								@keydown="
+									(e) => e.key === 'Enter' && handlePlaceholderButtonClick()
+								"
+							>
+								<span class="text-base">↩️</span>
+							</button>
+							<div class="relative">
+								<button
+									type="button"
+									tabindex="0"
+									aria-label="Menu kontekstowe"
+									class="h-8 w-8 rounded-full bg-white hover:bg-gray-100 border border-gray-300 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 shadow-sm"
+									@click.stop="handleToggleContextMenu"
+									@keydown="
+										(e) =>
+											(e.key === 'Enter' || e.key === ' ') &&
+											handleToggleContextMenu()
+									"
+								>
+									<Icon name="context-menu-dots" class="h-4 w-4" />
+								</button>
+								<div
+									v-if="showContextMenu"
+									ref="contextMenuRef"
+									class="absolute bottom-full left-0 mb-1 bg-white rounded-lg shadow-lg border border-gray-200 z-50 min-w-40 overflow-hidden"
+									@mouseenter="handleContextMenuMouseEnter"
+									@mouseleave="handleContextMenuMouseLeave"
+								>
+									<button
+										v-if="isOwnMessage"
+										type="button"
+										tabindex="0"
+										aria-label="Usuń wiadomość"
+										class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset"
+										@click.stop="handleDeleteClick"
+										@keydown="(e) => handleContextMenuKeyDown(e, 'delete')"
+									>
+										Usuń
+									</button>
+									<button
+										type="button"
+										tabindex="0"
+										:aria-label="
+											isPinned ? 'Odepnij wiadomość' : 'Przypnij wiadomość'
+										"
+										class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset"
+										@click.stop="handlePinClick"
+										@keydown="(e) => handleContextMenuKeyDown(e, 'pin')"
+									>
+										{{ isPinned ? 'Odepnij' : 'Przypnij' }}
+									</button>
+								</div>
+							</div>
+						</div>
 					</div>
 
 					<div v-if="hasReactions" class="flex flex-wrap gap-1 mt-1 px-1">
@@ -496,18 +575,6 @@ async function handleSaveEdit() {
 							}}</span>
 						</button>
 					</div>
-
-					<EmojiTooltip
-						ref="emojiTooltipRef"
-						:message-id="message.id"
-						:current-user-id="currentUserId"
-						:grouped-reactions="groupedReactions"
-						:user-reactions="userReactions"
-						:is-deleting="isDeleting"
-						position="left"
-						@reaction-click="handleReactionClick"
-						@show-change="handleTooltipShowChange"
-					/>
 				</div>
 			</div>
 		</div>
@@ -524,7 +591,102 @@ async function handleSaveEdit() {
 			<p class="text-xs font-medium text-gray-700 mb-1 mr-2">
 				{{ senderDisplayName }}
 			</p>
-			<div class="relative">
+			<div class="relative flex items-center gap-2">
+				<div
+					v-if="shouldShowActionBar"
+					ref="actionBarRef"
+					class="flex items-center gap-1 transition-opacity duration-200"
+					:class="{
+						'opacity-100': shouldShowActionBar,
+						'opacity-0': !shouldShowActionBar
+					}"
+					@mouseenter="handleActionBarMouseEnter"
+					@mouseleave="handleActionBarMouseLeave"
+				>
+					<div
+						ref="emojiTooltipContainerRef"
+						class="relative"
+						@mouseenter="handleActionBarMouseEnter"
+					>
+						<button
+							type="button"
+							tabindex="0"
+							aria-label="Dodaj reakcję"
+							class="h-8 w-8 rounded-full bg-white hover:bg-gray-100 border border-gray-300 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 shadow-sm"
+							@click.stop="handleEmojiButtonClick"
+							@keydown="(e) => e.key === 'Enter' && handleEmojiButtonClick()"
+						>
+							<span class="text-base">😊</span>
+						</button>
+						<EmojiTooltip
+							ref="emojiTooltipRef"
+							:message-id="message.id"
+							:current-user-id="currentUserId"
+							:grouped-reactions="groupedReactions"
+							:user-reactions="userReactions"
+							:is-deleting="isDeleting"
+							position="right"
+							@reaction-click="handleReactionClick"
+							@show-change="handleTooltipShowChange"
+						/>
+					</div>
+					<button
+						type="button"
+						tabindex="0"
+						aria-label="Opcje"
+						class="h-8 w-8 rounded-full bg-white hover:bg-gray-100 border border-gray-300 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 shadow-sm"
+						@click.stop="handlePlaceholderButtonClick"
+						@keydown="(e) => e.key === 'Enter' && handlePlaceholderButtonClick()"
+					>
+						<span class="text-base">↩️</span>
+					</button>
+					<div class="relative">
+						<button
+							type="button"
+							tabindex="0"
+							aria-label="Menu kontekstowe"
+							class="h-8 w-8 rounded-full bg-white hover:bg-gray-100 border border-gray-300 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 shadow-sm"
+							@click.stop="handleToggleContextMenu"
+							@keydown="
+								(e) =>
+									(e.key === 'Enter' || e.key === ' ') &&
+									handleToggleContextMenu()
+							"
+						>
+							<Icon name="context-menu-dots" class="h-4 w-4" />
+						</button>
+						<div
+							v-if="showContextMenu"
+							ref="contextMenuRef"
+							class="absolute bottom-full right-0 mb-1 bg-white rounded-lg shadow-lg border border-gray-200 z-50 min-w-40 overflow-hidden"
+							@mouseenter="handleContextMenuMouseEnter"
+							@mouseleave="handleContextMenuMouseLeave"
+						>
+							<button
+								v-if="isOwnMessage"
+								type="button"
+								tabindex="0"
+								aria-label="Usuń wiadomość"
+								class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset"
+								@click.stop="handleDeleteClick"
+								@keydown="(e) => handleContextMenuKeyDown(e, 'delete')"
+							>
+								Usuń
+							</button>
+							<button
+								type="button"
+								tabindex="0"
+								:aria-label="isPinned ? 'Odepnij wiadomość' : 'Przypnij wiadomość'"
+								class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset"
+								@click.stop="handlePinClick"
+								@keydown="(e) => handleContextMenuKeyDown(e, 'pin')"
+							>
+								{{ isPinned ? 'Odepnij' : 'Przypnij' }}
+							</button>
+						</div>
+					</div>
+				</div>
+
 				<div
 					class="relative rounded-2xl px-4 py-2 text-sm shadow-sm rounded-br-none"
 					:class="{
@@ -538,60 +700,6 @@ async function handleSaveEdit() {
 							: `Message from you${isPinned ? ' (pinned)' : ''}`
 					"
 				>
-					<button
-						v-if="showPinButton || isPinned"
-						type="button"
-						tabindex="0"
-						:aria-label="isPinned ? 'Odepnij wiadomość' : 'Przypnij wiadomość'"
-						class="absolute -top-2 -left-2 h-6 w-6 rounded-full flex items-center justify-center transition-all duration-150 shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 z-10"
-						:class="{
-							'opacity-100': showPinButton || isPinned,
-							'opacity-0': !showPinButton && !isPinned,
-							'bg-yellow-100 hover:bg-yellow-200 text-yellow-700': isPinned,
-							'bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700':
-								!isPinned
-						}"
-						@click.stop="handlePinClick"
-						@keydown="handlePinKeyDown"
-					>
-						<span class="text-xs">📌</span>
-					</button>
-					<button
-						v-if="isOwnMessage && !isDeleting && !isEditing"
-						ref="editButtonRef"
-						type="button"
-						tabindex="0"
-						aria-label="Edit message"
-						class="absolute -top-2 -right-8 h-6 w-6 rounded-full bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white flex items-center justify-center transition-all duration-150 shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 z-10"
-						:class="{
-							'opacity-100': shouldShowEditButton || isButtonFocused,
-							'opacity-0': !shouldShowEditButton && !isButtonFocused
-						}"
-						@click.stop="handleEditClick"
-						@keydown="handleEditKeyDown"
-						@focus="handleEditButtonFocus"
-						@blur="handleEditButtonBlur"
-					>
-						<span class="text-xs">✏️</span>
-					</button>
-					<button
-						v-if="isOwnMessage && !isDeleting && !isEditing"
-						ref="deleteButtonRef"
-						type="button"
-						tabindex="0"
-						aria-label="Delete message"
-						class="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-red-500 hover:bg-red-600 active:bg-red-700 text-white flex items-center justify-center transition-all duration-150 shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 z-10"
-						:class="{
-							'opacity-100': shouldShowDeleteButton || isButtonFocused,
-							'opacity-0': !shouldShowDeleteButton && !isButtonFocused
-						}"
-						@click="handleDeleteClick"
-						@keydown="handleDeleteKeyDown"
-						@focus="handleButtonFocus"
-						@blur="handleButtonBlur"
-					>
-						<Icon name="bin" class="h-3.5 w-3.5" />
-					</button>
 					<p v-if="isDeleting" class="whitespace-pre-wrap break-words italic">
 						Deleting...
 					</p>
@@ -663,18 +771,6 @@ async function handleSaveEdit() {
 						<span class="font-medium text-gray-700">{{ getReactionCount(emoji) }}</span>
 					</button>
 				</div>
-
-				<EmojiTooltip
-					ref="emojiTooltipRef"
-					:message-id="message.id"
-					:current-user-id="currentUserId"
-					:grouped-reactions="groupedReactions"
-					:user-reactions="userReactions"
-					:is-deleting="isDeleting"
-					position="right"
-					@reaction-click="handleReactionClick"
-					@show-change="handleTooltipShowChange"
-				/>
 			</div>
 		</div>
 
