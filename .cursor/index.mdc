@@ -49,3 +49,17 @@ Use section-separating comments:
 // 👉 Watchers
 // 👉 Lifecycle
 ```
+
+**Always use `function` declarations instead of arrow functions for methods and event handlers:**
+
+✅ **Preferred:**
+function handleClick() {
+// ...
+}
+
+function handleKeyDown(event: KeyboardEvent) {
+// ...
+}❌ **Avoid:**
+const handleClick = () => {
+// ...
+}
