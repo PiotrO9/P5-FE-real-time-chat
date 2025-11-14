@@ -6,7 +6,7 @@ export function useNativeWebSocket(url: string) {
 			retries: 3,
 			delay: 1000,
 			onFailed() {
-				console.error('Nie udało się połączyć z WebSocket po 3 próbach')
+				console.error('Failed to connect to WebSocket after 3 attempts')
 			}
 		},
 		heartbeat: {

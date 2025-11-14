@@ -25,15 +25,15 @@ export default defineNuxtPlugin(() => {
 	})
 
 	socket.on('connect', () => {
-		console.log('WebSocket połączony:', socket.id)
+		console.log('WebSocket connected:', socket.id)
 	})
 
 	socket.on('disconnect', () => {
-		console.log('WebSocket rozłączony')
+		console.log('WebSocket disconnected')
 	})
 
 	socket.on('connect_error', (error) => {
-		console.error('Błąd połączenia WebSocket:', error.message)
+		console.error('WebSocket connection error:', error.message)
 	})
 
 	return {

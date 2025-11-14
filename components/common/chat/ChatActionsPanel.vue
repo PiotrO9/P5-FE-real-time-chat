@@ -433,13 +433,13 @@ onUnmounted(() => {
 			<div class="flex-1 overflow-y-auto bg-white rounded-b-[1.125rem]">
 				<div class="p-4 border-b border-gray-200">
 					<h3 class="text-sm font-semibold text-gray-900 mb-3">
-						Przypięte wiadomości ({{ pinnedMessagesList.length }})
+						Pinned messages ({{ pinnedMessagesList.length }})
 					</h3>
 					<div v-if="pinnedMessagesLoading" class="text-sm text-gray-600">
-						Ładowanie...
+						Loading...
 					</div>
 					<div v-else-if="pinnedMessagesList.length === 0" class="text-sm text-gray-500">
-						Brak przypiętych wiadomości
+						No pinned messages
 					</div>
 					<div v-else class="space-y-2 max-h-96 overflow-y-auto">
 						<button
@@ -447,7 +447,7 @@ onUnmounted(() => {
 							:key="pinnedMessage.id"
 							type="button"
 							tabindex="0"
-							:aria-label="`Przejdź do wiadomości od ${pinnedMessage.senderUsername}`"
+							:aria-label="`Go to message from ${pinnedMessage.senderUsername}`"
 							class="w-full text-left px-3 py-2.5 text-xs rounded-lg hover:bg-gray-100 transition-colors border border-gray-200"
 							@click="handlePinnedMessageClick(pinnedMessage.id)"
 							@keydown.enter="handlePinnedMessageClick(pinnedMessage.id)"
@@ -462,7 +462,7 @@ onUnmounted(() => {
 											v-if="pinnedMessage.pinnedBy"
 											class="text-gray-400 text-[10px]"
 										>
-											przypięte przez {{ pinnedMessage.pinnedBy.username }}
+											pinned by {{ pinnedMessage.pinnedBy.username }}
 										</span>
 									</div>
 									<p class="text-gray-600 line-clamp-2 mb-1">
@@ -473,7 +473,7 @@ onUnmounted(() => {
 											{{ formatMessageTime(pinnedMessage.createdAt) }}
 										</p>
 										<span v-if="pinnedMessage.pinnedAt" class="text-[10px]">
-											• przypięte
+											• pinned
 											{{ formatMessageTime(pinnedMessage.pinnedAt) }}
 										</span>
 									</div>

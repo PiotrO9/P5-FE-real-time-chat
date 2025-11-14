@@ -28,31 +28,31 @@ const reactionsContainerRef = ref<HTMLDivElement | null>(null)
 
 const groupedEmojiCategories = [
 	{
-		label: 'Szybkie',
+		label: 'Quick',
 		emojis: ['👍', '❤️', '😄', '😮', '😢', '🙏']
 	},
 	{
-		label: 'Pozytywne',
+		label: 'Positive',
 		emojis: ['😁', '😂', '🥳', '😎', '🤩', '😇', '😋', '🤗']
 	},
 	{
-		label: 'Negatywne',
+		label: 'Negative',
 		emojis: ['😕', '😞', '😡', '😠', '😭', '🤬', '😤', '😢']
 	},
 	{
-		label: 'Gesty',
+		label: 'Gestures',
 		emojis: ['👍', '👎', '👏', '🙌', '🤝', '🤞', '✌️', '👊']
 	},
 	{
-		label: 'Emocje',
+		label: 'Emotions',
 		emojis: ['😅', '🤔', '😳', '😬', '🥹', '😴', '🤯', '🥶']
 	},
 	{
-		label: 'Zwierzęta',
+		label: 'Animals',
 		emojis: ['🐶', '🐱', '🐻', '🦊', '🐸', '🐼', '🐧', '🦄']
 	},
 	{
-		label: 'Symbole',
+		label: 'Symbols',
 		emojis: ['⭐', '🔥', '💯', '✨', '⚡', '🎯', '🎉', '💎']
 	}
 ]

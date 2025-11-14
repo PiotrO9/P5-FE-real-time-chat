@@ -45,7 +45,7 @@ function handleKeyDown(event: KeyboardEvent) {
 		v-if="hasMessage"
 		type="button"
 		tabindex="0"
-		aria-label="Otwórz przypięte wiadomości"
+		aria-label="Open pinned messages"
 		class="w-full px-4 py-3 bg-yellow-50 border-l-4 border-yellow-400 hover:bg-yellow-100 transition-colors text-left"
 		@click="handleClick"
 		@keydown="handleKeyDown"

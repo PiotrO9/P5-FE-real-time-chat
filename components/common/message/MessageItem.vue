@@ -192,7 +192,7 @@ function handleConfirmDelete() {
 }
 
 function handleCancelDelete() {
-	// Cancel delete action
+	return
 }
 
 function resetDialogState() {
@@ -233,7 +233,7 @@ function handleMessageMouseLeave() {
 }
 
 function handleTooltipShowChange(_show: boolean) {
-	// Tooltip show state changed
+	return
 }
 
 function handleReactionBadgeClick(emoji: string, event: Event) {
@@ -273,7 +273,7 @@ async function handleReactionClick(emoji: string) {
 			emit('reaction-updated', message.value.id, emoji, 'add')
 		}
 	} catch {
-		// Error handled by emit
+		return
 	} finally {
 		isReacting.value = false
 	}
@@ -329,7 +329,7 @@ async function handlePinClick() {
 		}
 	} catch (error: any) {
 		const errorMessage = error?.response?._data?.message || error?.message
-		toastError(errorMessage || 'Nie udało się zaktualizować przypięcia')
+		toastError(errorMessage || 'Failed to update pin status')
 	} finally {
 		isPinning.value = false
 	}
@@ -404,7 +404,6 @@ async function handleSaveEdit() {
 
 		if (res?.data) {
 			const updatedMessage = mapMessageFromBackend(res.data)
-			// Aktualizacja lokalna - WebSocket również zaktualizuje przez handleMessageUpdated
 			message.value.content = updatedMessage.content
 			message.value.edited = updatedMessage.edited ?? true
 			message.value.editedAt = updatedMessage.editedAt
@@ -414,7 +413,7 @@ async function handleSaveEdit() {
 		editContent.value = ''
 	} catch (error: any) {
 		const errorMessage = error?.response?._data?.message || error?.message
-		toastError(errorMessage || 'Nie udało się zaktualizować wiadomości')
+		toastError(errorMessage || 'Failed to update message')
 	} finally {
 		isUpdating.value = false
 		isSavingEdit.value = false
@@ -450,13 +449,13 @@ async function handleSaveEdit() {
 							'bg-white border-gray-200': !isPinned,
 							'bg-yellow-50 border-yellow-300': isPinned
 						}"
-						:aria-label="`Message from ${senderDisplayName}${isPinned ? ' (przypięta)' : ''}`"
+						:aria-label="`Message from ${senderDisplayName}${isPinned ? ' (pinned)' : ''}`"
 					>
 						<button
 							v-if="showPinButton || isPinned"
 							type="button"
 							tabindex="0"
-							:aria-label="isPinned ? 'Odepnij wiadomość' : 'Przypnij wiadomość'"
+							:aria-label="isPinned ? 'Unpin message' : 'Pin message'"
 							class="absolute -top-2 -right-2 h-6 w-6 rounded-full flex items-center justify-center transition-all duration-150 shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 z-10"
 							:class="{
 								'opacity-100': showPinButton || isPinned,
@@ -473,7 +472,7 @@ async function handleSaveEdit() {
 						<p class="whitespace-pre-wrap break-words">{{ messageContent }}</p>
 						<p class="mt-1 text-[10px] opacity-70 flex items-center gap-1">
 							{{ formattedTime }}
-							<span v-if="isEdited" class="italic opacity-60">(edytowano)</span>
+							<span v-if="isEdited" class="italic opacity-60">(edited)</span>
 						</p>
 					</div>
 
@@ -536,7 +535,7 @@ async function handleSaveEdit() {
 					:aria-label="
 						isDeleting
 							? 'Deleting message...'
-							: `Message from you${isPinned ? ' (przypięta)' : ''}`
+							: `Message from you${isPinned ? ' (pinned)' : ''}`
 					"
 				>
 					<button
@@ -562,7 +561,7 @@ async function handleSaveEdit() {
 						ref="editButtonRef"
 						type="button"
 						tabindex="0"
-						aria-label="Edytuj wiadomość"
+						aria-label="Edit message"
 						class="absolute -top-2 -right-8 h-6 w-6 rounded-full bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white flex items-center justify-center transition-all duration-150 shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 z-10"
 						:class="{
 							'opacity-100': shouldShowEditButton || isButtonFocused,
@@ -603,7 +602,7 @@ async function handleSaveEdit() {
 							:disabled="isUpdating"
 							class="w-full bg-transparent text-white placeholder-white/70 resize-none focus:outline-none focus:ring-0 border-none p-0 m-0"
 							rows="3"
-							aria-label="Edytuj wiadomość"
+							aria-label="Edit message"
 							@keydown="handleEditKeyDownTextarea"
 							@blur="handleCancelEdit"
 						/>
@@ -611,18 +610,18 @@ async function handleSaveEdit() {
 							<button
 								type="button"
 								tabindex="0"
-								aria-label="Anuluj edycję"
+								aria-label="Cancel edit"
 								class="px-3 py-1 text-xs bg-white/20 hover:bg-white/30 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-blue-600"
 								@mousedown.prevent
 								@click.stop="handleCancelEdit"
 								@keydown="(e) => e.key === 'Enter' && handleCancelEdit()"
 							>
-								Anuluj
+								Cancel
 							</button>
 							<button
 								type="button"
 								tabindex="0"
-								aria-label="Zapisz zmiany"
+								aria-label="Save changes"
 								:disabled="
 									isUpdating ||
 									!editContent.trim() ||
@@ -633,7 +632,7 @@ async function handleSaveEdit() {
 								@click.stop="handleSaveEdit"
 								@keydown="(e) => e.key === 'Enter' && handleSaveEdit()"
 							>
-								{{ isUpdating ? 'Zapisywanie...' : 'Zapisz' }}
+								{{ isUpdating ? 'Saving...' : 'Save' }}
 							</button>
 						</div>
 					</template>
@@ -641,7 +640,7 @@ async function handleSaveEdit() {
 						<p class="whitespace-pre-wrap break-words">{{ messageContent }}</p>
 						<p class="mt-1 text-[10px] opacity-70 flex items-center gap-1">
 							{{ formattedTime }}
-							<span v-if="isEdited" class="italic opacity-60">(edytowano)</span>
+							<span v-if="isEdited" class="italic opacity-60">(edited)</span>
 						</p>
 					</template>
 				</div>
@@ -652,7 +651,7 @@ async function handleSaveEdit() {
 						:key="emoji"
 						type="button"
 						tabindex="0"
-						:aria-label="`${getReactionCount(emoji)} reakcji ${emoji}, kliknij aby ${hasUserReaction(emoji) ? 'usunąć' : 'dodać'} reakcję`"
+						:aria-label="`${getReactionCount(emoji)} reactions ${emoji}, click to ${hasUserReaction(emoji) ? 'remove' : 'add'} reaction`"
 						class="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-gray-100 hover:bg-gray-200 border border-gray-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
 						:class="{
 							'bg-blue-100 border-blue-300': hasUserReaction(emoji)

@@ -143,29 +143,26 @@ Zmień adres na adres swojego serwera backend.
 
 ```typescript
 const {
-	user, // Dane zalogowanego użytkownika
-	isAuthenticated, // Czy użytkownik jest zalogowany
-	isLoading, // Stan ładowania
-	error, // Błąd autentykacji
-	login, // Funkcja logowania
-	register, // Funkcja rejestracji
-	logout, // Funkcja wylogowania
-	checkAuth, // Sprawdź stan autentykacji
-	refreshToken, // Odśwież token
-	clearError // Wyczyść błąd
+	user,
+	isAuthenticated,
+	isLoading,
+	error,
+	login,
+	register,
+	logout,
+	checkAuth,
+	refreshToken,
+	clearError
 } = useAuth()
 
-// Logowanie
 await login({ email: 'user@example.com', password: 'password' })
 
-// Rejestracja
 await register({
 	email: 'user@example.com',
 	username: 'username',
 	password: 'password'
 })
 
-// Wylogowanie
 await logout()
 ```
 
@@ -175,28 +172,23 @@ await logout()
 const {
 	isLoading,
 	error,
-	getUserProfile, // Pobierz profil użytkownika
-	getAllUsers, // Pobierz listę użytkowników
-	getUserStatus, // Pobierz status użytkownika
-	updateProfile, // Aktualizuj profil
-	updatePassword, // Zmień hasło
-	deleteUser, // Usuń konto
+	getUserProfile,
+	getAllUsers,
+	getUserStatus,
+	updateProfile,
+	updatePassword,
+	deleteUser,
 	clearError
 } = useUser()
 
-// Pobierz profil
 const user = await getUserProfile('user-id')
 
-// Lista użytkowników
 const response = await getAllUsers(1, 10)
 
-// Status użytkownika
 const status = await getUserStatus('user-id')
 
-// Aktualizuj profil
 await updateProfile('user-id', { username: 'newname' })
 
-// Zmień hasło
 await updatePassword('user-id', {
 	currentPassword: 'old',
 	newPassword: 'new'
@@ -208,13 +200,11 @@ await updatePassword('user-id', {
 ```typescript
 const { toasts, success, error, info, warning, clear } = useToast()
 
-// Pokaż powiadomienie
 success('Operacja zakończona sukcesem!')
 error('Wystąpił błąd')
 info('Informacja')
 warning('Ostrzeżenie')
 
-// Wyczyść wszystkie powiadomienia
 clear()
 ```
 
@@ -223,21 +213,16 @@ clear()
 ### Socket.IO
 
 ```typescript
-// W komponencie
 const { connect, disconnect, emit, on, isConnected } = useSocket()
 
-// Połącz
 connect()
 
-// Wyślij wiadomość
 emit('message', { text: 'Hello' })
 
-// Nasłuchuj wiadomości
 on('message', (data) => {
 	console.log('Otrzymano:', data)
 })
 
-// Rozłącz
 disconnect()
 ```
 
@@ -246,10 +231,8 @@ disconnect()
 ```typescript
 const { status, data, send, open, close } = useNativeWebSocket('ws://localhost:8080')
 
-// Wyślij wiadomość
 send('Hello')
 
-// Status: 'CONNECTING' | 'OPEN' | 'CLOSING' | 'CLOSED'
 watch(status, (newStatus) => {
 	console.log('Status:', newStatus)
 })
