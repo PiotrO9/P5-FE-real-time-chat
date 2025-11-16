@@ -143,13 +143,44 @@ export function useMessages(chats: Ref<Chat[]>, _selectedChatId: Ref<string | nu
 		const chat = chats.value.find((c) => String(c.id) === String(chatId))
 		if (!chat) return false
 
-		const exists = chat.messages.find((m) => String(m.id) === String(message.id))
-		if (!exists) {
-			chat.messages.push(message)
-			chat.lastMessage = message
+		const messageIndex = chat.messages.findIndex((m) => String(m.id) === String(message.id))
+
+		if (messageIndex !== -1) {
+			// Wiadomość już istnieje - aktualizuj ją z pełnymi danymi z WebSocket
+			const existingMessage = chat.messages[messageIndex]
+			if (existingMessage) {
+				existingMessage.content = message.content
+				existingMessage.senderUsername = message.senderUsername
+				existingMessage.reactions = message.reactions
+				existingMessage.createdAt = message.createdAt
+				existingMessage.isPinned = message.isPinned ?? false
+				existingMessage.pinnedBy = message.pinnedBy
+				existingMessage.pinnedAt = message.pinnedAt
+				existingMessage.edited = message.edited ?? false
+				existingMessage.editedAt = message.editedAt
+				existingMessage.replyTo = message.replyTo
+			}
+
+			// Aktualizuj lastMessage jeśli to jest ostatnia wiadomość
+			if (chat.lastMessage && String(chat.lastMessage.id) === String(message.id)) {
+				chat.lastMessage.content = message.content
+				chat.lastMessage.senderUsername = message.senderUsername
+				chat.lastMessage.reactions = message.reactions
+				chat.lastMessage.isPinned = message.isPinned ?? false
+				chat.lastMessage.pinnedBy = message.pinnedBy
+				chat.lastMessage.pinnedAt = message.pinnedAt
+				chat.lastMessage.edited = message.edited ?? false
+				chat.lastMessage.editedAt = message.editedAt
+				chat.lastMessage.replyTo = message.replyTo
+			}
+
 			return true
 		}
-		return false
+
+		// Nowa wiadomość - dodaj ją
+		chat.messages.push(message)
+		chat.lastMessage = message
+		return true
 	}
 
 	function updateMessage(chatId: string, message: Message) {
@@ -178,8 +209,12 @@ export function useMessages(chats: Ref<Chat[]>, _selectedChatId: Ref<string | nu
 				chat.lastMessage.pinnedBy = message.pinnedBy
 				chat.lastMessage.pinnedAt = message.pinnedAt
 				chat.lastMessage.content = message.content
+				chat.lastMessage.senderUsername = message.senderUsername
+				chat.lastMessage.reactions = message.reactions
+				chat.lastMessage.createdAt = message.createdAt
 				chat.lastMessage.edited = message.edited ?? false
 				chat.lastMessage.editedAt = message.editedAt
+				chat.lastMessage.replyTo = message.replyTo
 			}
 		}
 	}

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Message } from '~/types/Chat'
+import { nextTick } from 'vue'
 
 interface Props {
 	modelValue: string
@@ -15,6 +16,7 @@ interface Emits {
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
+const textareaRef = ref<HTMLTextAreaElement | null>(null)
 const hasReplyTo = computed(() => !!props.replyTo)
 
 function handleInput(event: Event) {
@@ -42,6 +44,24 @@ function handleSubmit() {
 function handleCancelReply() {
 	emit('cancel-reply')
 }
+
+function focusTextarea() {
+	nextTick(() => {
+		if (textareaRef.value) {
+			textareaRef.value.focus()
+		}
+	})
+}
+
+watch(
+	() => props.replyTo,
+	(newValue, oldValue) => {
+		// Gdy replyTo zmienia się z null na wartość (czyli użytkownik kliknął odpowiedź)
+		if (newValue && !oldValue) {
+			focusTextarea()
+		}
+	}
+)
 </script>
 
 <template>
@@ -72,13 +92,11 @@ function handleCancelReply() {
 				<Icon name="remove" class="h-4 w-4 text-gray-600" />
 			</button>
 		</div>
-		<form
-			class="md:px-3 py-3 flex items-end gap-3"
-			@submit.prevent="handleSubmit"
-		>
+		<form class="md:px-3 py-3 flex items-end gap-3" @submit.prevent="handleSubmit">
 			<label for="message" class="sr-only">Message</label>
 			<textarea
 				id="message"
+				ref="textareaRef"
 				:aria-label="'Message'"
 				:tabindex="0"
 				:rows="1"
