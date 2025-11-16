@@ -40,6 +40,13 @@ const typingText = computed(() => {
 	}
 	return `${typingUsers.value[0]} and ${typingUsers.value.length - 1} others are typing...`
 })
+const senderName = computed(() => {
+	if (!lastMessage.value) return null
+
+	const currentUserId = user.value?.id ?? 0
+	const isOwnMessage = String(lastMessage.value?.senderId) === String(currentUserId)
+	return isOwnMessage ? 'You' : lastMessage.value?.senderUsername || 'Unknown'
+})
 const displayMessage = computed(() => {
 	if (hasTypingUsers.value && typingText.value) {
 		return typingText.value
@@ -49,11 +56,7 @@ const displayMessage = computed(() => {
 		return 'No messages'
 	}
 
-	const currentUserId = user.value?.id ?? 0
-	const isOwnMessage = String(lastMessage.value?.senderId) === String(currentUserId)
-	const senderName = isOwnMessage ? 'You' : lastMessage.value?.senderUsername || 'Unknown'
-
-	return `${senderName}: ${lastMessageContent.value}`
+	return lastMessageContent.value
 })
 const hasUnread = computed(() => Number(chatData.value.unreadCount) > 0)
 const itemClasses = computed(() => {
@@ -115,7 +118,8 @@ function handleKeyDown(event: KeyboardEvent) {
 					<span class="truncate">{{ typingText }}</span>
 				</div>
 				<p v-else :class="['text-sm truncate min-w-0 text-slate-600']">
-					{{ displayMessage }}
+					<span v-if="senderName" class="font-semibold">{{ senderName }}</span
+					><span v-if="senderName">: </span>{{ displayMessage }}
 				</p>
 			</div>
 			<ActionsMenu classes="chat-item-action-menu" />

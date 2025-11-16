@@ -43,6 +43,13 @@ export function useMessageHelpers() {
 				? typeof messageData.editedAt === 'string'
 					? messageData.editedAt
 					: messageData.editedAt.toISOString()
+				: undefined,
+			replyTo: messageData.replyTo
+				? {
+						id: toNumber(messageData.replyTo.id),
+						content: messageData.replyTo.content || '',
+						senderUsername: messageData.replyTo.senderUsername || ''
+					}
 				: undefined
 		}
 	}

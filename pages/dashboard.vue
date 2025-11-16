@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Message } from '~/types/Chat'
 import ChatList from '~/components/chat/ChatList.vue'
 import ChatPanel from '~/components/chat/ChatPanel.vue'
 import ChatActionsPanel from '~/components/chat/ChatActionsPanel.vue'
@@ -32,6 +33,7 @@ const reactionsComposable = useReactions(
 
 const chatPanelRef = ref<any>(null)
 const isActionsPanelOpen = ref(false)
+const replyToMessage = ref<Message | null>(null)
 
 const searchQuery = computed({
 	get: () => chatsComposable.searchQuery.value,
@@ -43,7 +45,12 @@ const searchQuery = computed({
 watch(currentChat, (newChat) => {
 	if (!newChat) {
 		isActionsPanelOpen.value = false
+		replyToMessage.value = null
 	}
+})
+
+watch(chatsComposable.selectedChatId, () => {
+	replyToMessage.value = null
 })
 
 const currentTypingUsers = computed(() => {
@@ -203,7 +210,9 @@ async function handleSendMessage() {
 
 	typingUsersComposable.handleMessageSent(chat.id, emit)
 
-	await messagesComposable.sendMessage(chat.id, text)
+	const replyToId = replyToMessage.value?.id
+	await messagesComposable.sendMessage(chat.id, text, replyToId)
+	replyToMessage.value = null
 	nextTick(() => handleScrollToBottom())
 }
 
@@ -220,6 +229,18 @@ function handleReactionUpdated(
 	action: 'add' | 'remove'
 ) {
 	reactionsComposable.handleReactionUpdated(messageId, emoji, action)
+}
+
+function handleReply(message: Message) {
+	replyToMessage.value = message
+}
+
+function handleCancelReply() {
+	replyToMessage.value = null
+}
+
+function handleScrollToMessage(_messageId: string | number) {
+	// Event jest obsługiwany w ChatPanel
 }
 
 function handlePinUpdated(messageId: string | number, isPinned: boolean) {
@@ -502,17 +523,21 @@ onUnmounted(() => {
 							@delete-message="handleDeleteMessage"
 							@reaction-updated="handleReactionUpdated"
 							@pin-updated="handlePinUpdated"
+							@reply="handleReply"
+							@scroll-to-message="handleScrollToMessage"
 							@open-pinned-messages="handleOpenPinnedMessages"
 							@toggle-actions="isActionsPanelOpen = !isActionsPanelOpen"
 						/>
 						<template v-if="chatsComposable.selectedChat.value">
 							<MessageForm
 								:model-value="messagesComposable.newMessageText.value"
+								:reply-to="replyToMessage"
 								@update:model-value="
 									(val: string) => (messagesComposable.newMessageText.value = val)
 								"
 								@submit="handleSendMessage"
 								@typing="handleTypingInput"
+								@cancel-reply="handleCancelReply"
 							/>
 						</template>
 					</div>

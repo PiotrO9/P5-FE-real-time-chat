@@ -40,6 +40,11 @@ export type Message = {
 	pinnedAt?: string
 	edited?: boolean
 	editedAt?: string
+	replyTo?: {
+		id: number | string
+		content: string
+		senderUsername: string
+	}
 }
 
 export type Chat = {

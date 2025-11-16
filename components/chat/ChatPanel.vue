@@ -21,6 +21,8 @@ interface Emits {
 		action: 'add' | 'remove'
 	): void
 	(e: 'pin-updated', messageId: string | number, isPinned: boolean): void
+	(e: 'reply', message: Chat['messages'][0]): void
+	(e: 'scroll-to-message', messageId: string | number): void
 }
 
 const chatStore = useChatStore()
@@ -29,6 +31,7 @@ const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const messagesContainerRef = ref<HTMLDivElement | null>(null)
+const highlightedMessageId = ref<string | number | null>(null)
 
 const selectedChat = computed(() => props.selectedChat)
 const canLoadMore = computed(() => props.canLoadMore ?? false)
@@ -100,6 +103,24 @@ function handlePinUpdated(messageId: string | number, isPinned: boolean) {
 	emit('pin-updated', messageId, isPinned)
 }
 
+function handleReply(message: Chat['messages'][0]) {
+	emit('reply', message)
+}
+
+function handleScrollToMessage(messageId: string | number) {
+	const messageElement = messagesContainerRef.value?.querySelector(
+		`[data-message-id="${messageId}"]`
+	)
+	if (messageElement) {
+		messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+		highlightedMessageId.value = messageId
+		setTimeout(() => {
+			highlightedMessageId.value = null
+		}, 2000)
+	}
+	emit('scroll-to-message', messageId)
+}
+
 function handleOpenPinnedMessages() {
 	emit('open-pinned-messages')
 }
@@ -133,9 +154,12 @@ defineExpose({ scrollToBottom })
 			<MessageList
 				v-else
 				:messages="messages"
+				:highlighted-message-id="highlightedMessageId"
 				@delete-message="handleDeleteMessage"
 				@reaction-updated="handleReactionUpdated"
 				@pin-updated="handlePinUpdated"
+				@reply="handleReply"
+				@scroll-to-message="handleScrollToMessage"
 			/>
 		</div>
 

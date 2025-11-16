@@ -17,10 +17,16 @@ export async function fetchMessages(chatId: string, limit: number, offset: numbe
 	)
 }
 
-export async function sendMessage(chatId: string, content: string) {
-	return await useApi<ApiResponse<Message>>('POST', `/api/messages/${chatId}/messages`, {
-		content
-	})
+export async function sendMessage(
+	chatId: string,
+	content: string,
+	replyToId?: string | number
+) {
+	const body: { content: string; replyToId?: string | number } = { content }
+	if (replyToId !== undefined) {
+		body.replyToId = replyToId
+	}
+	return await useApi<ApiResponse<Message>>('POST', `/api/messages/${chatId}/messages`, body)
 }
 
 export async function deleteMessage(messageId: string | number) {

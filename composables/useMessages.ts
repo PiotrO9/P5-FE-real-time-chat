@@ -96,9 +96,9 @@ export function useMessages(chats: Ref<Chat[]>, _selectedChatId: Ref<string | nu
 		}
 	}
 
-	async function sendMessage(chatId: string, content: string) {
+	async function sendMessage(chatId: string, content: string, replyToId?: string | number) {
 		try {
-			const res = await sendMessageToService(chatId, content)
+			const res = await sendMessageToService(chatId, content, replyToId)
 			const saved = res.data as unknown as Message
 
 			const chat = chats.value.find((c) => c.id === chatId)
@@ -170,6 +170,7 @@ export function useMessages(chats: Ref<Chat[]>, _selectedChatId: Ref<string | nu
 				existingMessage.createdAt = message.createdAt
 				existingMessage.edited = message.edited ?? false
 				existingMessage.editedAt = message.editedAt
+				existingMessage.replyTo = message.replyTo
 			}
 
 			if (chat.lastMessage && String(chat.lastMessage.id) === String(message.id)) {
