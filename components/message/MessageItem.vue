@@ -62,7 +62,7 @@ const isEmojiTooltipOpen = ref(false)
 
 const message = computed(() => props.message)
 const currentUserId = computed(() => user.value?.id ?? 0)
-const isOwnMessage = computed(() => message.value.senderId === currentUserId.value)
+const isOwnMessage = computed(() => String(message.value.senderId) === String(currentUserId.value))
 const senderDisplayName = computed(() => {
 	if (isOwnMessage.value) {
 		return 'You'

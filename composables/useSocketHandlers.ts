@@ -30,6 +30,11 @@ export function useSocketHandlers(
 
 		const mappedMessage = mapMessageFromBackend(data.message)
 
+		// Ignoruj wiadomości od aktualnego użytkownika - zostały już dodane w sendMessage
+		if (String(mappedMessage.senderId) === String(currentUserId.value)) {
+			return
+		}
+
 		if (messages.addMessage(chatId, mappedMessage)) {
 			if (selectedChatId.value !== chat.id) {
 				chatsComposable.incrementUnreadCount(chatId)
