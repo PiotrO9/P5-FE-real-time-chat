@@ -8,6 +8,7 @@ import {
 	updateMessage as updateMessageService
 } from '~/services/chatService'
 import EmojiTooltip from '~/components/ui/EmojiTooltip.vue'
+import ReplyPreview from '~/components/message/ReplyPreview.vue'
 
 interface GroupedReaction {
 	userIds: (string | number)[]
@@ -437,35 +438,21 @@ async function handleSaveEdit() {
 		:data-message-id="message.id"
 	>
 		<div
-			v-if="hasReplyTo && message.replyTo"
-			class="w-full flex -mb-2 -translate-y-1"
-			:class="isOwnMessage ? 'justify-end' : 'justify-start'"
+			v-if="isOwnMessage && hasReplyTo && message.replyTo"
+			class="w-full flex -mb-2"
+			:class="
+				isOwnMessage
+					? 'justify-end -translate-y-1'
+					: 'justify-start translate-x-10 translate-y-4'
+			"
 		>
-			<button
-				type="button"
-				tabindex="0"
-				aria-label="Przejdź do oryginalnej wiadomości"
-				class="flex flex-col gap-0.5 max-w-[85%] bg-gray-300 rounded-lg p-2 text-gray-500 hover:text-gray-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 cursor-pointer"
-				:class="isOwnMessage ? 'items-end' : 'items-start'"
+			<ReplyPreview
+				:reply-to="message.replyTo"
+				:is-own-message="isOwnMessage"
+				:reply-to-sender-name="replyToSenderName"
+				variant="own"
 				@click="handleReplyToClick"
-				@keydown="(e) => (e.key === 'Enter' || e.key === ' ') && handleReplyToClick(e)"
-			>
-				<div class="flex items-center gap-1.5">
-					<span class="text-[11px] text-gray-500">
-						{{ isOwnMessage ? 'Odpowiedziałeś' : 'Odpowiedział' }}
-					</span>
-					<span class="text-[11px] font-medium text-gray-600">
-						{{ replyToSenderName }}
-					</span>
-				</div>
-				<p
-					v-if="message.replyTo.content"
-					class="text-[11px] text-gray-500 line-clamp-1 max-w-full break-words"
-					:class="isOwnMessage ? 'text-right' : 'text-left'"
-				>
-					{{ message.replyTo.content }}
-				</p>
-			</button>
+			/>
 		</div>
 		<div
 			class="w-full flex relative z-10"
@@ -483,6 +470,18 @@ async function handleSaveEdit() {
 						<p class="text-xs font-medium text-gray-700 mb-1">
 							{{ senderDisplayName }}
 						</p>
+						<div
+							v-if="!isOwnMessage && hasReplyTo && message.replyTo"
+							class="translate-y-2"
+						>
+							<ReplyPreview
+								:reply-to="message.replyTo"
+								:is-own-message="isOwnMessage"
+								:reply-to-sender-name="replyToSenderName"
+								variant="other"
+								@click="handleReplyToClick"
+							/>
+						</div>
 						<div
 							class="relative flex items-center gap-2"
 							@mouseenter="handleMessageMouseEnter"
