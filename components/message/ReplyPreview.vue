@@ -36,7 +36,7 @@ function handleKeyDown(event: KeyboardEvent) {
 
 const replyText = computed(() => {
 	if (props.isOwnMessage) {
-		return 'Odpowiedziałeś'
+		return 'Answered by'
 	}
 	return 'Answered by'
 })

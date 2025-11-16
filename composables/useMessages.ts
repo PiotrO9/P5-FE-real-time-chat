@@ -147,38 +147,44 @@ export function useMessages(chats: Ref<Chat[]>, _selectedChatId: Ref<string | nu
 
 		if (messageIndex !== -1) {
 			// Wiadomość już istnieje - aktualizuj ją z pełnymi danymi z WebSocket
+			// Używamy Object.assign aby Vue wykryło zmiany w zagnieżdżonych obiektach
 			const existingMessage = chat.messages[messageIndex]
 			if (existingMessage) {
-				existingMessage.content = message.content
-				existingMessage.senderUsername = message.senderUsername
-				existingMessage.reactions = message.reactions
-				existingMessage.createdAt = message.createdAt
-				existingMessage.isPinned = message.isPinned ?? false
-				existingMessage.pinnedBy = message.pinnedBy
-				existingMessage.pinnedAt = message.pinnedAt
-				existingMessage.edited = message.edited ?? false
-				existingMessage.editedAt = message.editedAt
-				existingMessage.replyTo = message.replyTo
+				Object.assign(existingMessage, {
+					content: message.content,
+					senderUsername: message.senderUsername,
+					reactions: message.reactions,
+					createdAt: message.createdAt,
+					isPinned: message.isPinned ?? false,
+					pinnedBy: message.pinnedBy,
+					pinnedAt: message.pinnedAt,
+					edited: message.edited ?? false,
+					editedAt: message.editedAt,
+					replyTo: message.replyTo
+				})
 			}
 
 			// Aktualizuj lastMessage jeśli to jest ostatnia wiadomość
 			if (chat.lastMessage && String(chat.lastMessage.id) === String(message.id)) {
-				chat.lastMessage.content = message.content
-				chat.lastMessage.senderUsername = message.senderUsername
-				chat.lastMessage.reactions = message.reactions
-				chat.lastMessage.isPinned = message.isPinned ?? false
-				chat.lastMessage.pinnedBy = message.pinnedBy
-				chat.lastMessage.pinnedAt = message.pinnedAt
-				chat.lastMessage.edited = message.edited ?? false
-				chat.lastMessage.editedAt = message.editedAt
-				chat.lastMessage.replyTo = message.replyTo
+				Object.assign(chat.lastMessage, {
+					content: message.content,
+					senderUsername: message.senderUsername,
+					reactions: message.reactions,
+					isPinned: message.isPinned ?? false,
+					pinnedBy: message.pinnedBy,
+					pinnedAt: message.pinnedAt,
+					edited: message.edited ?? false,
+					editedAt: message.editedAt,
+					replyTo: message.replyTo
+				})
 			}
 
 			return true
 		}
 
 		// Nowa wiadomość - dodaj ją
-		chat.messages.push(message)
+		// Używamy spread operatora aby zapewnić reaktywność Vue
+		chat.messages = [...chat.messages, message]
 		chat.lastMessage = message
 		return true
 	}

@@ -15,7 +15,16 @@ const chatStore = useChatStore()
 const { connect, disconnect, emit } = useSocket()
 const { error: toastError } = useToast()
 
-const currentUserId = computed(() => toNumber(user.value?.id ?? 0))
+// Obsługuj zarówno UUID (string) jak i liczby
+const currentUserId = computed(() => {
+	const userId = user.value?.id
+	if (!userId) return 0
+	// Jeśli to UUID (string, który nie jest liczbą), zwróć jako string
+	if (typeof userId === 'string' && isNaN(Number(userId))) {
+		return userId
+	}
+	return toNumber(userId)
+})
 const currentChat = computed(() => chatStore.currentChatDetails)
 
 const viewModeComposable = useViewMode()

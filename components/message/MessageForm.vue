@@ -56,7 +56,6 @@ function focusTextarea() {
 watch(
 	() => props.replyTo,
 	(newValue, oldValue) => {
-		// Gdy replyTo zmienia się z null na wartość (czyli użytkownik kliknął odpowiedź)
 		if (newValue && !oldValue) {
 			focusTextarea()
 		}

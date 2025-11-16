@@ -7,9 +7,14 @@ export function useMessageHelpers() {
 			throw new Error('messageData is undefined or null')
 		}
 
-		const id = toNumber(messageData.id)
+		// Obsługuj zarówno UUID (string) jak i liczby
+		const id = typeof messageData.id === 'string' && isNaN(Number(messageData.id))
+			? messageData.id
+			: toNumber(messageData.id)
 		const chatId = String(messageData.chatId)
-		const senderId = toNumber(messageData.senderId)
+		const senderId = typeof messageData.senderId === 'string' && isNaN(Number(messageData.senderId))
+			? messageData.senderId
+			: toNumber(messageData.senderId)
 
 		return {
 			id,
@@ -46,7 +51,9 @@ export function useMessageHelpers() {
 				: undefined,
 			replyTo: messageData.replyTo
 				? {
-						id: toNumber(messageData.replyTo.id),
+						id: typeof messageData.replyTo.id === 'string' && isNaN(Number(messageData.replyTo.id))
+							? messageData.replyTo.id
+							: toNumber(messageData.replyTo.id),
 						content: messageData.replyTo.content || '',
 						senderUsername: messageData.replyTo.senderUsername || ''
 					}

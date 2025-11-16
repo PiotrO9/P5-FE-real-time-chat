@@ -8,7 +8,7 @@ export function useSocketHandlers(
 	chats: Ref<Chat[]>,
 	friends: Ref<any[]>,
 	selectedChatId: Ref<string | null>,
-	currentUserId: Ref<number>,
+	currentUserId: Ref<number | string>,
 	typingUsers: ReturnType<typeof import('./useTypingUsers').useTypingUsers>,
 	messages: ReturnType<typeof import('./useMessages').useMessages>,
 	chatsComposable: ReturnType<typeof import('./useChats').useChats>,
@@ -31,11 +31,14 @@ export function useSocketHandlers(
 		const mappedMessage = mapMessageFromBackend(data.message)
 
 		// Ignoruj wiadomości od aktualnego użytkownika - zostały już dodane w sendMessage
+		// Porównujemy jako stringi, aby obsłużyć zarówno UUID jak i liczby
 		if (String(mappedMessage.senderId) === String(currentUserId.value)) {
 			return
 		}
 
-		if (messages.addMessage(chatId, mappedMessage)) {
+		const wasAdded = messages.addMessage(chatId, mappedMessage)
+
+		if (wasAdded) {
 			if (selectedChatId.value !== chat.id) {
 				chatsComposable.incrementUnreadCount(chatId)
 			}

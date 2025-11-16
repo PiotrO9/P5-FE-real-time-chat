@@ -17,9 +17,9 @@ export interface Reaction {
 export type SystemMessageType = 'member:added' | 'member:removed' | 'chat:created' | 'chat:updated'
 
 export type Message = {
-	id: number
+	id: number | string
 	chatId: string
-	senderId: number
+	senderId: number | string
 	senderUsername: string
 	content: string
 	createdAt: string
