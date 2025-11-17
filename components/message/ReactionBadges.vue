@@ -56,4 +56,3 @@ function handleReactionBadgeKeyDown(event: KeyboardEvent, emoji: string) {
 		</button>
 	</div>
 </template>
-

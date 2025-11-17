@@ -63,11 +63,7 @@ defineExpose({
 		@mouseenter="emit('mouseenter')"
 		@mouseleave="emit('mouseleave')"
 	>
-		<div
-			ref="emojiTooltipContainerRef"
-			class="relative"
-			@mouseenter="emit('mouseenter')"
-		>
+		<div ref="emojiTooltipContainerRef" class="relative" @mouseenter="emit('mouseenter')">
 			<button
 				type="button"
 				tabindex="0"
@@ -96,9 +92,7 @@ defineExpose({
 			aria-label="Odpowiedz na wiadomość"
 			class="h-8 w-8 rounded-full bg-white hover:bg-gray-100 border border-gray-300 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 shadow-sm"
 			@click.stop="emit('reply-click')"
-			@keydown="
-				(e) => (e.key === 'Enter' || e.key === ' ') && emit('reply-click')
-			"
+			@keydown="(e) => (e.key === 'Enter' || e.key === ' ') && emit('reply-click')"
 		>
 			<span class="text-base">↩️</span>
 		</button>
@@ -129,4 +123,3 @@ defineExpose({
 		</div>
 	</div>
 </template>
-
