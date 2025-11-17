@@ -74,9 +74,9 @@ const members = computed(() => {
 	})
 })
 const availableFriends = computed(() => {
-	const memberIds = members.value.map((m) => String(m.id))
+	const memberIds = members.value.map((member) => String(member.id))
 
-	return friends.value.filter((f) => !memberIds.includes(String(f.id)))
+	return friends.value.filter((friend) => !memberIds.includes(String(friend.id)))
 })
 const pinnedMessagesList = computed(() => {
 	if (!chat.value) return []
@@ -117,14 +117,14 @@ function handleAddUserFromSection(username: string) {
 		return
 	}
 
-	const friend = friends.value.find((f) => f.username.toLowerCase() === username.toLowerCase())
+	const friend = friends.value.find((friend) => friend.username.toLowerCase() === username.toLowerCase())
 
 	if (!friend) {
 		toastError('User not found in friends')
 		return
 	}
 
-	const isAlreadyMember = members.value.some((m) => String(m.id) === String(friend.id))
+	const isAlreadyMember = members.value.some((member) => String(member.id) === String(friend.id))
 	if (isAlreadyMember) {
 		toastError('User is already in the chat')
 		return
@@ -160,7 +160,7 @@ function handleCloseRoleMenu() {
 function handleChangeRole(memberId: string, newRole: Role) {
 	if (!chat.value) return
 
-	const member = members.value.find((m) => String(m.id) === String(memberId))
+	const member = members.value.find((member) => String(member.id) === String(memberId))
 	if (!member) return
 
 	if (member.role === newRole) {
@@ -209,7 +209,7 @@ function handleClickOutside(event: MouseEvent) {
 function handlePinnedMessageClick(messageId: string | number) {
 	if (!chat.value) return
 
-	const message = chat.value.messages.find((m) => String(m.id) === String(messageId))
+	const message = chat.value.messages.find((message) => String(message.id) === String(messageId))
 
 	if (message) {
 		const messageElement = document.querySelector(`[data-message-id="${messageId}"]`)
@@ -244,7 +244,7 @@ async function handleAddUser(friend: Friend) {
 async function handleRemoveUser(userId: string) {
 	if (!chat.value) return
 
-	const member = members.value.find((m) => String(m.id) === String(userId))
+	const member = members.value.find((member) => String(member.id) === String(userId))
 	if (!member) return
 
 	if (String(userId) === String(currentUserId.value)) {
@@ -301,12 +301,12 @@ async function fetchFriends() {
 		const res = await fetchFriendsFromService()
 		const raw = res?.data
 		const friendsList: FriendResponse[] = Array.isArray(raw?.friends) ? raw.friends : []
-		friends.value = friendsList.map((f) => ({
-			id: f.id,
-			username: f.username,
-			email: f.email,
-			isOnline: f.isOnline,
-			lastSeen: f.lastSeen
+		friends.value = friendsList.map((friend) => ({
+			id: friend.id,
+			username: friend.username,
+			email: friend.email,
+			isOnline: friend.isOnline,
+			lastSeen: friend.lastSeen
 		}))
 	} catch (err: any) {
 		console.error('Error fetching friends:', err)

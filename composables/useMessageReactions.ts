@@ -37,8 +37,8 @@ export function useMessageReactions(message: Ref<Message>, currentUserId: Ref<st
 	const hasReactions = computed(() => reactions.value.length > 0)
 
 	const userReactions = computed(() => {
-		return reactions.value.filter((r) =>
-			r.userIds.some((userId) => String(userId) === String(currentUserId.value))
+		return reactions.value.filter((reaction) =>
+			reaction.userIds.some((userId) => String(userId) === String(currentUserId.value))
 		)
 	})
 
@@ -46,7 +46,7 @@ export function useMessageReactions(message: Ref<Message>, currentUserId: Ref<st
 		const reactionGroup = groupedReactions.value[emoji]
 		if (!reactionGroup) return false
 
-		const foundReaction = reactionGroup.reactions.find((r) => r.emoji === emoji)
+		const foundReaction = reactionGroup.reactions.find((reaction) => reaction.emoji === emoji)
 		if (!foundReaction) return false
 
 		return foundReaction.userIds.some(
@@ -64,7 +64,7 @@ export function useMessageReactions(message: Ref<Message>, currentUserId: Ref<st
 		if (isReacting.value) return null
 
 		const hasThisReaction = hasUserReaction(emoji)
-		const currentUserReaction = userReactions.value.find((r) => r.emoji === emoji)
+		const currentUserReaction = userReactions.value.find((reaction) => reaction.emoji === emoji)
 
 		try {
 			isReacting.value = true

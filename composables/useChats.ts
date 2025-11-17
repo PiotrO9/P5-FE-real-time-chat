@@ -16,7 +16,7 @@ export function useChats() {
 	const selectedChat = computed<Chat | null>(() => {
 		if (selectedChatId.value === null) return null
 
-		return chats.value.find((c) => String(c.id) === String(selectedChatId.value)) ?? null
+		return chats.value.find((chat) => String(chat.id) === String(selectedChatId.value)) ?? null
 	})
 
 	const filteredChats = computed(() => {
@@ -24,7 +24,7 @@ export function useChats() {
 
 		if (query.length === 0) return chats.value
 
-		return chats.value.filter((c) => c.name.toLowerCase().includes(query))
+		return chats.value.filter((chat) => chat.name.toLowerCase().includes(query))
 	})
 
 	async function fetchChats() {
@@ -57,7 +57,7 @@ export function useChats() {
 	function selectChat(chatId: string) {
 		if (selectedChatId.value === chatId) return
 		selectedChatId.value = chatId
-		const chat = chats.value.find((c) => String(c.id) === String(chatId))
+		const chat = chats.value.find((chat) => String(chat.id) === String(chatId))
 		if (chat) chat.unreadCount = 0
 	}
 

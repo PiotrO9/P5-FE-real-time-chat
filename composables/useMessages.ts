@@ -72,7 +72,7 @@ export function useMessages(chats: Ref<Chat[]>, _selectedChatId: Ref<string | nu
 					: Array.isArray(raw?.messages)
 						? raw.messages
 						: []
-			const chat = chats.value.find((c) => String(c.id) === String(chatId))
+			const chat = chats.value.find((chat) => String(chat.id) === String(chatId))
 			if (!chat) return
 			if (append) {
 				chat.messages = [...chat.messages, ...items]
@@ -101,10 +101,10 @@ export function useMessages(chats: Ref<Chat[]>, _selectedChatId: Ref<string | nu
 			const res = await sendMessageToService(chatId, content, replyToId)
 			const saved = res.data as unknown as Message
 
-			const chat = chats.value.find((c) => c.id === chatId)
+			const chat = chats.value.find((chat) => chat.id === chatId)
 			if (!chat) return
 
-			const exists = chat.messages.find((m) => String(m.id) === String(saved.id))
+			const exists = chat.messages.find((message) => String(message.id) === String(saved.id))
 			if (!exists) {
 				chat.messages.push(saved)
 				chat.lastMessage = saved as Message
@@ -117,12 +117,14 @@ export function useMessages(chats: Ref<Chat[]>, _selectedChatId: Ref<string | nu
 	}
 
 	async function deleteMessage(chatId: string, messageId: string | number) {
-		const chat = chats.value.find((c) => String(c.id) === String(chatId))
+		const chat = chats.value.find((chat) => String(chat.id) === String(chatId))
 		if (!chat) return
 
 		try {
 			await deleteMessageFromService(messageId)
-			chat.messages = chat.messages.filter((m) => String(m.id) !== String(messageId))
+			chat.messages = chat.messages.filter(
+				(message) => String(message.id) !== String(messageId)
+			)
 
 			updateLastMessage(chat)
 		} catch (err: any) {
@@ -140,10 +142,12 @@ export function useMessages(chats: Ref<Chat[]>, _selectedChatId: Ref<string | nu
 	}
 
 	function addMessage(chatId: string, message: Message) {
-		const chat = chats.value.find((c) => String(c.id) === String(chatId))
+		const chat = chats.value.find((chat) => String(chat.id) === String(chatId))
 		if (!chat) return false
 
-		const messageIndex = chat.messages.findIndex((m) => String(m.id) === String(message.id))
+		const messageIndex = chat.messages.findIndex(
+			(message) => String(message.id) === String(message.id)
+		)
 
 		if (messageIndex !== -1) {
 			// Wiadomość już istnieje - aktualizuj ją z pełnymi danymi z WebSocket
@@ -190,10 +194,12 @@ export function useMessages(chats: Ref<Chat[]>, _selectedChatId: Ref<string | nu
 	}
 
 	function updateMessage(chatId: string, message: Message) {
-		const chat = chats.value.find((c) => String(c.id) === String(chatId))
+		const chat = chats.value.find((chat) => String(chat.id) === String(chatId))
 		if (!chat) return
 
-		const messageIndex = chat.messages.findIndex((m) => String(m.id) === String(message.id))
+		const messageIndex = chat.messages.findIndex(
+			(message) => String(message.id) === String(message.id)
+		)
 
 		if (messageIndex !== -1) {
 			const existingMessage = chat.messages[messageIndex]
@@ -226,7 +232,7 @@ export function useMessages(chats: Ref<Chat[]>, _selectedChatId: Ref<string | nu
 	}
 
 	function removeMessage(chatId: string, messageId: string | number) {
-		const chat = chats.value.find((c) => String(c.id) === String(chatId))
+		const chat = chats.value.find((chat) => String(chat.id) === String(chatId))
 		if (!chat) return
 
 		chat.messages = chat.messages.filter((m) => String(m.id) !== String(messageId))
