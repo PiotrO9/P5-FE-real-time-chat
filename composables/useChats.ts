@@ -2,6 +2,7 @@ import type { Chat } from '~/types/Chat'
 import type { ChatsResponse } from '~/types/ChatsApi'
 import { fetchChats as fetchChatsFromService } from '~/services/chatService'
 import { getErrorMessage } from '~/utils/errorHelpers'
+import { findById, compareIds } from '~/utils/idHelpers'
 import { useToast } from './useToast'
 
 export function useChats() {
@@ -16,7 +17,7 @@ export function useChats() {
 	const selectedChat = computed<Chat | null>(() => {
 		if (selectedChatId.value === null) return null
 
-		return chats.value.find((chat) => String(chat.id) === String(selectedChatId.value)) ?? null
+		return findById(chats.value, selectedChatId.value) ?? null
 	})
 
 	const filteredChats = computed(() => {
@@ -57,12 +58,12 @@ export function useChats() {
 	function selectChat(chatId: string) {
 		if (selectedChatId.value === chatId) return
 		selectedChatId.value = chatId
-		const chat = chats.value.find((chat) => String(chat.id) === String(chatId))
+		const chat = findById(chats.value, chatId)
 		if (chat) chat.unreadCount = 0
 	}
 
 	function findChatById(chatId: string): Chat | undefined {
-		return chats.value.find((c) => String(c.id) === String(chatId))
+		return findById(chats.value, chatId)
 	}
 
 	function updateChat(chatId: string, updates: Partial<Chat>) {
@@ -74,7 +75,7 @@ export function useChats() {
 
 	function incrementUnreadCount(chatId: string) {
 		const chat = findChatById(chatId)
-		if (chat && selectedChatId.value !== chat.id) {
+		if (chat && !compareIds(selectedChatId.value, chat.id)) {
 			chat.unreadCount++
 		}
 	}

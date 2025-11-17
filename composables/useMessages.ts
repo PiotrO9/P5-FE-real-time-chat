@@ -5,6 +5,7 @@ import {
 	deleteMessage as deleteMessageFromService
 } from '~/services/chatService'
 import { getErrorMessage } from '~/utils/errorHelpers'
+import { compareIds, findById, findIndexById } from '~/utils/idHelpers'
 import { useToast } from './useToast'
 
 export function useMessages(chats: Ref<Chat[]>, _selectedChatId: Ref<string | null>) {
@@ -72,7 +73,7 @@ export function useMessages(chats: Ref<Chat[]>, _selectedChatId: Ref<string | nu
 					: Array.isArray(raw?.messages)
 						? raw.messages
 						: []
-			const chat = chats.value.find((chat) => String(chat.id) === String(chatId))
+			const chat = findById(chats.value, chatId)
 			if (!chat) return
 			if (append) {
 				chat.messages = [...chat.messages, ...items]
@@ -101,10 +102,10 @@ export function useMessages(chats: Ref<Chat[]>, _selectedChatId: Ref<string | nu
 			const res = await sendMessageToService(chatId, content, replyToId)
 			const saved = res.data as unknown as Message
 
-			const chat = chats.value.find((chat) => chat.id === chatId)
-			if (!chat) return
+		const chat = findById(chats.value, chatId)
+		if (!chat) return
 
-			const exists = chat.messages.find((message) => String(message.id) === String(saved.id))
+		const exists = findById(chat.messages, saved.id)
 			if (!exists) {
 				chat.messages.push(saved)
 				chat.lastMessage = saved as Message
@@ -117,13 +118,13 @@ export function useMessages(chats: Ref<Chat[]>, _selectedChatId: Ref<string | nu
 	}
 
 	async function deleteMessage(chatId: string, messageId: string | number) {
-		const chat = chats.value.find((chat) => String(chat.id) === String(chatId))
+		const chat = findById(chats.value, chatId)
 		if (!chat) return
 
 		try {
 			await deleteMessageFromService(messageId)
 			chat.messages = chat.messages.filter(
-				(message) => String(message.id) !== String(messageId)
+				(message) => !compareIds(message.id, messageId)
 			)
 
 			updateLastMessage(chat)
@@ -141,47 +142,45 @@ export function useMessages(chats: Ref<Chat[]>, _selectedChatId: Ref<string | nu
 		}
 	}
 
+	function updateMessageFields(
+		existingMessage: Message,
+		updatedMessage: Message
+	): void {
+		Object.assign(existingMessage, {
+			content: updatedMessage.content,
+			senderUsername: updatedMessage.senderUsername,
+			reactions: updatedMessage.reactions,
+			createdAt: updatedMessage.createdAt,
+			isPinned: updatedMessage.isPinned ?? false,
+			pinnedBy: updatedMessage.pinnedBy,
+			pinnedAt: updatedMessage.pinnedAt,
+			edited: updatedMessage.edited ?? false,
+			editedAt: updatedMessage.editedAt,
+			replyTo: updatedMessage.replyTo
+		})
+	}
+
+	function syncLastMessage(chat: Chat, message: Message): void {
+		if (chat.lastMessage && compareIds(chat.lastMessage.id, message.id)) {
+			updateMessageFields(chat.lastMessage, message)
+		}
+	}
+
 	function addMessage(chatId: string, message: Message) {
-		const chat = chats.value.find((chat) => String(chat.id) === String(chatId))
+		const chat = findById(chats.value, chatId)
 		if (!chat) return false
 
-		const messageIndex = chat.messages.findIndex(
-			(message) => String(message.id) === String(message.id)
-		)
+		const messageIndex = findIndexById(chat.messages, message.id)
 
 		if (messageIndex !== -1) {
 			// Wiadomość już istnieje - aktualizuj ją z pełnymi danymi z WebSocket
-			// Używamy Object.assign aby Vue wykryło zmiany w zagnieżdżonych obiektach
 			const existingMessage = chat.messages[messageIndex]
 			if (existingMessage) {
-				Object.assign(existingMessage, {
-					content: message.content,
-					senderUsername: message.senderUsername,
-					reactions: message.reactions,
-					createdAt: message.createdAt,
-					isPinned: message.isPinned ?? false,
-					pinnedBy: message.pinnedBy,
-					pinnedAt: message.pinnedAt,
-					edited: message.edited ?? false,
-					editedAt: message.editedAt,
-					replyTo: message.replyTo
-				})
+				updateMessageFields(existingMessage, message)
 			}
 
 			// Aktualizuj lastMessage jeśli to jest ostatnia wiadomość
-			if (chat.lastMessage && String(chat.lastMessage.id) === String(message.id)) {
-				Object.assign(chat.lastMessage, {
-					content: message.content,
-					senderUsername: message.senderUsername,
-					reactions: message.reactions,
-					isPinned: message.isPinned ?? false,
-					pinnedBy: message.pinnedBy,
-					pinnedAt: message.pinnedAt,
-					edited: message.edited ?? false,
-					editedAt: message.editedAt,
-					replyTo: message.replyTo
-				})
-			}
+			syncLastMessage(chat, message)
 
 			return true
 		}
@@ -194,48 +193,26 @@ export function useMessages(chats: Ref<Chat[]>, _selectedChatId: Ref<string | nu
 	}
 
 	function updateMessage(chatId: string, message: Message) {
-		const chat = chats.value.find((chat) => String(chat.id) === String(chatId))
+		const chat = findById(chats.value, chatId)
 		if (!chat) return
 
-		const messageIndex = chat.messages.findIndex(
-			(message) => String(message.id) === String(message.id)
-		)
+		const messageIndex = findIndexById(chat.messages, message.id)
 
 		if (messageIndex !== -1) {
 			const existingMessage = chat.messages[messageIndex]
 			if (existingMessage) {
-				existingMessage.isPinned = message.isPinned ?? false
-				existingMessage.pinnedBy = message.pinnedBy
-				existingMessage.pinnedAt = message.pinnedAt
-				existingMessage.content = message.content
-				existingMessage.senderUsername = message.senderUsername
-				existingMessage.reactions = message.reactions
-				existingMessage.createdAt = message.createdAt
-				existingMessage.edited = message.edited ?? false
-				existingMessage.editedAt = message.editedAt
-				existingMessage.replyTo = message.replyTo
+				updateMessageFields(existingMessage, message)
 			}
 
-			if (chat.lastMessage && String(chat.lastMessage.id) === String(message.id)) {
-				chat.lastMessage.isPinned = message.isPinned ?? false
-				chat.lastMessage.pinnedBy = message.pinnedBy
-				chat.lastMessage.pinnedAt = message.pinnedAt
-				chat.lastMessage.content = message.content
-				chat.lastMessage.senderUsername = message.senderUsername
-				chat.lastMessage.reactions = message.reactions
-				chat.lastMessage.createdAt = message.createdAt
-				chat.lastMessage.edited = message.edited ?? false
-				chat.lastMessage.editedAt = message.editedAt
-				chat.lastMessage.replyTo = message.replyTo
-			}
+			syncLastMessage(chat, message)
 		}
 	}
 
 	function removeMessage(chatId: string, messageId: string | number) {
-		const chat = chats.value.find((chat) => String(chat.id) === String(chatId))
+		const chat = findById(chats.value, chatId)
 		if (!chat) return
 
-		chat.messages = chat.messages.filter((m) => String(m.id) !== String(messageId))
+		chat.messages = chat.messages.filter((m) => !compareIds(m.id, messageId))
 		updateLastMessage(chat)
 	}
 

@@ -1,4 +1,5 @@
 import type { Chat } from '~/types/Chat'
+import { findById, compareIds } from '~/utils/idHelpers'
 
 export function useReactions(
 	chats: Ref<Chat[]>,
@@ -11,10 +12,11 @@ export function useReactions(
 		emoji: string,
 		action: 'add' | 'remove'
 	) {
-		const chat = chats.value.find((chat) => String(chat.id) === String(selectedChatId.value))
+		if (!selectedChatId.value) return
+		const chat = findById(chats.value, selectedChatId.value)
 		if (!chat) return
 
-		const message = chat.messages.find((message) => String(message.id) === String(messageId))
+		const message = findById(chat.messages, messageId)
 		if (!message) return
 
 		if (!message.reactions) {
@@ -40,11 +42,13 @@ export function useReactions(
 
 			if (existingReaction) {
 				existingReaction.userIds = existingReaction.userIds.filter(
-					(id) => String(id) !== String(currentUserId.value)
+					(id) => !compareIds(id, currentUserId.value)
 				)
 
 				if (existingReaction.userIds.length === 0) {
-					message.reactions = message.reactions.filter((reaction) => reaction.emoji !== emoji)
+					message.reactions = message.reactions.filter(
+						(reaction) => reaction.emoji !== emoji
+					)
 				}
 			}
 		}
@@ -57,10 +61,10 @@ export function useReactions(
 		userId: string | number,
 		username: string
 	) {
-		const chat = chats.value.find((chat) => String(chat.id) === String(chatId))
+		const chat = findById(chats.value, chatId)
 		if (!chat) return
 
-		const message = chat.messages.find((message) => String(message.id) === String(messageId))
+		const message = findById(chat.messages, messageId)
 		if (!message) return
 
 		if (!message.reactions) {
@@ -70,7 +74,7 @@ export function useReactions(
 		const existingReaction = message.reactions.find((reaction) => reaction.emoji === emoji)
 
 		if (existingReaction) {
-			if (!existingReaction.userIds.some((id) => String(id) === String(userId))) {
+			if (!existingReaction.userIds.some((id) => compareIds(id, userId))) {
 				existingReaction.userIds.push(userId)
 			}
 		} else {
@@ -88,17 +92,17 @@ export function useReactions(
 		emoji: string,
 		userId: string | number
 	) {
-		const chat = chats.value.find((chat) => String(chat.id) === String(chatId))
+		const chat = findById(chats.value, chatId)
 		if (!chat) return
 
-		const message = chat.messages.find((message) => String(message.id) === String(messageId))
+		const message = findById(chat.messages, messageId)
 		if (!message || !message.reactions) return
 
 		const existingReaction = message.reactions.find((reaction) => reaction.emoji === emoji)
 
 		if (existingReaction) {
 			existingReaction.userIds = existingReaction.userIds.filter(
-				(id) => String(id) !== String(userId)
+				(id) => !compareIds(id, userId)
 			)
 
 			if (existingReaction.userIds.length === 0) {

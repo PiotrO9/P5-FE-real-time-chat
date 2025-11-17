@@ -11,6 +11,7 @@ import {
 } from '~/services/chatService'
 import { fetchFriends as fetchFriendsFromService } from '~/services/friendsService'
 import { getRoleLabel } from '~/utils/roleHelpers'
+import { compareIds, findById } from '~/utils/idHelpers'
 import ChatActionsHeader from './ChatActionsHeader.vue'
 import PinnedMessagesList from './PinnedMessagesList.vue'
 import AddUserSection from './AddUserSection.vue'
@@ -124,7 +125,7 @@ function handleAddUserFromSection(username: string) {
 		return
 	}
 
-	const isAlreadyMember = members.value.some((member) => String(member.id) === String(friend.id))
+	const isAlreadyMember = members.value.some((member) => compareIds(member.id, friend.id))
 	if (isAlreadyMember) {
 		toastError('User is already in the chat')
 		return
@@ -160,7 +161,7 @@ function handleCloseRoleMenu() {
 function handleChangeRole(memberId: string, newRole: Role) {
 	if (!chat.value) return
 
-	const member = members.value.find((member) => String(member.id) === String(memberId))
+	const member = findById(members.value, memberId)
 	if (!member) return
 
 	if (member.role === newRole) {
@@ -209,7 +210,7 @@ function handleClickOutside(event: MouseEvent) {
 function handlePinnedMessageClick(messageId: string | number) {
 	if (!chat.value) return
 
-	const message = chat.value.messages.find((message) => String(message.id) === String(messageId))
+	const message = findById(chat.value.messages, messageId)
 
 	if (message) {
 		const messageElement = document.querySelector(`[data-message-id="${messageId}"]`)
@@ -244,7 +245,7 @@ async function handleAddUser(friend: Friend) {
 async function handleRemoveUser(userId: string) {
 	if (!chat.value) return
 
-	const member = members.value.find((member) => String(member.id) === String(userId))
+	const member = findById(members.value, userId)
 	if (!member) return
 
 	if (String(userId) === String(currentUserId.value)) {

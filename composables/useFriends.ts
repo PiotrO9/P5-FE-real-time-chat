@@ -6,6 +6,7 @@ import {
 	deleteFriend as deleteFriendFromService
 } from '~/services/friendsService'
 import { getErrorMessage } from '~/utils/errorHelpers'
+import { findById } from '~/utils/idHelpers'
 import { useToast } from './useToast'
 
 export function useFriends() {
@@ -64,7 +65,7 @@ export function useFriends() {
 	}
 
 	async function removeFriend(friendId: string | number) {
-		const friend = friends.value.find((f) => String(f.id) === String(friendId))
+		const friend = findById(friends.value, friendId)
 		if (!friend) return
 
 		try {
@@ -78,7 +79,7 @@ export function useFriends() {
 	}
 
 	function updateFriendStatus(userId: string | number, isOnline: boolean, lastSeen?: Date) {
-		const friend = friends.value.find((f) => String(f.id) === String(userId))
+		const friend = findById(friends.value, userId)
 		if (friend) {
 			friend.isOnline = isOnline
 			if (lastSeen) {
@@ -88,7 +89,7 @@ export function useFriends() {
 	}
 
 	function findFriendById(friendId: string | number): Friend | undefined {
-		return friends.value.find((f) => String(f.id) === String(friendId))
+		return findById(friends.value, friendId)
 	}
 
 	return {

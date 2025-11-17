@@ -8,6 +8,7 @@ import FriendsList from '~/components/friends/FriendsList.vue'
 import AddFriendsPanel from '~/components/friends/AddFriendsPanel.vue'
 import InvitesPanel from '~/components/friends/InvitesPanel.vue'
 import { toNumber } from '~/utils/typeHelpers'
+import { compareIds, findById } from '~/utils/idHelpers'
 import { fetchPinnedMessages } from '~/services/chatService'
 
 const { user } = useAuth()
@@ -123,7 +124,7 @@ function handleStartChat(friendId: string | number) {
 
 	const existingChat = chatsComposable.chats.value
 		.filter((chat) => chat.isGroup == false)
-		.find((c) => String(c.otherUser.id) === String(friend.id))
+		.find((c) => c.otherUser && compareIds(c.otherUser.id, friend.id))
 
 	if (existingChat) {
 		handleSelectChat(existingChat.id)
@@ -183,7 +184,7 @@ function handleChatUpdated(data: { members: any[]; currentUserRole?: any }) {
 	}
 
 	const storeChat = chatStore.currentChatDetails
-	if (storeChat && String(storeChat.id) === String(chat.id)) {
+	if (storeChat && compareIds(storeChat.id, chat.id)) {
 		storeChat.members = data.members
 		if (data.currentUserRole) {
 			storeChat.currentUserRole = data.currentUserRole
@@ -271,7 +272,7 @@ function handlePinUpdated(messageId: string | number, isPinned: boolean) {
 	const chat = chatsComposable.selectedChat.value
 	if (!chat) return
 
-	const message = chat.messages.find((m) => String(m.id) === String(messageId))
+	const message = findById(chat.messages, messageId)
 	if (message) {
 		message.isPinned = isPinned
 	}

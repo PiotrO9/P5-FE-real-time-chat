@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ChatMember, Role } from '~/types/ChatsApi'
 import { getRoleLabel, getRoleColor, getAvailableRoles } from '~/utils/roleHelpers'
+import { compareIds } from '~/utils/idHelpers'
 import ChatInitial from './ChatInitial.vue'
 
 interface Props {
@@ -27,7 +28,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<Emits>()
 
 const isMenuOpen = computed(() => props.openRoleMenuId === String(props.member.id))
-const isCurrentUser = computed(() => String(props.member.id) === String(props.currentUserId))
+const isCurrentUser = computed(() => compareIds(props.member.id, props.currentUserId))
 
 function handleToggleRoleMenu(event?: Event) {
 	if (event) {

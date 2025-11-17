@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Message } from '~/types/Chat'
+import { compareIds } from '~/utils/idHelpers'
 import MessageItem from '~/components/message/MessageItem.vue'
 import SystemMessage from '~/components/message/SystemMessage.vue'
 
@@ -60,7 +61,7 @@ function handleScrollToMessage(messageId: string | number) {
 			:messages="messagesList"
 			:highlighted="
 				props.highlightedMessageId !== null &&
-				String(message.id) === String(props.highlightedMessageId)
+				compareIds(message.id, props.highlightedMessageId)
 			"
 			@delete="handleDeleteMessage"
 			@reaction-updated="handleReactionUpdated"

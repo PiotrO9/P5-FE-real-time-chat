@@ -3,6 +3,7 @@ import { nextTick } from 'vue'
 import { useSocket } from './useSocket'
 import { useMessageHelpers } from './useMessageHelpers'
 import { toNumber } from '~/utils/typeHelpers'
+import { compareIds, findIndexById } from '~/utils/idHelpers'
 
 export function useSocketHandlers(
 	chats: Ref<Chat[]>,
@@ -31,19 +32,18 @@ export function useSocketHandlers(
 		const mappedMessage = mapMessageFromBackend(data.message)
 
 		// Ignoruj wiadomości od aktualnego użytkownika - zostały już dodane w sendMessage
-		// Porównujemy jako stringi, aby obsłużyć zarówno UUID jak i liczby
-		if (String(mappedMessage.senderId) === String(currentUserId.value)) {
+		if (compareIds(mappedMessage.senderId, currentUserId.value)) {
 			return
 		}
 
 		const wasAdded = messages.addMessage(chatId, mappedMessage)
 
 		if (wasAdded) {
-			if (selectedChatId.value !== chat.id) {
+			if (!compareIds(selectedChatId.value, chat.id)) {
 				chatsComposable.incrementUnreadCount(chatId)
 			}
 
-			if (selectedChatId.value === chat.id) {
+			if (compareIds(selectedChatId.value, chat.id)) {
 				nextTick(() => onScrollToBottom())
 			}
 		}
@@ -119,7 +119,7 @@ export function useSocketHandlers(
 		})
 		chat.messages.push(systemMessage)
 
-		if (selectedChatId.value === chat.id) {
+		if (compareIds(selectedChatId.value, chat.id)) {
 			nextTick(() => onScrollToBottom())
 		}
 	}
@@ -139,7 +139,7 @@ export function useSocketHandlers(
 		})
 		chat.messages.push(systemMessage)
 
-		if (selectedChatId.value === chat.id) {
+		if (compareIds(selectedChatId.value, chat.id)) {
 			nextTick(() => onScrollToBottom())
 		}
 	}
@@ -152,7 +152,7 @@ export function useSocketHandlers(
 		const userId = toNumber(data.userId)
 
 		let username = 'Unknown user'
-		if (chat.otherUser && String(chat.otherUser.id) === String(userId)) {
+		if (chat.otherUser && compareIds(chat.otherUser.id, userId)) {
 			username = chat.otherUser.username
 		} else {
 			const friend = friendsComposable.findFriendById(userId)
@@ -168,7 +168,7 @@ export function useSocketHandlers(
 		})
 		chat.messages.push(systemMessage)
 
-		if (selectedChatId.value === chat.id) {
+		if (compareIds(selectedChatId.value, chat.id)) {
 			nextTick(() => onScrollToBottom())
 		}
 	}
@@ -192,7 +192,7 @@ export function useSocketHandlers(
 		}
 
 		const messageId = String(messageData.id)
-		const messageIndex = chat.messages.findIndex((m) => String(m.id) === messageId)
+		const messageIndex = findIndexById(chat.messages, messageId)
 
 		if (messageIndex !== -1) {
 			const message = chat.messages[messageIndex]
@@ -236,7 +236,7 @@ export function useSocketHandlers(
 		const chat = chatsComposable.findChatById(chatId)
 		if (!chat) return
 
-		const messageIndex = chat.messages.findIndex((m) => String(m.id) === String(data.messageId))
+		const messageIndex = findIndexById(chat.messages, data.messageId)
 
 		if (messageIndex !== -1) {
 			const message = chat.messages[messageIndex]
