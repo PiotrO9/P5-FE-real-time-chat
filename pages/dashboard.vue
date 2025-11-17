@@ -71,6 +71,21 @@ const typingUsersByChat = computed(() => {
 	return typingUsersComposable.updateTypingUsersByChat(chatsComposable.chats.value)
 })
 
+const pendingInvitesTotal = computed(() => {
+	const total = invitesComposable.invites.value.totalPending
+	if (!total) {
+		return 0
+	}
+	return total
+})
+
+useDynamicTitle({
+	selectedChat: chatsComposable.selectedChat,
+	viewMode: viewModeComposable.viewMode,
+	friendsSubView: viewModeComposable.friendsSubView,
+	invitesTotal: pendingInvitesTotal
+})
+
 const socketHandlers = useSocketHandlers(
 	chatsComposable.chats,
 	friendsComposable.friends,
