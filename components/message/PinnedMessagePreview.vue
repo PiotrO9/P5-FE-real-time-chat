@@ -14,18 +14,7 @@ const emit = defineEmits<Emits>()
 
 const message = computed(() => props.message)
 const hasMessage = computed(() => message.value !== null)
-
-function formatMessageTime(createdAt: string): string {
-	return new Date(createdAt).toLocaleTimeString([], {
-		hour: '2-digit',
-		minute: '2-digit'
-	})
-}
-
-function truncateMessage(content: string, maxLength: number = 60): string {
-	if (content.length <= maxLength) return content
-	return content.substring(0, maxLength) + '...'
-}
+const { formatMessageTime, truncateMessage } = useMessageHelpers()
 
 function handleClick() {
 	if (!hasMessage.value) return

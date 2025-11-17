@@ -90,8 +90,23 @@ export function useMessageHelpers() {
 		}
 	}
 
+	function formatMessageTime(createdAt: string): string {
+		return new Date(createdAt).toLocaleTimeString([], {
+			hour: '2-digit',
+			minute: '2-digit'
+		})
+	}
+
+	function truncateMessage(content: string, maxLength: number = 50): string {
+		if (content.length <= maxLength) return content
+
+		return content.substring(0, maxLength) + '...'
+	}
+
 	return {
 		mapMessageFromBackend,
-		createSystemMessage
+		createSystemMessage,
+		formatMessageTime,
+		truncateMessage
 	}
 }

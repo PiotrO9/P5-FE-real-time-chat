@@ -13,21 +13,10 @@ interface Emits {
 defineProps<Props>()
 const emit = defineEmits<Emits>()
 
+const { formatMessageTime, truncateMessage } = useMessageHelpers()
+
 function handlePinnedMessageClick(messageId: string | number) {
 	emit('message-click', messageId)
-}
-
-function formatMessageTime(createdAt: string): string {
-	return new Date(createdAt).toLocaleTimeString([], {
-		hour: '2-digit',
-		minute: '2-digit'
-	})
-}
-
-function truncateMessage(content: string, maxLength: number = 50): string {
-	if (content.length <= maxLength) return content
-
-	return content.substring(0, maxLength) + '...'
 }
 </script>
 

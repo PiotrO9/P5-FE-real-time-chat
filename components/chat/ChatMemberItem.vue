@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ChatMember, Role } from '~/types/ChatsApi'
+import { getRoleLabel, getRoleColor, getAvailableRoles } from '~/utils/roleHelpers'
 import ChatInitial from './ChatInitial.vue'
 
 interface Props {
@@ -25,39 +26,8 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>()
 
-function getRoleLabel(role: Role): string {
-	switch (role) {
-		case 'OWNER':
-			return 'Owner'
-		case 'MODERATOR':
-			return 'Moderator'
-		case 'MEMBER':
-			return 'Member'
-		default:
-			return 'Member'
-	}
-}
-
-function getRoleColor(role: Role): string {
-	switch (role) {
-		case 'OWNER':
-			return 'bg-purple-100 text-purple-700 border-purple-300'
-		case 'MODERATOR':
-			return 'bg-blue-100 text-blue-700 border-blue-300'
-		case 'MEMBER':
-			return 'bg-gray-100 text-gray-700 border-gray-300'
-		default:
-			return 'bg-gray-100 text-gray-700 border-gray-300'
-	}
-}
-
-function getAvailableRoles(currentRole: Role): Role[] {
-	if (currentRole === 'OWNER') {
-		return []
-	}
-
-	return ['MEMBER', 'MODERATOR']
-}
+const isMenuOpen = computed(() => props.openRoleMenuId === String(props.member.id))
+const isCurrentUser = computed(() => String(props.member.id) === String(props.currentUserId))
 
 function handleToggleRoleMenu(event?: Event) {
 	if (event) {
@@ -74,9 +44,6 @@ function handleChangeRole(newRole: Role) {
 function handleRemoveUser() {
 	emit('remove-user', String(props.member.id))
 }
-
-const isMenuOpen = computed(() => props.openRoleMenuId === String(props.member.id))
-const isCurrentUser = computed(() => String(props.member.id) === String(props.currentUserId))
 </script>
 
 <template>

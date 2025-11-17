@@ -44,17 +44,10 @@ const uiState = reactive({
 const actionBarRef = ref<InstanceType<typeof MessageActionBar> | null>(null)
 
 const currentUserId = computed(() => user.value?.id ?? 0)
-const isOwnMessage = computed(() => String(props.message.senderId) === String(currentUserId.value))
-const senderDisplayName = computed(() => {
-	if (isOwnMessage.value) return 'You'
-	return props.message.senderUsername || 'Unknown'
-})
-const formattedTime = computed(() => {
-	return new Date(props.message.createdAt).toLocaleTimeString([], {
-		hour: '2-digit',
-		minute: '2-digit'
-	})
-})
+const messageRef = computed(() => props.message)
+const { isOwnMessage, senderDisplayName } = useMessageOwnership(messageRef, currentUserId)
+const { formatMessageTime } = useMessageHelpers()
+const formattedTime = computed(() => formatMessageTime(props.message.createdAt))
 const isEdited = computed(() => props.message.edited === true || !!props.message.editedAt)
 const isPinned = computed(() => props.message.isPinned ?? false)
 const hasReplyTo = computed(() => !!props.message.replyTo)

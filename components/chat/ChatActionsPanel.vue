@@ -10,6 +10,7 @@ import {
 	fetchPinnedMessages
 } from '~/services/chatService'
 import { fetchFriends as fetchFriendsFromService } from '~/services/friendsService'
+import { getRoleLabel } from '~/utils/roleHelpers'
 import ChatActionsHeader from './ChatActionsHeader.vue'
 import PinnedMessagesList from './PinnedMessagesList.vue'
 import AddUserSection from './AddUserSection.vue'
@@ -185,19 +186,6 @@ function handleCancelRoleChange() {
 	selectedMemberId.value = null
 	selectedNewRole.value = null
 	selectedMemberName.value = ''
-}
-
-function getRoleLabel(role: Role): string {
-	switch (role) {
-		case 'OWNER':
-			return 'Owner'
-		case 'MODERATOR':
-			return 'Moderator'
-		case 'MEMBER':
-			return 'Member'
-		default:
-			return 'Member'
-	}
 }
 
 function handleToggleState() {

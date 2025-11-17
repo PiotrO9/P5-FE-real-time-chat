@@ -28,18 +28,7 @@ const lastMessage = computed(() => chatData.value.lastMessage)
 const lastMessageContent = computed(() => lastMessage.value?.content || '')
 const unreadCount = computed(() => Number(chatData.value.unreadCount))
 const typingUsers = computed(() => props.typingUsers ?? [])
-const hasTypingUsers = computed(() => typingUsers.value.length > 0)
-const typingText = computed(() => {
-	if (!hasTypingUsers.value) return null
-
-	if (typingUsers.value.length === 1) {
-		return `${typingUsers.value[0]} is typing...`
-	}
-	if (typingUsers.value.length === 2) {
-		return `${typingUsers.value[0]} and ${typingUsers.value[1]} are typing...`
-	}
-	return `${typingUsers.value[0]} and ${typingUsers.value.length - 1} others are typing...`
-})
+const { typingText, hasTypingUsers } = useTypingText(typingUsers)
 const senderName = computed(() => {
 	if (!lastMessage.value) return null
 

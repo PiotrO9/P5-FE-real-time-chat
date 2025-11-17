@@ -53,17 +53,8 @@ const lastPinnedMessage = computed(() => {
 	})
 	return sorted[0]
 })
-const typingText = computed(() => {
-	if (!props.typingUsers || props.typingUsers.length === 0) return null
-
-	if (props.typingUsers.length === 1) {
-		return `${props.typingUsers[0]} is typing...`
-	}
-	if (props.typingUsers.length === 2) {
-		return `${props.typingUsers[0]} and ${props.typingUsers[1]} are typing...`
-	}
-	return `${props.typingUsers[0]} and ${props.typingUsers.length - 1} others are typing...`
-})
+const typingUsersRef = computed(() => props.typingUsers ?? [])
+const { typingText } = useTypingText(typingUsersRef)
 
 watch(
 	() => selectedChat,
