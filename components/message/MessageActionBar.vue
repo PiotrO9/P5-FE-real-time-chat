@@ -72,7 +72,7 @@ defineExpose({
 				@click.stop="handleEmojiButtonClick"
 				@keydown="(e) => e.key === 'Enter' && handleEmojiButtonClick()"
 			>
-				<span class="text-base">😊</span>
+				<Icon name="smile" class="h-4 w-4" />
 			</button>
 			<EmojiTooltip
 				ref="emojiTooltipRef"
@@ -94,7 +94,7 @@ defineExpose({
 			@click.stop="emit('reply-click')"
 			@keydown="(e) => (e.key === 'Enter' || e.key === ' ') && emit('reply-click')"
 		>
-			<span class="text-base">↩️</span>
+			<Icon name="reply" class="h-4 w-4" />
 		</button>
 		<div class="relative">
 			<button
