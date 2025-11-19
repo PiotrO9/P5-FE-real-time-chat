@@ -17,11 +17,7 @@ export async function fetchMessages(chatId: string, limit: number, offset: numbe
 	)
 }
 
-export async function sendMessage(
-	chatId: string,
-	content: string,
-	replyToId?: string | number
-) {
+export async function sendMessage(chatId: string, content: string, replyToId?: string | number) {
 	const body: { content: string; replyToId?: string | number } = { content }
 	if (replyToId !== undefined) {
 		body.replyToId = replyToId

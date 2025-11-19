@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { Message } from '~/types/Chat'
 import ChatList from '~/components/chat/ChatList.vue'
 import ChatPanel from '~/components/chat/ChatPanel.vue'
 import ChatActionsPanel from '~/components/chat/ChatActionsPanel.vue'
@@ -7,313 +6,15 @@ import MessageForm from '~/components/message/MessageForm.vue'
 import FriendsList from '~/components/friends/FriendsList.vue'
 import AddFriendsPanel from '~/components/friends/AddFriendsPanel.vue'
 import InvitesPanel from '~/components/friends/InvitesPanel.vue'
-import { toNumber } from '~/utils/typeHelpers'
-import { compareIds, findById } from '~/utils/idHelpers'
-import { fetchPinnedMessages } from '~/services/chatService'
 
-const { user } = useAuth()
-const chatStore = useChatStore()
-const { connect, disconnect, emit } = useSocket()
-const { error: toastError } = useToast()
-
-// Obsługuj zarówno UUID (string) jak i liczby
-const currentUserId = computed(() => {
-	const userId = user.value?.id
-	if (!userId) return 0
-	// Jeśli to UUID (string, który nie jest liczbą), zwróć jako string
-	if (typeof userId === 'string' && isNaN(Number(userId))) {
-		return userId
-	}
-	return toNumber(userId)
-})
-const currentChat = computed(() => chatStore.currentChatDetails)
-
-const viewModeComposable = useViewMode()
-const chatsComposable = useChats()
-const messagesComposable = useMessages(chatsComposable.chats, chatsComposable.selectedChatId)
-const friendsComposable = useFriends()
-const invitesComposable = useInvites()
-const typingUsersComposable = useTypingUsers(currentUserId)
-const reactionsComposable = useReactions(
-	chatsComposable.chats,
-	chatsComposable.selectedChatId,
-	currentUserId,
-	user
-)
-
-const chatPanelRef = ref<any>(null)
-const isActionsPanelOpen = ref(false)
-const replyToMessage = ref<Message | null>(null)
-
-const searchQuery = computed({
-	get: () => chatsComposable.searchQuery.value,
-	set: (value: string) => {
-		chatsComposable.searchQuery.value = value
-	}
-})
-
-watch(currentChat, (newChat) => {
-	if (!newChat) {
-		isActionsPanelOpen.value = false
-		replyToMessage.value = null
-	}
-})
-
-watch(chatsComposable.selectedChatId, () => {
-	replyToMessage.value = null
-})
-
-const currentTypingUsers = computed(() => {
-	if (!chatsComposable.selectedChatId.value) return []
-	return typingUsersComposable.getTypingUsers(chatsComposable.selectedChatId.value)
-})
-
-const typingUsersByChat = computed(() => {
-	return typingUsersComposable.updateTypingUsersByChat(chatsComposable.chats.value)
-})
-
-const pendingInvitesTotal = computed(() => {
-	const total = invitesComposable.invites.value.totalPending
-	if (!total) {
-		return 0
-	}
-	return total
-})
-
-useDynamicTitle({
-	selectedChat: chatsComposable.selectedChat,
-	viewMode: viewModeComposable.viewMode,
-	friendsSubView: viewModeComposable.friendsSubView,
-	invitesTotal: pendingInvitesTotal
-})
-
-const socketHandlers = useSocketHandlers(
-	chatsComposable.chats,
-	friendsComposable.friends,
-	chatsComposable.selectedChatId,
-	currentUserId,
-	typingUsersComposable,
-	messagesComposable,
-	chatsComposable,
-	friendsComposable,
-	reactionsComposable,
-	handleScrollToBottom
-)
-
-function handleViewModeChange(mode: 'chats' | 'friends') {
-	viewModeComposable.setViewMode(mode)
-	if (mode === 'friends') {
-		friendsComposable.fetchFriends()
-		invitesComposable.fetchInvites()
-	}
-}
-
-function handleFriendsSubViewChange(subView: 'list' | 'add' | 'invites') {
-	viewModeComposable.setFriendsSubView(subView)
-
-	if (subView === 'invites') {
-		invitesComposable.fetchInvites()
-	}
-}
-
-function handleStartChat(friendId: string | number) {
-	const friend = friendsComposable.findFriendById(friendId)
-	if (!friend) return
-
-	viewModeComposable.setViewMode('chats')
-
-	const existingChat = chatsComposable.chats.value
-		.filter((chat) => chat.isGroup == false)
-		.find((c) => c.otherUser && compareIds(c.otherUser.id, friend.id))
-
-	if (existingChat) {
-		handleSelectChat(existingChat.id)
-		return
-	}
-
-	toastError('Chat not found with this friend')
-}
-
-async function handleSelectChat(chatId: string) {
-	if (chatsComposable.selectedChatId.value === chatId) return
-	chatsComposable.selectChat(chatId)
-	messagesComposable.fetchMessages(chatId, false)
-	await fetchPinnedMessagesForChat(chatId)
-	nextTick(() => handleScrollToBottom())
-	isActionsPanelOpen.value = false
-}
-
-async function fetchPinnedMessagesForChat(chatId: string) {
-	try {
-		const { mapMessageFromBackend } = useMessageHelpers()
-		const res = await fetchPinnedMessages(chatId)
-		const raw = res?.data
-		const pinnedItems: any[] = Array.isArray(raw?.pinnedMessages) ? raw.pinnedMessages : []
-
-		const mappedMessages = pinnedItems.map((pinnedItem) => {
-			const message = mapMessageFromBackend(pinnedItem.message)
-			return {
-				...message,
-				isPinned: true,
-				pinnedBy: pinnedItem.pinnedBy
-					? {
-							id: pinnedItem.pinnedBy.id,
-							username: pinnedItem.pinnedBy.username
-						}
-					: undefined,
-				pinnedAt: pinnedItem.pinnedAt
-					? typeof pinnedItem.pinnedAt === 'string'
-						? pinnedItem.pinnedAt
-						: pinnedItem.pinnedAt.toISOString()
-					: undefined
-			}
-		})
-		chatStore.setPinnedMessages(chatId, mappedMessages)
-	} catch (err: any) {
-		console.error('Error fetching pinned messages:', err)
-	}
-}
-
-function handleChatUpdated(data: { members: any[]; currentUserRole?: any }) {
-	const chat = chatsComposable.selectedChat.value
-	if (!chat) return
-
-	chat.members = data.members
-	if (data.currentUserRole) {
-		chat.currentUserRole = data.currentUserRole
-	}
-
-	const storeChat = chatStore.currentChatDetails
-	if (storeChat && compareIds(storeChat.id, chat.id)) {
-		storeChat.members = data.members
-		if (data.currentUserRole) {
-			storeChat.currentUserRole = data.currentUserRole
-		}
-	}
-}
-
-function handleLoadMore() {
-	const chatId = chatsComposable.selectedChatId.value
-	if (chatId === null) return
-	const state = messagesComposable.getChatState(chatId)
-	if (!state.hasMore) return
-	messagesComposable.fetchMessages(chatId, true)
-}
-
-function handleScrollToBottom() {
-	chatPanelRef.value?.scrollToBottom?.()
-}
-
-async function handleAddFriend(username: string) {
-	await friendsComposable.addFriend(username)
-	await invitesComposable.fetchInvites()
-}
-
-async function handleRemoveFriend(friendId: string | number) {
-	await friendsComposable.removeFriend(friendId)
-}
-
-async function handleAcceptInvite(inviteId: string) {
-	await invitesComposable.acceptInvite(inviteId)
-	await friendsComposable.fetchFriends()
-	await invitesComposable.fetchInvites()
-}
-
-async function handleRejectInvite(inviteId: string) {
-	await invitesComposable.rejectInvite(inviteId)
-	await invitesComposable.fetchInvites()
-}
-
-async function handleSendMessage() {
-	const chat = chatsComposable.selectedChat.value
-
-	if (!chat) return
-
-	const text = messagesComposable.newMessageText.value.trim()
-
-	if (text.length === 0) return
-
-	typingUsersComposable.handleMessageSent(chat.id, emit)
-
-	const replyToId = replyToMessage.value?.id
-	await messagesComposable.sendMessage(chat.id, text, replyToId)
-	replyToMessage.value = null
-	nextTick(() => handleScrollToBottom())
-}
-
-async function handleDeleteMessage(messageId: string | number) {
-	const chat = chatsComposable.selectedChat.value
-	if (!chat) return
-
-	await messagesComposable.deleteMessage(chat.id, messageId)
-}
-
-function handleReactionUpdated(
-	messageId: string | number,
-	emoji: string,
-	action: 'add' | 'remove'
-) {
-	reactionsComposable.handleReactionUpdated(messageId, emoji, action)
-}
-
-function handleReply(message: Message) {
-	replyToMessage.value = message
-}
-
-function handleCancelReply() {
-	replyToMessage.value = null
-}
-
-function handleScrollToMessage(_messageId: string | number) {
-	// Event jest obsługiwany w ChatPanel
-}
-
-function handlePinUpdated(messageId: string | number, isPinned: boolean) {
-	const chat = chatsComposable.selectedChat.value
-	if (!chat) return
-
-	const message = findById(chat.messages, messageId)
-	if (message) {
-		message.isPinned = isPinned
-	}
-}
-
-function handleOpenPinnedMessages() {
-	const chat = chatsComposable.selectedChat.value
-	if (!chat) return
-	chatStore.openChatDetails(chat)
-	isActionsPanelOpen.value = true
-}
-
-function handleTypingInput() {
-	const chatId = chatsComposable.selectedChatId.value
-	if (!chatId) return
-	typingUsersComposable.handleTypingInput(chatId, emit)
-}
+const dashboard = useDashboard()
 
 onMounted(async () => {
-	connect()
-	socketHandlers.setupListeners()
-
-	await chatsComposable.fetchChats()
-
-	if (chatsComposable.selectedChatId.value !== null) return
-
-	const firstChat = chatsComposable.chats.value[0]
-
-	if (!firstChat) return
-
-	chatsComposable.selectChat(firstChat.id)
-
-	await messagesComposable.fetchMessages(firstChat.id, false)
-	await fetchPinnedMessagesForChat(firstChat.id)
-	nextTick(() => handleScrollToBottom())
+	await dashboard.initialize()
 })
 
 onUnmounted(() => {
-	typingUsersComposable.cleanup()
-	socketHandlers.cleanupListeners()
-	disconnect()
+	dashboard.cleanup()
 })
 </script>
 
@@ -329,7 +30,7 @@ onUnmounted(() => {
 							<div class="flex items-center justify-between mb-3">
 								<h1 class="text-xl font-semibold text-slate-900">
 									{{
-										viewModeComposable.viewMode.value === 'chats'
+										dashboard.viewModeComposable.viewMode.value === 'chats'
 											? 'Messages'
 											: 'Friends'
 									}}
@@ -339,15 +40,17 @@ onUnmounted(() => {
 										type="button"
 										:class="[
 											'px-3 py-1.5 text-xs font-medium rounded-lg transition-colors',
-											viewModeComposable.viewMode.value === 'chats'
+											dashboard.viewModeComposable.viewMode.value === 'chats'
 												? 'bg-blue-500 text-white'
 												: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
 										]"
 										tabindex="0"
 										aria-label="Chats view"
-										@click="handleViewModeChange('chats')"
-										@keydown.enter="handleViewModeChange('chats')"
-										@keydown.space.prevent="handleViewModeChange('chats')"
+										@click="dashboard.handleViewModeChange('chats')"
+										@keydown.enter="dashboard.handleViewModeChange('chats')"
+										@keydown.space.prevent="
+											dashboard.handleViewModeChange('chats')
+										"
 									>
 										Chats
 									</button>
@@ -355,36 +58,46 @@ onUnmounted(() => {
 										type="button"
 										:class="[
 											'px-3 py-1.5 text-xs font-medium rounded-lg transition-colors',
-											viewModeComposable.viewMode.value === 'friends'
+											dashboard.viewModeComposable.viewMode.value ===
+											'friends'
 												? 'bg-blue-500 text-white'
 												: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
 										]"
 										tabindex="0"
 										aria-label="Friends view"
-										@click="handleViewModeChange('friends')"
-										@keydown.enter="handleViewModeChange('friends')"
-										@keydown.space.prevent="handleViewModeChange('friends')"
+										@click="dashboard.handleViewModeChange('friends')"
+										@keydown.enter="dashboard.handleViewModeChange('friends')"
+										@keydown.space.prevent="
+											dashboard.handleViewModeChange('friends')
+										"
 									>
 										Friends
 									</button>
 								</div>
 							</div>
 
-							<template v-if="viewModeComposable.viewMode.value === 'friends'">
+							<template
+								v-if="dashboard.viewModeComposable.viewMode.value === 'friends'"
+							>
 								<div class="flex gap-2 mb-3">
 									<button
 										type="button"
 										:class="[
 											'flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors',
-											viewModeComposable.friendsSubView.value === 'list'
+											dashboard.viewModeComposable.friendsSubView.value ===
+											'list'
 												? 'bg-blue-500 text-white'
 												: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
 										]"
 										tabindex="0"
 										aria-label="Friends list"
-										@click="handleFriendsSubViewChange('list')"
-										@keydown.enter="handleFriendsSubViewChange('list')"
-										@keydown.space.prevent="handleFriendsSubViewChange('list')"
+										@click="dashboard.handleFriendsSubViewChange('list')"
+										@keydown.enter="
+											dashboard.handleFriendsSubViewChange('list')
+										"
+										@keydown.space.prevent="
+											dashboard.handleFriendsSubViewChange('list')
+										"
 									>
 										Friends
 									</button>
@@ -392,27 +105,35 @@ onUnmounted(() => {
 										type="button"
 										:class="[
 											'flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors relative',
-											viewModeComposable.friendsSubView.value === 'invites'
+											dashboard.viewModeComposable.friendsSubView.value ===
+											'invites'
 												? 'bg-blue-500 text-white'
 												: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
 										]"
 										tabindex="0"
 										aria-label="Invitations"
-										@click="handleFriendsSubViewChange('invites')"
-										@keydown.enter="handleFriendsSubViewChange('invites')"
+										@click="dashboard.handleFriendsSubViewChange('invites')"
+										@keydown.enter="
+											dashboard.handleFriendsSubViewChange('invites')
+										"
 										@keydown.space.prevent="
-											handleFriendsSubViewChange('invites')
+											dashboard.handleFriendsSubViewChange('invites')
 										"
 									>
 										Invitations
 										<span
-											v-if="invitesComposable.invites.value.totalPending > 0"
+											v-if="
+												dashboard.invitesComposable.invites.value
+													.totalPending > 0
+											"
 											class="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center"
 										>
 											{{
-												invitesComposable.invites.value.totalPending > 9
+												dashboard.invitesComposable.invites.value
+													.totalPending > 9
 													? '9+'
-													: invitesComposable.invites.value.totalPending
+													: dashboard.invitesComposable.invites.value
+															.totalPending
 											}}
 										</span>
 									</button>
@@ -420,26 +141,31 @@ onUnmounted(() => {
 										type="button"
 										:class="[
 											'flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors',
-											viewModeComposable.friendsSubView.value === 'add'
+											dashboard.viewModeComposable.friendsSubView.value ===
+											'add'
 												? 'bg-blue-500 text-white'
 												: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
 										]"
 										tabindex="0"
 										aria-label="Add friends"
-										@click="handleFriendsSubViewChange('add')"
-										@keydown.enter="handleFriendsSubViewChange('add')"
-										@keydown.space.prevent="handleFriendsSubViewChange('add')"
+										@click="dashboard.handleFriendsSubViewChange('add')"
+										@keydown.enter="dashboard.handleFriendsSubViewChange('add')"
+										@keydown.space.prevent="
+											dashboard.handleFriendsSubViewChange('add')
+										"
 									>
 										Add
 									</button>
 								</div>
 							</template>
 
-							<template v-if="viewModeComposable.viewMode.value === 'chats'">
+							<template
+								v-if="dashboard.viewModeComposable.viewMode.value === 'chats'"
+							>
 								<label for="chat-search" class="sr-only">Search chat</label>
 								<input
 									id="chat-search"
-									v-model="searchQuery"
+									v-model="dashboard.searchQuery"
 									type="text"
 									placeholder="Search..."
 									class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -447,78 +173,87 @@ onUnmounted(() => {
 							</template>
 						</div>
 
-						<template v-if="viewModeComposable.viewMode.value === 'chats'">
+						<template v-if="dashboard.viewModeComposable.viewMode.value === 'chats'">
 							<div
-								v-if="chatsComposable.chatsLoading.value"
+								v-if="dashboard.chatsComposable.chatsLoading.value"
 								class="p-4 text-sm text-slate-600"
 							>
 								Loading chats...
 							</div>
 							<div
-								v-else-if="chatsComposable.chatsError.value"
+								v-else-if="dashboard.chatsComposable.chatsError.value"
 								class="p-4 text-sm text-red-600"
 							>
-								{{ chatsComposable.chatsError.value }}
+								{{ dashboard.chatsComposable.chatsError.value }}
 							</div>
 							<ChatList
 								v-else
-								:chats="chatsComposable.filteredChats.value"
+								:chats="dashboard.chatsComposable.filteredChats.value"
 								:selected-chat-id="
-									chatsComposable.selectedChatId.value?.toString() ?? null
+									dashboard.chatsComposable.selectedChatId.value?.toString() ??
+									null
 								"
-								:typing-users-by-chat="typingUsersByChat"
-								@select-chat="handleSelectChat"
+								:typing-users-by-chat="dashboard.typingUsersByChat.value"
+								@select-chat="dashboard.handleSelectChat"
 							/>
 						</template>
 
-						<template v-else-if="viewModeComposable.viewMode.value === 'friends'">
+						<template
+							v-else-if="dashboard.viewModeComposable.viewMode.value === 'friends'"
+						>
 							<div
-								v-if="viewModeComposable.friendsSubView.value === 'list'"
+								v-if="dashboard.viewModeComposable.friendsSubView.value === 'list'"
 								class="h-full"
 							>
 								<div
-									v-if="friendsComposable.friendsLoading.value"
+									v-if="dashboard.friendsComposable.friendsLoading.value"
 									class="p-4 text-sm text-slate-600"
 								>
 									Loading friends...
 								</div>
 								<div
-									v-else-if="friendsComposable.friendsError.value"
+									v-else-if="dashboard.friendsComposable.friendsError.value"
 									class="p-4 text-sm text-red-600"
 								>
-									{{ friendsComposable.friendsError.value }}
+									{{ dashboard.friendsComposable.friendsError.value }}
 								</div>
 								<FriendsList
 									v-else
-									:friends="friendsComposable.friends.value"
-									@remove-friend="handleRemoveFriend"
-									@start-chat="handleStartChat"
+									:friends="dashboard.friendsComposable.friends.value"
+									@remove-friend="dashboard.handleRemoveFriend"
+									@start-chat="dashboard.handleStartChat"
 								/>
 							</div>
-							<div v-else-if="viewModeComposable.friendsSubView.value === 'invites'">
+							<div
+								v-else-if="
+									dashboard.viewModeComposable.friendsSubView.value === 'invites'
+								"
+							>
 								<div
-									v-if="invitesComposable.invitesLoading.value"
+									v-if="dashboard.invitesComposable.invitesLoading.value"
 									class="p-4 text-sm text-slate-600"
 								>
 									Loading invitations...
 								</div>
 								<div
-									v-else-if="invitesComposable.invitesError.value"
+									v-else-if="dashboard.invitesComposable.invitesError.value"
 									class="p-4 text-sm text-red-600"
 								>
-									{{ invitesComposable.invitesError.value }}
+									{{ dashboard.invitesComposable.invitesError.value }}
 								</div>
 								<InvitesPanel
 									v-else
-									:sent-invites="invitesComposable.invites.value.sentInvites"
-									:received-invites="
-										invitesComposable.invites.value.receivedInvites
+									:sent-invites="
+										dashboard.invitesComposable.invites.value.sentInvites
 									"
-									@accept-invite="handleAcceptInvite"
-									@reject-invite="handleRejectInvite"
+									:received-invites="
+										dashboard.invitesComposable.invites.value.receivedInvites
+									"
+									@accept-invite="dashboard.handleAcceptInvite"
+									@reject-invite="dashboard.handleRejectInvite"
 								/>
 							</div>
-							<AddFriendsPanel v-else @add-friend="handleAddFriend" />
+							<AddFriendsPanel v-else @add-friend="dashboard.handleAddFriend" />
 						</template>
 					</div>
 				</aside>
@@ -526,49 +261,53 @@ onUnmounted(() => {
 				<div :class="['w-full py-4 bg-gray']">
 					<div class="flex-1 flex flex-col min-h-0 w-full h-full">
 						<ChatPanel
-							ref="chatPanelRef"
-							:selected-chat="chatsComposable.selectedChat.value"
-							:current-user-id="currentUserId"
-							:typing-users="currentTypingUsers"
+							:ref="(el) => (dashboard.chatPanelRef.value = el)"
+							:selected-chat="dashboard.chatsComposable.selectedChat.value"
+							:current-user-id="dashboard.currentUserId.value"
+							:typing-users="dashboard.currentTypingUsers.value"
 							:can-load-more="
-								chatsComposable.selectedChat.value
-									? messagesComposable.messagesState[
-											chatsComposable.selectedChat.value.id
+								dashboard.chatsComposable.selectedChat.value
+									? dashboard.messagesComposable.messagesState[
+											dashboard.chatsComposable.selectedChat.value.id
 										]?.hasMore
 									: false
 							"
 							:is-loading-more="
-								chatsComposable.selectedChat.value
-									? messagesComposable.messagesState[
-											chatsComposable.selectedChat.value.id
+								dashboard.chatsComposable.selectedChat.value
+									? dashboard.messagesComposable.messagesState[
+											dashboard.chatsComposable.selectedChat.value.id
 										]?.loading
 									: false
 							"
-							@load-more="handleLoadMore"
-							@delete-message="handleDeleteMessage"
-							@reaction-updated="handleReactionUpdated"
-							@pin-updated="handlePinUpdated"
-							@reply="handleReply"
-							@scroll-to-message="handleScrollToMessage"
-							@open-pinned-messages="handleOpenPinnedMessages"
-							@toggle-actions="isActionsPanelOpen = !isActionsPanelOpen"
+							@load-more="dashboard.handleLoadMore"
+							@delete-message="dashboard.handleDeleteMessage"
+							@reaction-updated="dashboard.handleReactionUpdated"
+							@pin-updated="dashboard.handlePinUpdated"
+							@reply="dashboard.handleReply"
+							@scroll-to-message="dashboard.handleScrollToMessage"
+							@open-pinned-messages="dashboard.handleOpenPinnedMessages"
+							@toggle-actions="
+								dashboard.isActionsPanelOpen.value =
+									!dashboard.isActionsPanelOpen.value
+							"
 						/>
-						<template v-if="chatsComposable.selectedChat.value">
+						<template v-if="dashboard.chatsComposable.selectedChat.value">
 							<MessageForm
-								:model-value="messagesComposable.newMessageText.value"
-								:reply-to="replyToMessage"
+								:model-value="dashboard.messagesComposable.newMessageText.value"
+								:reply-to="dashboard.replyToMessage.value"
 								@update:model-value="
-									(val: string) => (messagesComposable.newMessageText.value = val)
+									(val: string) =>
+										(dashboard.messagesComposable.newMessageText.value = val)
 								"
-								@submit="handleSendMessage"
-								@typing="handleTypingInput"
-								@cancel-reply="handleCancelReply"
+								@submit="dashboard.handleSendMessage"
+								@typing="dashboard.handleTypingInput"
+								@cancel-reply="dashboard.handleCancelReply"
 							/>
 						</template>
 					</div>
 
 					<section
-						v-if="!chatsComposable.selectedChat.value"
+						v-if="!dashboard.chatsComposable.selectedChat.value"
 						class="md:hidden flex-1 flex flex-col"
 					>
 						<div class="flex-1 flex items-center justify-center text-gray-500">
@@ -578,11 +317,11 @@ onUnmounted(() => {
 				</div>
 
 				<ChatActionsPanel
-					v-if="currentChat"
-					v-model="isActionsPanelOpen"
-					:chat="currentChat"
-					:current-user-id="currentUserId"
-					@chat-updated="handleChatUpdated"
+					v-if="dashboard.currentChat.value"
+					v-model="dashboard.isActionsPanelOpen.value"
+					:chat="dashboard.currentChat.value"
+					:current-user-id="dashboard.currentUserId.value"
+					@chat-updated="dashboard.handleChatUpdated"
 				/>
 			</div>
 		</div>
