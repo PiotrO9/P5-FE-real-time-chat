@@ -2,7 +2,8 @@ import type { Chat, Message } from '~/types/Chat'
 import {
 	fetchMessages as fetchMessagesFromService,
 	sendMessage as sendMessageToService,
-	deleteMessage as deleteMessageFromService
+	deleteMessage as deleteMessageFromService,
+	forwardMessage as forwardMessageFromService
 } from '~/services/chatService'
 import { getErrorMessage } from '~/utils/errorHelpers'
 import { compareIds, findById, findIndexById } from '~/utils/idHelpers'
@@ -156,7 +157,8 @@ export function useMessages(chats: Ref<Chat[]>, _selectedChatId: Ref<string | nu
 			pinnedAt: updatedMessage.pinnedAt,
 			edited: updatedMessage.edited ?? false,
 			editedAt: updatedMessage.editedAt,
-			replyTo: updatedMessage.replyTo
+			replyTo: updatedMessage.replyTo,
+			forwardedFrom: updatedMessage.forwardedFrom
 		})
 	}
 
@@ -216,6 +218,27 @@ export function useMessages(chats: Ref<Chat[]>, _selectedChatId: Ref<string | nu
 		updateLastMessage(chat)
 	}
 
+	async function forwardMessage(targetChatId: string, messageId: string | number) {
+		try {
+			const res = await forwardMessageFromService(targetChatId, messageId)
+			const forwardedMessage = res.data as unknown as Message
+
+			const chat = findById(chats.value, targetChatId)
+			if (!chat) return
+
+			const exists = findById(chat.messages, forwardedMessage.id)
+			if (!exists) {
+				chat.messages.push(forwardedMessage)
+				chat.lastMessage = forwardedMessage as Message
+			}
+
+			return forwardedMessage
+		} catch (err: any) {
+			toastError(getErrorMessage(err, 'Failed to forward message'))
+			throw err
+		}
+	}
+
 	return {
 		messagesState,
 		newMessageText,
@@ -226,6 +249,7 @@ export function useMessages(chats: Ref<Chat[]>, _selectedChatId: Ref<string | nu
 		addMessage,
 		updateMessage,
 		removeMessage,
+		forwardMessage,
 		getChatState
 	}
 }

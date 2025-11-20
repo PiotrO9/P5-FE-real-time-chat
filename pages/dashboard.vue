@@ -265,6 +265,7 @@ onUnmounted(() => {
 							:selected-chat="dashboard.chatsComposable.selectedChat.value"
 							:current-user-id="dashboard.currentUserId.value"
 							:typing-users="dashboard.currentTypingUsers.value"
+							:available-chats="dashboard.chatsComposable.chats.value"
 							:can-load-more="
 								dashboard.chatsComposable.selectedChat.value
 									? dashboard.messagesComposable.messagesState[
@@ -285,6 +286,7 @@ onUnmounted(() => {
 							@pin-updated="dashboard.handlePinUpdated"
 							@reply="dashboard.handleReply"
 							@scroll-to-message="dashboard.handleScrollToMessage"
+							@forward-message="dashboard.handleForwardMessage"
 							@open-pinned-messages="dashboard.handleOpenPinnedMessages"
 							@mark-latest-as-read="dashboard.handleMarkLatestMessageAsRead"
 							@toggle-actions="

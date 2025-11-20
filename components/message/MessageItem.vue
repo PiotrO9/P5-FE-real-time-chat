@@ -6,15 +6,17 @@ import MessageBubble from './MessageBubble.vue'
 import MessageActionBar from './MessageActionBar.vue'
 import ReactionBadges from './ReactionBadges.vue'
 import MessageReadsIndicator from './MessageReadsIndicator.vue'
+import ForwardMessageDialog from './ForwardMessageDialog.vue'
 
 interface Props {
 	message: Message
 	messages?: Message[]
 	highlighted?: boolean
+	availableChats?: any[]
 }
 
 interface Emits {
-	(e: 'delete', messageId: string | number): void
+	(e: 'delete' | 'scroll-to-message', messageId: string | number): void
 	(
 		e: 'reaction-updated',
 		messageId: string | number,
@@ -23,7 +25,7 @@ interface Emits {
 	): void
 	(e: 'pin-updated', messageId: string | number, isPinned: boolean): void
 	(e: 'reply', message: Message): void
-	(e: 'scroll-to-message', messageId: string | number): void
+	(e: 'forward-message', targetChatId: string, messageId: string | number): void
 }
 
 const { user } = useAuth()
@@ -32,12 +34,15 @@ const chatStore = useChatStore()
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
+const availableChats = computed(() => props.availableChats || [])
+
 const uiState = reactive({
 	showActionBar: false,
 	showContextMenu: false,
 	isFocused: false,
 	isDeleting: false,
 	showDeleteDialog: false,
+	showForwardDialog: false,
 	justClosedDialog: false,
 	isEmojiTooltipOpen: false
 })
@@ -242,6 +247,24 @@ async function handlePinClick() {
 	const newPinState = await togglePin()
 	emit('pin-updated', props.message.id, newPinState)
 }
+
+function handleForwardClick() {
+	if (uiState.isDeleting) return
+	uiState.showContextMenu = false
+	uiState.showForwardDialog = true
+}
+
+function handleForwardDialogUpdate(open: boolean) {
+	uiState.showForwardDialog = open
+	if (!open) {
+		resetDialogState()
+	}
+}
+
+function handleSelectChatForForward(chatId: string) {
+	emit('forward-message', chatId, props.message.id)
+	uiState.showForwardDialog = false
+}
 </script>
 
 <template>
@@ -318,6 +341,7 @@ async function handlePinClick() {
 									@mouseleave="handleActionBarMouseLeave"
 									@delete="handleDeleteClick"
 									@pin="handlePinClick"
+									@forward="handleForwardClick"
 									@context-menu-mouseenter="handleContextMenuMouseEnter"
 									@context-menu-mouseleave="handleContextMenuMouseLeave"
 								/>
@@ -358,6 +382,7 @@ async function handlePinClick() {
 							@mouseleave="handleActionBarMouseLeave"
 							@delete="handleDeleteClick"
 							@pin="handlePinClick"
+							@forward="handleForwardClick"
 							@context-menu-mouseenter="handleContextMenuMouseEnter"
 							@context-menu-mouseleave="handleContextMenuMouseLeave"
 						/>
@@ -408,6 +433,15 @@ async function handlePinClick() {
 			@update:open="handleDialogUpdate"
 			@confirm="handleConfirmDelete"
 			@cancel="handleCancelDelete"
+		/>
+
+		<ForwardMessageDialog
+			v-if="uiState.showForwardDialog"
+			:open="uiState.showForwardDialog"
+			:chats="availableChats"
+			:current-chat-id="props.message.chatId"
+			@update:open="handleForwardDialogUpdate"
+			@select-chat="handleSelectChatForForward"
 		/>
 	</div>
 </template>

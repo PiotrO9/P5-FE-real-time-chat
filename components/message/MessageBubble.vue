@@ -103,6 +103,27 @@ const ariaLabel = computed(() => {
 			</div>
 		</template>
 		<template v-else>
+			<div
+				v-if="message.forwardedFrom"
+				class="mb-2 pb-2 border-b border-current border-opacity-20"
+			>
+				<p class="text-xs opacity-80 font-medium">
+					Przekazane z:
+					{{ message.forwardedFrom.chatName || 'Czat prywatny' }}
+				</p>
+				<p class="text-[10px] opacity-60">
+					{{ message.forwardedFrom.senderUsername }} •
+					{{
+						new Date(message.forwardedFrom.originalCreatedAt).toLocaleString('pl-PL', {
+							day: '2-digit',
+							month: '2-digit',
+							year: 'numeric',
+							hour: '2-digit',
+							minute: '2-digit'
+						})
+					}}
+				</p>
+			</div>
 			<p class="whitespace-pre-wrap break-words">{{ message.content }}</p>
 			<p class="mt-1 text-[10px] opacity-70 flex items-center gap-1">
 				{{ formattedTime }}

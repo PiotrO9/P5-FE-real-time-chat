@@ -8,6 +8,7 @@ interface Props {
 interface Emits {
 	(e: 'delete'): void
 	(e: 'pin'): void
+	(e: 'forward'): void
 	(e: 'mouseenter'): void
 	(e: 'mouseleave'): void
 }
@@ -15,13 +16,15 @@ interface Emits {
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
-function handleKeyDown(event: KeyboardEvent, action: 'delete' | 'pin') {
+function handleKeyDown(event: KeyboardEvent, action: 'delete' | 'pin' | 'forward') {
 	if (event.key === 'Enter' || event.key === ' ') {
 		event.preventDefault()
 		if (action === 'delete') {
 			emit('delete')
 		} else if (action === 'pin') {
 			emit('pin')
+		} else if (action === 'forward') {
+			emit('forward')
 		}
 	}
 }
@@ -54,6 +57,16 @@ function handleKeyDown(event: KeyboardEvent, action: 'delete' | 'pin') {
 			@keydown="(e) => handleKeyDown(e, 'pin')"
 		>
 			{{ isPinned ? 'Odepnij' : 'Przypnij' }}
+		</button>
+		<button
+			type="button"
+			tabindex="0"
+			aria-label="Przekaż wiadomość"
+			class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset"
+			@click.stop="emit('forward')"
+			@keydown="(e) => handleKeyDown(e, 'forward')"
+		>
+			Przekaż
 		</button>
 	</div>
 </template>

@@ -69,7 +69,19 @@ export function useMessageHelpers() {
 						: toNumber(read.userId),
 				username: read.username || '',
 				readAt: typeof read.readAt === 'string' ? read.readAt : read.readAt.toISOString()
-			}))
+			})),
+			forwardedFrom: messageData.forwardedFrom
+				? {
+						messageId: String(messageData.forwardedFrom.messageId),
+						chatId: String(messageData.forwardedFrom.chatId),
+						chatName: messageData.forwardedFrom.chatName ?? null,
+						senderUsername: messageData.forwardedFrom.senderUsername || '',
+						originalCreatedAt:
+							typeof messageData.forwardedFrom.originalCreatedAt === 'string'
+								? messageData.forwardedFrom.originalCreatedAt
+								: messageData.forwardedFrom.originalCreatedAt.toISOString()
+					}
+				: null
 		}
 	}
 

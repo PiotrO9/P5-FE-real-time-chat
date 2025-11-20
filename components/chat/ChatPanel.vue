@@ -10,6 +10,7 @@ interface Props {
 	canLoadMore?: boolean
 	isLoadingMore?: boolean
 	typingUsers?: string[]
+	availableChats?: Chat[]
 }
 
 interface Emits {
@@ -25,6 +26,7 @@ interface Emits {
 	(e: 'reply', message: Chat['messages'][0]): void
 	(e: 'scroll-to-message', messageId: string | number): void
 	(e: 'mark-latest-as-read'): void
+	(e: 'forward-message', targetChatId: string, messageId: string | number): void
 }
 
 const chatStore = useChatStore()
@@ -114,6 +116,10 @@ function handleScrollToMessage(messageId: string | number) {
 	emit('scroll-to-message', messageId)
 }
 
+function handleForwardMessage(targetChatId: string, messageId: string | number) {
+	emit('forward-message', targetChatId, messageId)
+}
+
 function handleOpenPinnedMessages() {
 	emit('open-pinned-messages')
 }
@@ -174,11 +180,13 @@ defineExpose({ scrollToBottom })
 				v-else
 				:messages="messages"
 				:highlighted-message-id="highlightedMessageId"
+				:available-chats="props.availableChats"
 				@delete-message="handleDeleteMessage"
 				@reaction-updated="handleReactionUpdated"
 				@pin-updated="handlePinUpdated"
 				@reply="handleReply"
 				@scroll-to-message="handleScrollToMessage"
+				@forward-message="handleForwardMessage"
 			/>
 		</div>
 

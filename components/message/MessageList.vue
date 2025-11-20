@@ -7,6 +7,7 @@ import SystemMessage from '~/components/message/SystemMessage.vue'
 interface Props {
 	messages: Message[]
 	highlightedMessageId?: string | number | null
+	availableChats?: any[]
 }
 
 interface Emits {
@@ -20,6 +21,7 @@ interface Emits {
 	(e: 'pin-updated', messageId: string | number, isPinned: boolean): void
 	(e: 'reply', message: Message): void
 	(e: 'scroll-to-message', messageId: string | number): void
+	(e: 'forward-message', targetChatId: string, messageId: string | number): void
 }
 
 const props = defineProps<Props>()
@@ -50,6 +52,10 @@ function handleReply(message: Message) {
 function handleScrollToMessage(messageId: string | number) {
 	emit('scroll-to-message', messageId)
 }
+
+function handleForwardMessage(targetChatId: string, messageId: string | number) {
+	emit('forward-message', targetChatId, messageId)
+}
 </script>
 
 <template>
@@ -63,11 +69,13 @@ function handleScrollToMessage(messageId: string | number) {
 				props.highlightedMessageId !== null &&
 				compareIds(message.id, props.highlightedMessageId)
 			"
+			:available-chats="props.availableChats"
 			@delete="handleDeleteMessage"
 			@reaction-updated="handleReactionUpdated"
 			@pin-updated="handlePinUpdated"
 			@reply="handleReply"
 			@scroll-to-message="handleScrollToMessage"
+			@forward-message="handleForwardMessage"
 		/>
 	</template>
 </template>

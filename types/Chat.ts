@@ -52,6 +52,13 @@ export type Message = {
 		senderUsername: string
 	}
 	reads?: MessageReadItem[]
+	forwardedFrom?: {
+		messageId: string
+		chatId: string
+		chatName: string | null
+		senderUsername: string
+		originalCreatedAt: string
+	} | null
 }
 
 export type Chat = {

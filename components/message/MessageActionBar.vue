@@ -25,6 +25,7 @@ interface Emits {
 	(e: 'mouseleave'): void
 	(e: 'delete'): void
 	(e: 'pin'): void
+	(e: 'forward'): void
 	(e: 'context-menu-mouseenter'): void
 	(e: 'context-menu-mouseleave'): void
 }
@@ -117,6 +118,7 @@ defineExpose({
 				:position="position"
 				@delete="emit('delete')"
 				@pin="emit('pin')"
+				@forward="emit('forward')"
 				@mouseenter="emit('context-menu-mouseenter')"
 				@mouseleave="emit('context-menu-mouseleave')"
 			/>

@@ -282,6 +282,15 @@ export function useDashboard() {
 		}
 	}
 
+	async function handleForwardMessage(targetChatId: string, messageId: string | number) {
+		try {
+			await messagesComposable.forwardMessage(targetChatId, messageId)
+			nextTick(() => handleScrollToBottom())
+		} catch (error) {
+			// Błąd jest już obsłużony w forwardMessage
+		}
+	}
+
 	function handleOpenPinnedMessages() {
 		const chat = chatsComposable.selectedChat.value
 		if (!chat) return
@@ -366,6 +375,7 @@ export function useDashboard() {
 		handleOpenPinnedMessages,
 		handleTypingInput,
 		handleMarkLatestMessageAsRead,
+		handleForwardMessage,
 
 		// Lifecycle
 		initialize,

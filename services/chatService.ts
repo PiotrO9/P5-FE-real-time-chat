@@ -92,3 +92,9 @@ export async function fetchMessageReaders(messageId: string | number) {
 		`/api/messages/${messageId}/readers`
 	)
 }
+
+export async function forwardMessage(targetChatId: string, messageId: string | number) {
+	return await useApi<ApiResponse<Message>>('POST', `/api/messages/${targetChatId}/forward`, {
+		messageId
+	})
+}
