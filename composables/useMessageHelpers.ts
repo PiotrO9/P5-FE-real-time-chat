@@ -61,7 +61,15 @@ export function useMessageHelpers() {
 						content: messageData.replyTo.content || '',
 						senderUsername: messageData.replyTo.senderUsername || ''
 					}
-				: undefined
+				: undefined,
+			reads: messageData.reads?.map((read: any) => ({
+				userId:
+					typeof read.userId === 'string' && isNaN(Number(read.userId))
+						? read.userId
+						: toNumber(read.userId),
+				username: read.username || '',
+				readAt: typeof read.readAt === 'string' ? read.readAt : read.readAt.toISOString()
+			}))
 		}
 	}
 

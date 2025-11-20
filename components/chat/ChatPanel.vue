@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Chat } from '~/types/Chat'
+import { onMounted, onUnmounted } from 'vue'
 import ChatHeader from '~/components/chat/ChatHeader.vue'
 import MessageList from '~/components/message/MessageList.vue'
 import PinnedMessagePreview from '~/components/message/PinnedMessagePreview.vue'
@@ -23,6 +24,7 @@ interface Emits {
 	(e: 'pin-updated', messageId: string | number, isPinned: boolean): void
 	(e: 'reply', message: Chat['messages'][0]): void
 	(e: 'scroll-to-message', messageId: string | number): void
+	(e: 'mark-latest-as-read'): void
 }
 
 const chatStore = useChatStore()
@@ -115,6 +117,32 @@ function handleScrollToMessage(messageId: string | number) {
 function handleOpenPinnedMessages() {
 	emit('open-pinned-messages')
 }
+
+function handleScroll() {
+	const el = messagesContainerRef.value
+	if (!el) return
+
+	// Sprawdź czy użytkownik jest blisko dołu (w promieniu 100px)
+	const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 100
+
+	if (isNearBottom) {
+		emit('mark-latest-as-read')
+	}
+}
+
+onMounted(() => {
+	const el = messagesContainerRef.value
+	if (el) {
+		el.addEventListener('scroll', handleScroll)
+	}
+})
+
+onUnmounted(() => {
+	const el = messagesContainerRef.value
+	if (el) {
+		el.removeEventListener('scroll', handleScroll)
+	}
+})
 
 defineExpose({ scrollToBottom })
 </script>

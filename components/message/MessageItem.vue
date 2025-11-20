@@ -5,6 +5,7 @@ import MessageAvatar from './MessageAvatar.vue'
 import MessageBubble from './MessageBubble.vue'
 import MessageActionBar from './MessageActionBar.vue'
 import ReactionBadges from './ReactionBadges.vue'
+import MessageReadsIndicator from './MessageReadsIndicator.vue'
 
 interface Props {
 	message: Message
@@ -389,6 +390,11 @@ async function handlePinClick() {
 							@reaction-click="handleReactionClick"
 						/>
 					</div>
+					<MessageReadsIndicator
+						v-if="isOwnMessage && message.reads && message.reads.length > 0"
+						:reads="message.reads"
+						:max-visible="3"
+					/>
 				</div>
 			</template>
 		</div>

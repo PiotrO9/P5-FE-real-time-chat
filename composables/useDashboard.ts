@@ -2,6 +2,7 @@ import type { Message } from '~/types/Chat'
 import { toNumber } from '~/utils/typeHelpers'
 import { compareIds, findById } from '~/utils/idHelpers'
 import { pinnedMessagesService } from '~/services/pinnedMessagesService'
+import { markMessageAsRead } from '~/services/chatService'
 
 export function useDashboard() {
 	const { user } = useAuth()
@@ -32,6 +33,7 @@ export function useDashboard() {
 		ref(toNumber(currentUserId.value)) as Ref<number>,
 		user
 	)
+	const messageReadsComposable = useMessageReads(chatsComposable.chats)
 
 	const chatPanelRef = ref<any>(null)
 	const isActionsPanelOpen = ref(false)
@@ -89,6 +91,7 @@ export function useDashboard() {
 		chatsComposable,
 		friendsComposable,
 		reactionsComposable,
+		messageReadsComposable,
 		handleScrollToBottom
 	)
 
@@ -131,7 +134,13 @@ export function useDashboard() {
 		chatsComposable.selectChat(chatId)
 		messagesComposable.fetchMessages(chatId, false)
 		await pinnedMessagesService.fetchPinnedMessagesForChat(chatId)
-		nextTick(() => handleScrollToBottom())
+		nextTick(() => {
+			handleScrollToBottom()
+			// Oznacz najnowszą wiadomość jako przeczytaną po załadowaniu chatu
+			setTimeout(() => {
+				handleMarkLatestMessageAsRead()
+			}, 500)
+		})
 		isActionsPanelOpen.value = false
 	}
 
@@ -163,6 +172,10 @@ export function useDashboard() {
 
 	function handleScrollToBottom() {
 		chatPanelRef.value?.scrollToBottom?.()
+		// Oznacz najnowszą wiadomość jako przeczytaną po scroll do dołu
+		nextTick(() => {
+			handleMarkLatestMessageAsRead()
+		})
 	}
 
 	async function handleAddFriend(username: string) {
@@ -200,6 +213,36 @@ export function useDashboard() {
 		await messagesComposable.sendMessage(chat.id, text, replyToId)
 		replyToMessage.value = null
 		nextTick(() => handleScrollToBottom())
+	}
+
+	async function handleMarkLatestMessageAsRead() {
+		const chat = chatsComposable.selectedChat.value
+		if (!chat || !chat.messages || chat.messages.length === 0) return
+
+		// Znajdź najnowszą wiadomość, która nie jest systemowa i nie jest własna
+		const nonSystemMessages = chat.messages.filter(
+			(msg) => !msg.isSystem && !compareIds(msg.senderId, currentUserId.value)
+		)
+
+		if (nonSystemMessages.length === 0) return
+
+		const latestMessage = nonSystemMessages[nonSystemMessages.length - 1]
+		if (!latestMessage) return
+
+		// Sprawdź czy już przeczytana
+		const hasRead = messageReadsComposable.hasUserReadMessage(
+			latestMessage,
+			currentUserId.value
+		)
+
+		if (hasRead) return
+
+		try {
+			await markMessageAsRead(latestMessage.id)
+		} catch (error) {
+			// Cicho ignoruj błędy - nie chcemy przeszkadzać użytkownikowi
+			console.warn('Failed to mark message as read:', error)
+		}
 	}
 
 	async function handleDeleteMessage(messageId: string | number) {
@@ -294,6 +337,7 @@ export function useDashboard() {
 		invitesComposable,
 		typingUsersComposable,
 		reactionsComposable,
+		messageReadsComposable,
 
 		// Refs
 		chatPanelRef,
@@ -321,6 +365,7 @@ export function useDashboard() {
 		handlePinUpdated,
 		handleOpenPinnedMessages,
 		handleTypingInput,
+		handleMarkLatestMessageAsRead,
 
 		// Lifecycle
 		initialize,

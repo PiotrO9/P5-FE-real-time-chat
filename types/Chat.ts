@@ -14,6 +14,12 @@ export interface Reaction {
 	username: string
 }
 
+export interface MessageReadItem {
+	userId: number | string
+	username: string
+	readAt: string
+}
+
 export type SystemMessageType = 'member:added' | 'member:removed' | 'chat:created' | 'chat:updated'
 
 export type Message = {
@@ -45,6 +51,7 @@ export type Message = {
 		content: string
 		senderUsername: string
 	}
+	reads?: MessageReadItem[]
 }
 
 export type Chat = {

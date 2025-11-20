@@ -81,3 +81,14 @@ export async function updateMessage(messageId: string | number, content: string)
 		content
 	})
 }
+
+export async function markMessageAsRead(messageId: string | number) {
+	return await useApi<ApiResponse<void>>('POST', `/api/messages/${messageId}/read`)
+}
+
+export async function fetchMessageReaders(messageId: string | number) {
+	return await useApi<ApiResponse<{ userId: string; username: string; readAt: string }[]>>(
+		'GET',
+		`/api/messages/${messageId}/readers`
+	)
+}

@@ -286,6 +286,7 @@ onUnmounted(() => {
 							@reply="dashboard.handleReply"
 							@scroll-to-message="dashboard.handleScrollToMessage"
 							@open-pinned-messages="dashboard.handleOpenPinnedMessages"
+							@mark-latest-as-read="dashboard.handleMarkLatestMessageAsRead"
 							@toggle-actions="
 								dashboard.isActionsPanelOpen.value =
 									!dashboard.isActionsPanelOpen.value

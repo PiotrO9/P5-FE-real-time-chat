@@ -15,6 +15,7 @@ export function useSocketHandlers(
 	chatsComposable: ReturnType<typeof import('./useChats').useChats>,
 	friendsComposable: ReturnType<typeof import('./useFriends').useFriends>,
 	reactions: ReturnType<typeof import('./useReactions').useReactions>,
+	messageReads: ReturnType<typeof import('./useMessageReads').useMessageReads>,
 	onScrollToBottom: () => void
 ) {
 	const { on, off } = useSocket()
@@ -39,11 +40,11 @@ export function useSocketHandlers(
 		const wasAdded = messages.addMessage(chatId, mappedMessage)
 
 		if (wasAdded) {
-			if (!compareIds(selectedChatId.value, chat.id)) {
+			if (selectedChatId.value && !compareIds(selectedChatId.value, chat.id)) {
 				chatsComposable.incrementUnreadCount(chatId)
 			}
 
-			if (compareIds(selectedChatId.value, chat.id)) {
+			if (selectedChatId.value && compareIds(selectedChatId.value, chat.id)) {
 				nextTick(() => onScrollToBottom())
 			}
 		}
@@ -119,7 +120,7 @@ export function useSocketHandlers(
 		})
 		chat.messages.push(systemMessage)
 
-		if (compareIds(selectedChatId.value, chat.id)) {
+		if (selectedChatId.value && compareIds(selectedChatId.value, chat.id)) {
 			nextTick(() => onScrollToBottom())
 		}
 	}
@@ -139,7 +140,7 @@ export function useSocketHandlers(
 		})
 		chat.messages.push(systemMessage)
 
-		if (compareIds(selectedChatId.value, chat.id)) {
+		if (selectedChatId.value && compareIds(selectedChatId.value, chat.id)) {
 			nextTick(() => onScrollToBottom())
 		}
 	}
@@ -168,7 +169,7 @@ export function useSocketHandlers(
 		})
 		chat.messages.push(systemMessage)
 
-		if (compareIds(selectedChatId.value, chat.id)) {
+		if (selectedChatId.value && compareIds(selectedChatId.value, chat.id)) {
 			nextTick(() => onScrollToBottom())
 		}
 	}
@@ -253,6 +254,40 @@ export function useSocketHandlers(
 		chatStore.removePinnedMessage(chatId, data.messageId)
 	}
 
+	function handleMessageRead(data: {
+		chatId: string
+		messageId: string
+		reader: { userId: string; username: string; readAt: string }
+	}) {
+		const chatId = String(data.chatId)
+		const readerUserId =
+			typeof data.reader.userId === 'string' && isNaN(Number(data.reader.userId))
+				? data.reader.userId
+				: toNumber(data.reader.userId)
+
+		// Dodaj odczyt do wiadomości
+		messageReads.addReadToMessage(chatId, data.messageId, {
+			userId: readerUserId,
+			username: data.reader.username,
+			readAt: data.reader.readAt
+		})
+
+		// Usuń odczyt z poprzednich wiadomości tego użytkownika w tym chacie
+		const chat = chatsComposable.findChatById(chatId)
+		if (!chat) return
+
+		const currentMessageIndex = findIndexById(chat.messages, data.messageId)
+		if (currentMessageIndex === -1) return
+
+		// Usuń odczyty z wszystkich wiadomości przed tą (starszych)
+		for (let i = 0; i < currentMessageIndex; i++) {
+			const message = chat.messages[i]
+			if (message && message.reads) {
+				messageReads.removeReadFromMessage(chatId, message.id, readerUserId)
+			}
+		}
+	}
+
 	function setupListeners() {
 		on('message:new', handleNewMessage)
 		on('message:updated', handleMessageUpdated)
@@ -268,6 +303,7 @@ export function useSocketHandlers(
 		on('member:removed', handleMemberRemoved)
 		on('message:pinned', handleMessagePinned)
 		on('message:unpinned', handleMessageUnpinned)
+		on('message:read', handleMessageRead)
 	}
 
 	function cleanupListeners() {
@@ -285,6 +321,7 @@ export function useSocketHandlers(
 		off('member:removed', handleMemberRemoved)
 		off('message:pinned', handleMessagePinned)
 		off('message:unpinned', handleMessageUnpinned)
+		off('message:read', handleMessageRead)
 	}
 
 	return {
