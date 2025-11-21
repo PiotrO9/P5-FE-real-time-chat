@@ -54,9 +54,18 @@ const messageRef = computed(() => props.message)
 const { isOwnMessage, senderDisplayName } = useMessageOwnership(messageRef, currentUserId)
 const { formatMessageTime } = useMessageHelpers()
 const formattedTime = computed(() => formatMessageTime(props.message.createdAt))
+const isDeleted = computed(() => props.message.isDeleted === true)
 const isEdited = computed(() => props.message.edited === true || !!props.message.editedAt)
 const isPinned = computed(() => props.message.isPinned ?? false)
 const hasReplyTo = computed(() => !!props.message.replyTo)
+
+watch(isDeleted, (newValue) => {
+	if (newValue && uiState.isDeleting) {
+		uiState.isDeleting = false
+		uiState.showDeleteDialog = false
+		resetDialogState()
+	}
+})
 const replyToSenderName = computed(() => {
 	if (!props.message.replyTo) return ''
 	return props.message.replyTo.senderUsername || 'Unknown'
@@ -90,7 +99,11 @@ const isEditing = computed(() => unref(editState.isEditing))
 const isUpdating = computed(() => unref(editState.isUpdating))
 
 const shouldShowActionBar = computed(
-	() => !uiState.isDeleting && !isEditing.value && (uiState.showActionBar || uiState.isFocused)
+	() =>
+		!isDeleted.value &&
+		!uiState.isDeleting &&
+		!isEditing.value &&
+		(uiState.showActionBar || uiState.isFocused)
 )
 
 const actionBarProps = computed(() => ({
@@ -99,6 +112,7 @@ const actionBarProps = computed(() => ({
 	groupedReactions: groupedReactions.value,
 	userReactions: userReactions.value,
 	isDeleting: uiState.isDeleting,
+	isDeleted: isDeleted.value,
 	position: (isOwnMessage.value ? 'right' : 'left') as 'left' | 'right',
 	isOwnMessage: isOwnMessage.value,
 	isPinned: isPinned.value,
@@ -119,7 +133,7 @@ function shouldHideActionBar(): boolean {
 }
 
 function handleFocus() {
-	if (!uiState.isDeleting) {
+	if (!isDeleted.value && !uiState.isDeleting) {
 		uiState.isFocused = true
 		uiState.showActionBar = true
 	}
@@ -131,7 +145,7 @@ function handleBlur() {
 }
 
 function handleMessageMouseEnter() {
-	if (!uiState.isDeleting && !isEditing.value) {
+	if (!isDeleted.value && !uiState.isDeleting && !isEditing.value) {
 		uiState.showActionBar = true
 	}
 }
@@ -183,6 +197,7 @@ function handleEmojiButtonClick() {
 }
 
 function handleReplyClick() {
+	if (isDeleted.value) return
 	emit('reply', props.message)
 }
 
@@ -195,7 +210,8 @@ function handleReplyToClick(event: Event) {
 }
 
 function handleDeleteClick() {
-	if (!isOwnMessage.value || uiState.isDeleting || uiState.justClosedDialog) return
+	if (!isOwnMessage.value || isDeleted.value || uiState.isDeleting || uiState.justClosedDialog)
+		return
 
 	uiState.showContextMenu = false
 	uiState.showDeleteDialog = true
@@ -233,6 +249,7 @@ function handleEditTextareaRef(el: HTMLTextAreaElement | null) {
 }
 
 async function handleReactionClick(emoji: string) {
+	if (isDeleted.value) return
 	const result = await toggleReaction(emoji)
 
 	if (result) {
@@ -241,7 +258,7 @@ async function handleReactionClick(emoji: string) {
 }
 
 async function handlePinClick() {
-	if (isPinning.value || uiState.isDeleting) return
+	if (isDeleted.value || isPinning.value || uiState.isDeleting) return
 	uiState.showContextMenu = false
 
 	const newPinState = await togglePin()
@@ -249,7 +266,7 @@ async function handlePinClick() {
 }
 
 function handleForwardClick() {
-	if (uiState.isDeleting) return
+	if (isDeleted.value || uiState.isDeleting) return
 	uiState.showContextMenu = false
 	uiState.showForwardDialog = true
 }
@@ -348,7 +365,7 @@ function handleSelectChatForForward(chatId: string) {
 							</div>
 
 							<ReactionBadges
-								v-if="hasReactions"
+								v-if="hasReactions && !isDeleted"
 								:grouped-reactions="groupedReactions"
 								:has-user-reaction="hasUserReaction"
 								:get-reaction-count="getReactionCount"
@@ -407,7 +424,7 @@ function handleSelectChatForForward(chatId: string) {
 						/>
 
 						<ReactionBadges
-							v-if="hasReactions"
+							v-if="hasReactions && !isDeleted"
 							:grouped-reactions="groupedReactions"
 							:has-user-reaction="hasUserReaction"
 							:get-reaction-count="getReactionCount"

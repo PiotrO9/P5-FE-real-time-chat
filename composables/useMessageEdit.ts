@@ -11,7 +11,7 @@ export function useMessageEdit(message: Ref<Message>, onSuccess?: () => void) {
 	const { error: toastError } = useToast()
 
 	function startEdit() {
-		if (isEditing.value) return
+		if (isEditing.value || message.value.isDeleted) return
 		isEditing.value = true
 		editContent.value = message.value.content
 		nextTick(() => {
@@ -29,6 +29,7 @@ export function useMessageEdit(message: Ref<Message>, onSuccess?: () => void) {
 	async function saveEdit() {
 		if (
 			isUpdating.value ||
+			message.value.isDeleted ||
 			!editContent.value.trim() ||
 			editContent.value.trim() === message.value.content
 		) {

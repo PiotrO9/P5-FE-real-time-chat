@@ -8,6 +8,7 @@ interface Props {
 	groupedReactions: Record<string, any>
 	userReactions: any[]
 	isDeleting: boolean
+	isDeleted?: boolean
 	position: 'left' | 'right'
 	isOwnMessage: boolean
 	isPinned: boolean
@@ -69,9 +70,10 @@ defineExpose({
 				type="button"
 				tabindex="0"
 				aria-label="Dodaj reakcję"
-				class="h-8 w-8 rounded-full bg-white hover:bg-gray-100 border border-gray-300 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 shadow-sm"
+				:disabled="props.isDeleted"
+				class="h-8 w-8 rounded-full bg-white hover:bg-gray-100 border border-gray-300 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
 				@click.stop="handleEmojiButtonClick"
-				@keydown="(e) => e.key === 'Enter' && handleEmojiButtonClick()"
+				@keydown="(e) => e.key === 'Enter' && !props.isDeleted && handleEmojiButtonClick()"
 			>
 				<Icon name="smile" class="h-4 w-4" />
 			</button>
@@ -91,9 +93,13 @@ defineExpose({
 			type="button"
 			tabindex="0"
 			aria-label="Odpowiedz na wiadomość"
-			class="h-8 w-8 rounded-full bg-white hover:bg-gray-100 border border-gray-300 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 shadow-sm"
-			@click.stop="emit('reply-click')"
-			@keydown="(e) => (e.key === 'Enter' || e.key === ' ') && emit('reply-click')"
+			:disabled="props.isDeleted"
+			class="h-8 w-8 rounded-full bg-white hover:bg-gray-100 border border-gray-300 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
+			@click.stop="!props.isDeleted && emit('reply-click')"
+			@keydown="
+				(e) =>
+					!props.isDeleted && (e.key === 'Enter' || e.key === ' ') && emit('reply-click')
+			"
 		>
 			<Icon name="reply" class="h-4 w-4" />
 		</button>
@@ -102,10 +108,14 @@ defineExpose({
 				type="button"
 				tabindex="0"
 				aria-label="Menu kontekstowe"
-				class="h-8 w-8 rounded-full bg-white hover:bg-gray-100 border border-gray-300 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 shadow-sm"
-				@click.stop="emit('context-menu-toggle')"
+				:disabled="props.isDeleted"
+				class="h-8 w-8 rounded-full bg-white hover:bg-gray-100 border border-gray-300 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
+				@click.stop="!props.isDeleted && emit('context-menu-toggle')"
 				@keydown="
-					(e) => (e.key === 'Enter' || e.key === ' ') && emit('context-menu-toggle')
+					(e) =>
+						!props.isDeleted &&
+						(e.key === 'Enter' || e.key === ' ') &&
+						emit('context-menu-toggle')
 				"
 			>
 				<Icon name="context-menu-dots" class="h-4 w-4" />
@@ -115,6 +125,7 @@ defineExpose({
 				ref="contextMenuRef"
 				:is-own-message="isOwnMessage"
 				:is-pinned="isPinned"
+				:is-deleted="isDeleted"
 				:position="position"
 				@delete="emit('delete')"
 				@pin="emit('pin')"

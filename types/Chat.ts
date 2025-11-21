@@ -59,6 +59,7 @@ export type Message = {
 		senderUsername: string
 		originalCreatedAt: string
 	} | null
+	isDeleted?: boolean
 }
 
 export type Chat = {

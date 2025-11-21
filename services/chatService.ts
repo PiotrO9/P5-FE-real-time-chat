@@ -26,7 +26,7 @@ export async function sendMessage(chatId: string, content: string, replyToId?: s
 }
 
 export async function deleteMessage(messageId: string | number) {
-	return await useApi<ApiResponse<void>>('DELETE', `/api/messages/${messageId}`)
+	return await useApi<ApiResponse<Message>>('DELETE', `/api/messages/${messageId}`)
 }
 
 export async function addReaction(messageId: string | number, emoji: string) {

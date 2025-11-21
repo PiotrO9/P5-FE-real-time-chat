@@ -8,6 +8,7 @@ import {
 import { getErrorMessage } from '~/utils/errorHelpers'
 import { compareIds, findById, findIndexById } from '~/utils/idHelpers'
 import { useToast } from './useToast'
+import { useMessageHelpers } from './useMessageHelpers'
 
 export function useMessages(chats: Ref<Chat[]>, _selectedChatId: Ref<string | null>) {
 	const { error: toastError } = useToast()
@@ -103,10 +104,10 @@ export function useMessages(chats: Ref<Chat[]>, _selectedChatId: Ref<string | nu
 			const res = await sendMessageToService(chatId, content, replyToId)
 			const saved = res.data as unknown as Message
 
-		const chat = findById(chats.value, chatId)
-		if (!chat) return
+			const chat = findById(chats.value, chatId)
+			if (!chat) return
 
-		const exists = findById(chat.messages, saved.id)
+			const exists = findById(chat.messages, saved.id)
 			if (!exists) {
 				chat.messages.push(saved)
 				chat.lastMessage = saved as Message
@@ -123,12 +124,21 @@ export function useMessages(chats: Ref<Chat[]>, _selectedChatId: Ref<string | nu
 		if (!chat) return
 
 		try {
-			await deleteMessageFromService(messageId)
-			chat.messages = chat.messages.filter(
-				(message) => !compareIds(message.id, messageId)
-			)
+			const res = await deleteMessageFromService(messageId)
+			const { mapMessageFromBackend } = useMessageHelpers()
 
-			updateLastMessage(chat)
+			if (res?.data) {
+				const deletedMessage = mapMessageFromBackend(res.data)
+
+				const messageIndex = findIndexById(chat.messages, messageId)
+				if (messageIndex !== -1) {
+					const existingMessage = chat.messages[messageIndex]
+					if (existingMessage) {
+						updateMessageFields(existingMessage, deletedMessage)
+						syncLastMessage(chat, deletedMessage)
+					}
+				}
+			}
 		} catch (err: any) {
 			toastError(getErrorMessage(err, 'Failed to delete message'))
 		}
@@ -143,10 +153,7 @@ export function useMessages(chats: Ref<Chat[]>, _selectedChatId: Ref<string | nu
 		}
 	}
 
-	function updateMessageFields(
-		existingMessage: Message,
-		updatedMessage: Message
-	): void {
+	function updateMessageFields(existingMessage: Message, updatedMessage: Message): void {
 		Object.assign(existingMessage, {
 			content: updatedMessage.content,
 			senderUsername: updatedMessage.senderUsername,
@@ -158,7 +165,8 @@ export function useMessages(chats: Ref<Chat[]>, _selectedChatId: Ref<string | nu
 			edited: updatedMessage.edited ?? false,
 			editedAt: updatedMessage.editedAt,
 			replyTo: updatedMessage.replyTo,
-			forwardedFrom: updatedMessage.forwardedFrom
+			forwardedFrom: updatedMessage.forwardedFrom,
+			isDeleted: updatedMessage.isDeleted ?? false
 		})
 	}
 

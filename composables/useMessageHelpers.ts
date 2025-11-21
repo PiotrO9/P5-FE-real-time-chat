@@ -81,7 +81,8 @@ export function useMessageHelpers() {
 								? messageData.forwardedFrom.originalCreatedAt
 								: messageData.forwardedFrom.originalCreatedAt.toISOString()
 					}
-				: null
+				: null,
+			isDeleted: messageData.isDeleted ?? false
 		}
 	}
 

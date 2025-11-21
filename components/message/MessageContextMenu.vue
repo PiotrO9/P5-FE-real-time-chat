@@ -2,6 +2,7 @@
 interface Props {
 	isOwnMessage: boolean
 	isPinned: boolean
+	isDeleted?: boolean
 	position: 'left' | 'right'
 }
 
@@ -42,9 +43,10 @@ function handleKeyDown(event: KeyboardEvent, action: 'delete' | 'pin' | 'forward
 			type="button"
 			tabindex="0"
 			aria-label="Usuń wiadomość"
-			class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset"
-			@click.stop="emit('delete')"
-			@keydown="(e) => handleKeyDown(e, 'delete')"
+			:disabled="isDeleted"
+			class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+			@click.stop="!isDeleted && emit('delete')"
+			@keydown="(e) => !isDeleted && handleKeyDown(e, 'delete')"
 		>
 			Usuń
 		</button>
@@ -52,9 +54,10 @@ function handleKeyDown(event: KeyboardEvent, action: 'delete' | 'pin' | 'forward
 			type="button"
 			tabindex="0"
 			:aria-label="isPinned ? 'Odepnij wiadomość' : 'Przypnij wiadomość'"
-			class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset"
-			@click.stop="emit('pin')"
-			@keydown="(e) => handleKeyDown(e, 'pin')"
+			:disabled="isDeleted"
+			class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+			@click.stop="!isDeleted && emit('pin')"
+			@keydown="(e) => !isDeleted && handleKeyDown(e, 'pin')"
 		>
 			{{ isPinned ? 'Odepnij' : 'Przypnij' }}
 		</button>
@@ -62,9 +65,10 @@ function handleKeyDown(event: KeyboardEvent, action: 'delete' | 'pin' | 'forward
 			type="button"
 			tabindex="0"
 			aria-label="Przekaż wiadomość"
-			class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset"
-			@click.stop="emit('forward')"
-			@keydown="(e) => handleKeyDown(e, 'forward')"
+			:disabled="isDeleted"
+			class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+			@click.stop="!isDeleted && emit('forward')"
+			@keydown="(e) => !isDeleted && handleKeyDown(e, 'forward')"
 		>
 			Przekaż
 		</button>

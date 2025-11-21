@@ -13,7 +13,7 @@ interface Props {
 	senderDisplayName: string
 	formattedTime: string
 	isEdited: boolean
-	editTextareaRef?: (el: HTMLTextAreaElement | null) => void
+	editTextareaRef?: (el: any) => void
 }
 
 interface Emits {
@@ -27,26 +27,32 @@ const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const bubbleClasses = computed(() => {
+	const isDeleted = props.message.isDeleted === true
 	if (props.isOwnMessage) {
 		return {
-			'opacity-50': props.isDeleting,
-			'bg-blue-600 text-white': !props.isPinned,
-			'bg-yellow-500 text-white': props.isPinned,
+			'opacity-50': props.isDeleting || isDeleted,
+			'bg-blue-600 text-white': !props.isPinned && !isDeleted,
+			'bg-yellow-500 text-white': props.isPinned && !isDeleted,
+			'bg-gray-400 text-white': isDeleted,
 			'ring-2 ring-gray-900 ring-offset-2': props.highlighted,
 			'rounded-br-none': true
 		}
 	} else {
 		return {
-			'bg-white border-gray-200': !props.isPinned,
-			'bg-yellow-50 border-yellow-300': props.isPinned,
+			'bg-white border-gray-200': !props.isPinned && !isDeleted,
+			'bg-yellow-50 border-yellow-300': props.isPinned && !isDeleted,
+			'bg-gray-100 border-gray-300': isDeleted,
 			'ring-2 ring-gray-900 ring-offset-2': props.highlighted,
 			'rounded-bl-none': true
 		}
 	}
 })
 
+const isDeleted = computed(() => props.message.isDeleted === true)
+
 const ariaLabel = computed(() => {
 	if (props.isDeleting) return 'Deleting message...'
+	if (isDeleted.value) return 'Deleted message'
 	if (props.isOwnMessage) {
 		return `Message from you${props.isPinned ? ' (pinned)' : ''}`
 	}
@@ -64,6 +70,9 @@ const ariaLabel = computed(() => {
 		:aria-label="ariaLabel"
 	>
 		<p v-if="isDeleting" class="whitespace-pre-wrap break-words italic">Deleting...</p>
+		<p v-else-if="isDeleted" class="whitespace-pre-wrap break-words italic opacity-70">
+			Wiadomość została usunięta
+		</p>
 		<template v-else-if="isEditing">
 			<textarea
 				:ref="editTextareaRef"
