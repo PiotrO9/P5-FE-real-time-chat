@@ -14,7 +14,7 @@ interface Props {
 }
 
 interface Emits {
-	(e: 'load-more' | 'toggle-actions' | 'open-pinned-messages'): void
+	(e: 'load-more' | 'toggle-actions' | 'open-pinned-messages' | 'back'): void
 	(e: 'delete-message', messageId: string | number): void
 	(
 		e: 'reaction-updated',
@@ -124,6 +124,10 @@ function handleOpenPinnedMessages() {
 	emit('open-pinned-messages')
 }
 
+function handleBack() {
+	emit('back')
+}
+
 function handleScroll() {
 	const el = messagesContainerRef.value
 	if (!el) return
@@ -154,8 +158,8 @@ defineExpose({ scrollToBottom })
 </script>
 
 <template>
-	<section v-if="selectedChat" class="hidden md:flex flex-1 flex-col min-h-0 h-full">
-		<ChatHeader :selected-chat @toggle-actions="handleToggleActions" />
+	<section v-if="selectedChat" class="flex flex-1 flex-col min-h-0 h-full">
+		<ChatHeader :selected-chat @toggle-actions="handleToggleActions" @back="handleBack" />
 
 		<PinnedMessagePreview
 			v-if="lastPinnedMessage"
@@ -166,7 +170,7 @@ defineExpose({ scrollToBottom })
 
 		<div
 			ref="messagesContainerRef"
-			class="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 py-4 space-y-4 bg-white min-h-0"
+			class="flex-1 overflow-y-auto overflow-x-hidden px-3 md:px-6 py-4 space-y-4 bg-white min-h-0"
 		>
 			<LoadMoreButton
 				v-if="canLoadMore"
@@ -193,9 +197,4 @@ defineExpose({ scrollToBottom })
 		<Typing v-if="typingText" :typing-text />
 	</section>
 
-	<section v-else class="md:hidden flex-1 flex flex-col">
-		<div class="flex-1 flex items-center justify-center text-gray-500">
-			Select a chat from the list on the left
-		</div>
-	</section>
 </template>

@@ -25,6 +25,7 @@ interface Props {
 
 interface Emits {
 	(e: 'chat-updated', data: { members: ChatMember[]; currentUserRole?: Role }): void
+	(e: 'close'): void
 }
 
 const chatStore = useChatStore()
@@ -195,6 +196,7 @@ function handleCancelRoleChange() {
 function handleToggleState() {
 	chatStore.closeChatDetails()
 	isOpen.value = false
+	emit('close')
 }
 
 function handleClickOutside(event: MouseEvent) {
@@ -394,61 +396,123 @@ onUnmounted(() => {
 </script>
 
 <template>
-	<aside v-if="chat && isOpen" class="md:min-w-96 bg-white flex flex-col">
-		<div class="flex flex-col py-4 pr-4 bg-gray flex-1">
-			<ChatActionsHeader
-				:is-group-chat="isGroupChat"
-				:is-owner="isOwner"
-				@close="handleToggleState"
-			/>
+	<template v-if="chat && isOpen">
+		<Teleport to="body">
+			<div class="lg:hidden fixed inset-0 z-50 bg-black/50" @click.self="handleToggleState">
+				<div class="bg-white flex flex-col h-full shadow-xl">
+					<div class="flex flex-col p-4 bg-gray flex-1 overflow-hidden">
+						<ChatActionsHeader
+							:is-group-chat="isGroupChat"
+							:is-owner="isOwner"
+							@close="handleToggleState"
+						/>
 
-			<div class="flex-1 overflow-y-auto bg-white rounded-b-[1.125rem]">
-				<template v-if="!isGroupChat && chat?.otherUser">
-					<UserInfoSection :user="chat.otherUser" />
-				</template>
+						<div class="flex-1 overflow-y-auto bg-white rounded-b-[1.125rem]">
+							<template v-if="!isGroupChat && chat?.otherUser">
+								<UserInfoSection :user="chat.otherUser" />
+							</template>
 
-				<PinnedMessagesList
-					:pinned-messages="pinnedMessagesList"
-					:is-loading="pinnedMessagesLoading"
-					@message-click="handlePinnedMessageClick"
+							<PinnedMessagesList
+								:pinned-messages="pinnedMessagesList"
+								:is-loading="pinnedMessagesLoading"
+								@message-click="handlePinnedMessageClick"
+							/>
+
+							<template v-if="isGroupChat && isOwner">
+								<AddUserSection
+									:available-friends="availableFriends"
+									:is-adding-user="isAddingUser"
+									@add-user="handleAddUserFromSection"
+									@add-user-click="handleAddUserClick"
+								/>
+
+								<ChatMembersList
+									:members="members"
+									:current-user-id="currentUserId"
+									:is-owner="isOwner"
+									:is-loading="chatDetailsLoading"
+									:open-role-menu-id="openRoleMenuId"
+									:is-updating-role="isUpdatingRole"
+									:is-removing-user="isRemovingUser"
+									@toggle-role-menu="handleToggleRoleMenu"
+									@change-role="handleChangeRole"
+									@remove-user="handleRemoveUser"
+								/>
+							</template>
+
+							<template v-else-if="isGroupChat">
+								<ChatMembersList
+									:members="members"
+									:current-user-id="currentUserId"
+									:is-owner="false"
+									:is-loading="chatDetailsLoading"
+									:open-role-menu-id="null"
+									:is-updating-role="null"
+									:is-removing-user="null"
+								/>
+							</template>
+						</div>
+					</div>
+				</div>
+			</div>
+		</Teleport>
+
+		<aside class="hidden lg:flex md:min-w-96 bg-white flex-col">
+			<div class="flex flex-col py-4 pr-4 bg-gray flex-1">
+				<ChatActionsHeader
+					:is-group-chat="isGroupChat"
+					:is-owner="isOwner"
+					@close="handleToggleState"
 				/>
 
-				<template v-if="isGroupChat && isOwner">
-					<AddUserSection
-						:available-friends="availableFriends"
-						:is-adding-user="isAddingUser"
-						@add-user="handleAddUserFromSection"
-						@add-user-click="handleAddUserClick"
+				<div class="flex-1 overflow-y-auto bg-white rounded-b-[1.125rem]">
+					<template v-if="!isGroupChat && chat?.otherUser">
+						<UserInfoSection :user="chat.otherUser" />
+					</template>
+
+					<PinnedMessagesList
+						:pinned-messages="pinnedMessagesList"
+						:is-loading="pinnedMessagesLoading"
+						@message-click="handlePinnedMessageClick"
 					/>
 
-					<ChatMembersList
-						:members="members"
-						:current-user-id="currentUserId"
-						:is-owner="isOwner"
-						:is-loading="chatDetailsLoading"
-						:open-role-menu-id="openRoleMenuId"
-						:is-updating-role="isUpdatingRole"
-						:is-removing-user="isRemovingUser"
-						@toggle-role-menu="handleToggleRoleMenu"
-						@change-role="handleChangeRole"
-						@remove-user="handleRemoveUser"
-					/>
-				</template>
+					<template v-if="isGroupChat && isOwner">
+						<AddUserSection
+							:available-friends="availableFriends"
+							:is-adding-user="isAddingUser"
+							@add-user="handleAddUserFromSection"
+							@add-user-click="handleAddUserClick"
+						/>
 
-				<template v-else-if="isGroupChat">
-					<ChatMembersList
-						:members="members"
-						:current-user-id="currentUserId"
-						:is-owner="false"
-						:is-loading="chatDetailsLoading"
-						:open-role-menu-id="null"
-						:is-updating-role="null"
-						:is-removing-user="null"
-					/>
-				</template>
+						<ChatMembersList
+							:members="members"
+							:current-user-id="currentUserId"
+							:is-owner="isOwner"
+							:is-loading="chatDetailsLoading"
+							:open-role-menu-id="openRoleMenuId"
+							:is-updating-role="isUpdatingRole"
+							:is-removing-user="isRemovingUser"
+							@toggle-role-menu="handleToggleRoleMenu"
+							@change-role="handleChangeRole"
+							@remove-user="handleRemoveUser"
+						/>
+					</template>
+
+					<template v-else-if="isGroupChat">
+						<ChatMembersList
+							:members="members"
+							:current-user-id="currentUserId"
+							:is-owner="false"
+							:is-loading="chatDetailsLoading"
+							:open-role-menu-id="null"
+							:is-updating-role="null"
+							:is-removing-user="null"
+						/>
+					</template>
+				</div>
 			</div>
-		</div>
-	</aside>
+		</aside>
+	</template>
 
 	<Dialog
 		:open="showConfirmDialog"

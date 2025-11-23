@@ -80,7 +80,7 @@ function handleKeyDown(event: KeyboardEvent) {
 			<ChatInitial :chat-initial />
 			<div class="min-w-0 flex-1 flex flex-col">
 				<div class="flex items-center justify-between gap-2 min-w-0">
-					<p class="font-medium text-slate-900 truncate min-w-0">
+					<p class="font-medium text-sm md:text-base text-slate-900 truncate min-w-0">
 						{{ chatName }}
 					</p>
 				</div>
@@ -106,7 +106,7 @@ function handleKeyDown(event: KeyboardEvent) {
 					</div>
 					<span class="truncate">{{ typingText }}</span>
 				</div>
-				<p v-else :class="['text-sm truncate min-w-0 text-slate-600']">
+				<p v-else :class="['text-xs md:text-sm truncate min-w-0 text-slate-600']">
 					<span v-if="senderName" class="font-semibold">{{ senderName }}</span
 					><span v-if="senderName">: </span>{{ displayMessage }}
 				</p>

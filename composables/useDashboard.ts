@@ -305,6 +305,12 @@ export function useDashboard() {
 		typingUsersComposable.handleTypingInput(chatId, emit)
 	}
 
+	function handleBackToChats() {
+		chatsComposable.selectedChatId.value = null
+		isActionsPanelOpen.value = false
+		replyToMessage.value = null
+	}
+
 	async function initialize() {
 		connect()
 		socketHandlers.setupListeners()
@@ -377,6 +383,7 @@ export function useDashboard() {
 		handleTypingInput,
 		handleMarkLatestMessageAsRead,
 		handleForwardMessage,
+		handleBackToChats,
 
 		// Lifecycle
 		initialize,

@@ -62,7 +62,7 @@ const ariaLabel = computed(() => {
 
 <template>
 	<div
-		class="relative rounded-2xl px-4 py-2 text-sm shadow-sm transition-all duration-300"
+		class="relative rounded-2xl px-3 md:px-4 py-2 text-xs md:text-sm shadow-sm transition-all duration-300 max-w-[85%] md:max-w-[75%]"
 		:class="[
 			isOwnMessage ? 'rounded-br-none' : 'max-w-full border rounded-bl-none',
 			bubbleClasses

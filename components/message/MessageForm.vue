@@ -91,7 +91,10 @@ watch(
 				<Icon name="remove" class="h-4 w-4 text-gray-600" />
 			</button>
 		</div>
-		<form class="md:px-3 py-3 flex items-end gap-3" @submit.prevent="handleSubmit">
+		<form
+			class="px-3 md:px-3 py-3 flex items-end gap-2 md:gap-3"
+			@submit.prevent="handleSubmit"
+		>
 			<label for="message" class="sr-only">Message</label>
 			<textarea
 				id="message"
@@ -101,15 +104,17 @@ watch(
 				:rows="1"
 				:placeholder="hasReplyTo ? 'Napisz odpowiedź...' : 'Type a message...'"
 				:value="props.modelValue"
+				class="flex-1 min-w-0 text-sm md:text-base resize-none border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 				@input="handleInput"
 				@keydown="handleKeyDown"
 			></textarea>
 			<button
 				type="submit"
-				class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+				class="inline-flex items-center justify-center px-3 md:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm md:text-base font-medium rounded-lg transition-colors flex-shrink-0"
 				aria-label="Send message"
 			>
-				Send
+				<span class="hidden sm:inline">Send</span>
+				<span class="sm:hidden">→</span>
 			</button>
 		</form>
 	</div>

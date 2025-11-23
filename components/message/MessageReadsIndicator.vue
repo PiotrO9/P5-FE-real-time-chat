@@ -136,7 +136,6 @@ const hasReads = computed(() => props.reads.length > 0)
 			+{{ hiddenReadsCount }}
 		</div>
 
-		<!-- Custom Tooltip -->
 		<Transition
 			enter-active-class="transition-opacity duration-200"
 			enter-from-class="opacity-0"
@@ -152,13 +151,11 @@ const hasReads = computed(() => props.reads.length > 0)
 				@mouseenter="handleTooltipMouseEnter"
 				@mouseleave="handleTooltipMouseLeave"
 			>
-				<!-- Single read tooltip -->
 				<div v-if="tooltipContent.isSingle" class="flex flex-col gap-1">
 					<div class="font-semibold">{{ tooltipContent.username }}</div>
 					<div class="text-gray-300 text-[11px]">Read {{ tooltipContent.dateTime }}</div>
 				</div>
 
-				<!-- Multiple reads tooltip -->
 				<div v-else-if="tooltipContent.reads" class="flex flex-col gap-2">
 					<div class="font-semibold mb-1">
 						Read by {{ tooltipContent.reads.length }} more
@@ -175,7 +172,6 @@ const hasReads = computed(() => props.reads.length > 0)
 					</div>
 				</div>
 
-				<!-- Arrow pointing right (towards the read indicators) -->
 				<div
 					class="absolute top-full right-4 -mt-1 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"
 				></div>

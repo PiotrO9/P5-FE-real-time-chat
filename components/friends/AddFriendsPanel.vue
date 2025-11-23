@@ -43,18 +43,20 @@ function handleKeyDown(event: KeyboardEvent) {
 					v-model="username"
 					type="text"
 					placeholder="Enter username..."
+					class="flex-1 min-w-0 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 					:disabled="isSubmitting"
 					@keydown="handleKeyDown"
 				/>
 				<button
 					type="button"
-					class="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+					class="px-3 md:px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
 					tabindex="0"
 					aria-label="Send invitation"
 					:disabled="!username.trim() || isSubmitting"
 					@click="handleSubmit"
 				>
-					Send
+					<span class="hidden sm:inline">Send</span>
+					<span class="sm:hidden">+</span>
 				</button>
 			</div>
 			<p class="mt-2 text-xs text-gray-500">

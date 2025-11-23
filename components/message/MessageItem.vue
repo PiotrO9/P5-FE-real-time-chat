@@ -308,7 +308,7 @@ function handleSelectChatForForward(chatId: string) {
 			:class="isOwnMessage ? 'justify-end' : 'justify-start'"
 		>
 			<template v-if="!isOwnMessage">
-				<div class="flex items-start gap-2 max-w-[85%] relative">
+				<div class="flex items-start gap-2 max-w-[90%] md:max-w-[85%] relative">
 					<MessageAvatar :sender-name="senderDisplayName" />
 
 					<div class="min-w-0 flex-1 flex items-start gap-2">
@@ -379,7 +379,7 @@ function handleSelectChatForForward(chatId: string) {
 
 			<template v-else>
 				<div
-					class="flex flex-col items-end max-w-[85%] relative z-1"
+					class="flex flex-col items-end max-w-[90%] md:max-w-[85%] relative z-1"
 					tabindex="0"
 					@mouseenter="handleMessageMouseEnter"
 					@mouseleave="handleMessageMouseLeave"

@@ -42,7 +42,7 @@ function handlePinnedMessageClick(messageId: string | number) {
 			>
 				<div class="flex items-start justify-between gap-2">
 					<div class="flex-1 min-w-0">
-						<div class="flex items-center gap-2 mb-1">
+						<div class="flex flex-wrap items-center gap-2 mb-1">
 							<p class="font-medium text-gray-900">
 								{{ pinnedMessage.senderUsername }}
 							</p>

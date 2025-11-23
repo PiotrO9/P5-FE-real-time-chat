@@ -128,10 +128,10 @@ function getStatusText(status: string): string {
 										</p>
 									</div>
 								</div>
-								<div class="flex items-center gap-2 flex-shrink-0">
+								<div class="flex items-center gap-1 md:gap-2 flex-shrink-0">
 									<span
 										:class="[
-											'px-2 py-1 text-xs font-medium rounded-full border',
+											'px-2 py-1 text-xs font-medium rounded-full border hidden sm:inline-block',
 											getStatusBadgeClass(invite.status)
 										]"
 									>
@@ -140,23 +140,25 @@ function getStatusText(status: string): string {
 									<template v-if="invite.status === 'PENDING'">
 										<button
 											type="button"
-											class="px-3 py-1.5 bg-green-500 text-white text-xs font-medium rounded-lg hover:bg-green-600 transition-colors"
+											class="px-2 md:px-3 py-1.5 bg-green-500 text-white text-xs font-medium rounded-lg hover:bg-green-600 transition-colors"
 											tabindex="0"
 											aria-label="Accept invitation"
 											@click="handleAccept(invite.id)"
 											@keydown="handleKeyDown($event, 'accept', invite.id)"
 										>
-											Accept
+											<span class="hidden sm:inline">Accept</span>
+											<span class="sm:hidden">✓</span>
 										</button>
 										<button
 											type="button"
-											class="px-3 py-1.5 bg-red-500 text-white text-xs font-medium rounded-lg hover:bg-red-600 transition-colors"
+											class="px-2 md:px-3 py-1.5 bg-red-500 text-white text-xs font-medium rounded-lg hover:bg-red-600 transition-colors"
 											tabindex="0"
 											aria-label="Reject invitation"
 											@click="handleReject(invite.id)"
 											@keydown="handleKeyDown($event, 'reject', invite.id)"
 										>
-											Reject
+											<span class="hidden sm:inline">Reject</span>
+											<span class="sm:hidden">×</span>
 										</button>
 									</template>
 								</div>

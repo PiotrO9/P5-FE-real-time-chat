@@ -19,16 +19,21 @@ onUnmounted(() => {
 </script>
 
 <template>
-	<div class="h-screen w-screen bg-slate-50">
+	<div class="h-screen w-screen bg-slate-50 overflow-hidden">
 		<div class="h-full w-full">
-			<div class="h-full flex bg-white">
-				<aside class="w-full md:max-w-96 h-dvh border-gray-200 flex flex-col p-4 bg-gray">
+			<div class="h-full flex bg-white relative">
+				<aside
+					:class="[
+						'w-full md:max-w-96 h-dvh border-gray-200 flex flex-col p-4 bg-gray transition-transform duration-300 ease-in-out',
+						dashboard.chatsComposable.selectedChat.value ? 'hidden md:flex' : 'flex'
+					]"
+				>
 					<div class="flex flex-col rounded-lg bg-white h-full">
 						<div
 							class="p-4 border-b border-gray-200 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 rounded-t-[1.125rem]"
 						>
 							<div class="flex items-center justify-between mb-3">
-								<h1 class="text-xl font-semibold text-slate-900">
+								<h1 class="text-lg md:text-xl font-semibold text-slate-900">
 									{{
 										dashboard.viewModeComposable.viewMode.value === 'chats'
 											? 'Messages'
@@ -168,7 +173,7 @@ onUnmounted(() => {
 									v-model="dashboard.searchQuery"
 									type="text"
 									placeholder="Search..."
-									class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+									class="w-full px-3 py-2 text-xs md:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 								/>
 							</template>
 						</div>
@@ -258,7 +263,12 @@ onUnmounted(() => {
 					</div>
 				</aside>
 
-				<div class="w-full py-4 pr-4 bg-gray">
+				<div
+					:class="[
+						'w-full p-4 md:pl-0 bg-gray transition-transform duration-300 ease-in-out',
+						dashboard.chatsComposable.selectedChat.value ? 'flex' : 'hidden md:flex'
+					]"
+				>
 					<div class="flex-1 flex flex-col min-h-0 w-full h-full">
 						<ChatPanel
 							:ref="(el) => (dashboard.chatPanelRef.value = el)"
@@ -293,6 +303,7 @@ onUnmounted(() => {
 								dashboard.isActionsPanelOpen.value =
 									!dashboard.isActionsPanelOpen.value
 							"
+							@back="dashboard.handleBackToChats"
 						/>
 						<template v-if="dashboard.chatsComposable.selectedChat.value">
 							<MessageForm
@@ -308,15 +319,6 @@ onUnmounted(() => {
 							/>
 						</template>
 					</div>
-
-					<section
-						v-if="!dashboard.chatsComposable.selectedChat.value"
-						class="md:hidden flex-1 flex flex-col"
-					>
-						<div class="flex-1 flex items-center justify-center text-gray-500">
-							Select a chat from the list on the left
-						</div>
-					</section>
 				</div>
 
 				<ChatActionsPanel
@@ -325,6 +327,7 @@ onUnmounted(() => {
 					:chat="dashboard.currentChat.value"
 					:current-user-id="dashboard.currentUserId.value"
 					@chat-updated="dashboard.handleChatUpdated"
+					@close="dashboard.isActionsPanelOpen.value = false"
 				/>
 			</div>
 		</div>
