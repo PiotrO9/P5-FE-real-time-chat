@@ -1,12 +1,14 @@
 import type { Friend } from '~/types/Chat'
 import type { FriendResponse } from '~/types/FriendsApi'
+import type { User } from '~/types/Chat'
+import type { FriendInviteAcceptedEvent } from '~/types/socket'
 import {
 	fetchFriends as fetchFriendsFromService,
 	sendFriendInvite,
 	deleteFriend as deleteFriendFromService
 } from '~/services/friendsService'
 import { getErrorMessage } from '~/utils/errorHelpers'
-import { findById } from '~/utils/idHelpers'
+import { findById, compareIds } from '~/utils/idHelpers'
 import { useToast } from './useToast'
 
 export function useFriends() {
@@ -92,6 +94,37 @@ export function useFriends() {
 		return findById(friends.value, friendId)
 	}
 
+	function mapUserToFriend(user: User, isRequester: boolean = false): Friend {
+		return {
+			id: user.id,
+			username: user.username,
+			email: user.email,
+			isOnline: false,
+			lastSeen: user.lastSeen,
+			createdAt: user.createdAt,
+			friendshipCreatedAt: new Date().toISOString()
+		}
+	}
+
+	function addFriendFromEvent(friendship: FriendInviteAcceptedEvent['friendship'], currentUserId: string | number) {
+		const isCurrentUserRequester = compareIds(friendship.requester.id, currentUserId)
+		const newFriend = isCurrentUserRequester 
+			? mapUserToFriend(friendship.addressee, false)
+			: mapUserToFriend(friendship.requester, true)
+
+		const existingFriend = findFriendById(newFriend.id)
+		if (!existingFriend) {
+			friends.value.push(newFriend)
+		}
+	}
+
+	function removeFriendFromList(friendId: string | number) {
+		const index = friends.value.findIndex((friend) => compareIds(friend.id, friendId))
+		if (index !== -1) {
+			friends.value.splice(index, 1)
+		}
+	}
+
 	return {
 		friends,
 		friendsLoading,
@@ -100,6 +133,8 @@ export function useFriends() {
 		addFriend,
 		removeFriend,
 		updateFriendStatus,
-		findFriendById
+		findFriendById,
+		addFriendFromEvent,
+		removeFriendFromList
 	}
 }

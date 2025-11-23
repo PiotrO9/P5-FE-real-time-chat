@@ -1,7 +1,14 @@
 import type { Chat, Message } from '~/types/Chat'
+import type {
+	FriendInviteReceivedEvent,
+	FriendInviteAcceptedEvent,
+	FriendInviteRejectedEvent,
+	FriendRemovedEvent
+} from '~/types/socket'
 import { nextTick } from 'vue'
 import { useSocket } from './useSocket'
 import { useMessageHelpers } from './useMessageHelpers'
+import { useToast } from './useToast'
 import { toNumber } from '~/utils/typeHelpers'
 import { compareIds, findIndexById } from '~/utils/idHelpers'
 
@@ -14,12 +21,14 @@ export function useSocketHandlers(
 	messages: ReturnType<typeof import('./useMessages').useMessages>,
 	chatsComposable: ReturnType<typeof import('./useChats').useChats>,
 	friendsComposable: ReturnType<typeof import('./useFriends').useFriends>,
+	invitesComposable: ReturnType<typeof import('./useInvites').useInvites>,
 	reactions: ReturnType<typeof import('./useReactions').useReactions>,
 	messageReads: ReturnType<typeof import('./useMessageReads').useMessageReads>,
 	onScrollToBottom: () => void
 ) {
 	const { on, off } = useSocket()
 	const { mapMessageFromBackend, createSystemMessage } = useMessageHelpers()
+	const { success: toastSuccess } = useToast()
 
 	function handleNewMessage(data: { chatId: string; message: any }) {
 		const chatId = String(data.chatId)
@@ -288,6 +297,37 @@ export function useSocketHandlers(
 		}
 	}
 
+	function handleFriendInviteReceived(data: FriendInviteReceivedEvent) {
+		invitesComposable.addReceivedInvite(data.invite)
+		const senderName = data.invite.sender.username
+		toastSuccess(`You received an invitation from ${senderName}`)
+	}
+
+	function handleFriendInviteAccepted(data: FriendInviteAcceptedEvent) {
+		friendsComposable.addFriendFromEvent(data.friendship, currentUserId.value)
+		invitesComposable.removeInvitesByUserIds(
+			data.friendship.requester.id,
+			data.friendship.addressee.id
+		)
+
+		const friendName = compareIds(data.friendship.requester.id, currentUserId.value)
+			? data.friendship.addressee.username
+			: data.friendship.requester.username
+		toastSuccess(`${friendName} accepted the invitation`)
+	}
+
+	function handleFriendInviteRejected(data: FriendInviteRejectedEvent) {
+		invitesComposable.updateInviteStatus(data.invite)
+		const receiverName = data.invite.receiver.username
+		toastSuccess(`${receiverName} rejected the invitation`)
+	}
+
+	function handleFriendRemoved(data: FriendRemovedEvent) {
+		friendsComposable.removeFriendFromList(data.friendId)
+		const friendName = data.friend.username
+		toastSuccess(`${friendName} has been removed from friends list`)
+	}
+
 	function setupListeners() {
 		on('message:new', handleNewMessage)
 		on('message:updated', handleMessageUpdated)
@@ -304,6 +344,10 @@ export function useSocketHandlers(
 		on('message:pinned', handleMessagePinned)
 		on('message:unpinned', handleMessageUnpinned)
 		on('message:read', handleMessageRead)
+		on('friend:invite:received', handleFriendInviteReceived)
+		on('friend:invite:accepted', handleFriendInviteAccepted)
+		on('friend:invite:rejected', handleFriendInviteRejected)
+		on('friend:removed', handleFriendRemoved)
 	}
 
 	function cleanupListeners() {
@@ -322,6 +366,10 @@ export function useSocketHandlers(
 		off('message:pinned', handleMessagePinned)
 		off('message:unpinned', handleMessageUnpinned)
 		off('message:read', handleMessageRead)
+		off('friend:invite:received', handleFriendInviteReceived)
+		off('friend:invite:accepted', handleFriendInviteAccepted)
+		off('friend:invite:rejected', handleFriendInviteRejected)
+		off('friend:removed', handleFriendRemoved)
 	}
 
 	return {

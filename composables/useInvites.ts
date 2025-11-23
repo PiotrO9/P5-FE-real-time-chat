@@ -1,10 +1,13 @@
 import type { Invite } from '~/types/FriendsApi'
+import type { User } from '~/types/Chat'
+import type { FriendInviteReceivedEvent, FriendInviteRejectedEvent } from '~/types/socket'
 import {
 	fetchInvites as fetchInvitesFromService,
 	acceptInvite,
 	rejectInvite
 } from '~/services/friendsService'
 import { getErrorMessage } from '~/utils/errorHelpers'
+import { findIndexById, compareIds } from '~/utils/idHelpers'
 import { useToast } from './useToast'
 
 export function useInvites() {
@@ -72,12 +75,124 @@ export function useInvites() {
 		}
 	}
 
+	function mapUserToInviteUser(user: User): Invite['sender'] {
+		return {
+			id: user.id,
+			username: user.username,
+			email: user.email,
+			isOnline: false
+		}
+	}
+
+	function addReceivedInvite(inviteData: FriendInviteReceivedEvent['invite']) {
+		const invite: Invite = {
+			id: inviteData.id,
+			status: inviteData.status,
+			createdAt: typeof inviteData.createdAt === 'string' 
+				? inviteData.createdAt 
+				: inviteData.createdAt.toISOString(),
+			sender: mapUserToInviteUser(inviteData.sender),
+			receiver: inviteData.receiver ? mapUserToInviteUser(inviteData.receiver) : undefined
+		}
+
+		const existingIndex = findIndexById(invites.value.receivedInvites, invite.id)
+		if (existingIndex === -1) {
+			invites.value.receivedInvites.push(invite)
+			invites.value.totalReceived++
+			invites.value.totalPending++
+		}
+	}
+
+	function removeInvite(inviteId: string) {
+		const sentIndex = findIndexById(invites.value.sentInvites, inviteId)
+		if (sentIndex !== -1) {
+			const invite = invites.value.sentInvites[sentIndex]
+			if (invite.status === 'PENDING') {
+				invites.value.totalPending--
+			}
+			invites.value.sentInvites.splice(sentIndex, 1)
+			invites.value.totalSent--
+			return
+		}
+
+		const receivedIndex = findIndexById(invites.value.receivedInvites, inviteId)
+		if (receivedIndex !== -1) {
+			const invite = invites.value.receivedInvites[receivedIndex]
+			if (invite.status === 'PENDING') {
+				invites.value.totalPending--
+			}
+			invites.value.receivedInvites.splice(receivedIndex, 1)
+			invites.value.totalReceived--
+		}
+	}
+
+	function updateInviteStatus(inviteData: FriendInviteRejectedEvent['invite']) {
+		const inviteId = inviteData.id
+		const sentIndex = findIndexById(invites.value.sentInvites, inviteId)
+		
+		if (sentIndex !== -1) {
+			const invite = invites.value.sentInvites[sentIndex]
+			if (invite.status === 'PENDING') {
+				invites.value.totalPending--
+			}
+			invites.value.sentInvites[sentIndex] = {
+				...invite,
+				status: inviteData.status,
+				receiver: inviteData.receiver ? mapUserToInviteUser(inviteData.receiver) : undefined
+			}
+			return
+		}
+
+		const receivedIndex = findIndexById(invites.value.receivedInvites, inviteId)
+		if (receivedIndex !== -1) {
+			const invite = invites.value.receivedInvites[receivedIndex]
+			if (invite.status === 'PENDING') {
+				invites.value.totalPending--
+			}
+			invites.value.receivedInvites[receivedIndex] = {
+				...invite,
+				status: inviteData.status,
+				sender: inviteData.sender ? mapUserToInviteUser(inviteData.sender) : undefined
+			}
+		}
+	}
+
+	function removeInvitesByUserIds(userId1: string | number, userId2: string | number) {
+		const sentToRemove: string[] = []
+		const receivedToRemove: string[] = []
+
+		invites.value.sentInvites.forEach((invite) => {
+			if (
+				(invite.receiver && compareIds(invite.receiver.id, userId1)) ||
+				(invite.receiver && compareIds(invite.receiver.id, userId2))
+			) {
+				sentToRemove.push(invite.id)
+			}
+		})
+
+		invites.value.receivedInvites.forEach((invite) => {
+			if (
+				(invite.sender && compareIds(invite.sender.id, userId1)) ||
+				(invite.sender && compareIds(invite.sender.id, userId2))
+			) {
+				receivedToRemove.push(invite.id)
+			}
+		})
+
+		sentToRemove.forEach((inviteId) => removeInvite(inviteId))
+		receivedToRemove.forEach((inviteId) => removeInvite(inviteId))
+	}
+
 	return {
 		invites,
 		invitesLoading,
 		invitesError,
 		fetchInvites,
 		acceptInvite: acceptInviteHandler,
-		rejectInvite: rejectInviteHandler
+		rejectInvite: rejectInviteHandler,
+		addReceivedInvite,
+		removeInvite,
+		updateInviteStatus,
+		removeInvitesByUserIds
 	}
 }

@@ -90,6 +90,7 @@ export function useDashboard() {
 		messagesComposable,
 		chatsComposable,
 		friendsComposable,
+		invitesComposable,
 		reactionsComposable,
 		messageReadsComposable,
 		handleScrollToBottom
