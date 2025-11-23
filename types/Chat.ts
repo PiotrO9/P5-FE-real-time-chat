@@ -6,6 +6,7 @@ export interface User {
 	lastSeen: string
 	createdAt: string
 	id: string
+	isOnline?: boolean
 }
 
 export interface Reaction {

@@ -16,6 +16,7 @@ import ChatActionsHeader from './ChatActionsHeader.vue'
 import PinnedMessagesList from './PinnedMessagesList.vue'
 import AddUserSection from './AddUserSection.vue'
 import ChatMembersList from './ChatMembersList.vue'
+import UserInfoSection from './UserInfoSection.vue'
 
 interface Props {
 	chat: Chat | null
@@ -118,7 +119,9 @@ function handleAddUserFromSection(username: string) {
 		return
 	}
 
-	const friend = friends.value.find((friend) => friend.username.toLowerCase() === username.toLowerCase())
+	const friend = friends.value.find(
+		(friend) => friend.username.toLowerCase() === username.toLowerCase()
+	)
 
 	if (!friend) {
 		toastError('User not found in friends')
@@ -400,6 +403,10 @@ onUnmounted(() => {
 			/>
 
 			<div class="flex-1 overflow-y-auto bg-white rounded-b-[1.125rem]">
+				<template v-if="!isGroupChat && chat?.otherUser">
+					<UserInfoSection :user="chat.otherUser" />
+				</template>
+
 				<PinnedMessagesList
 					:pinned-messages="pinnedMessagesList"
 					:is-loading="pinnedMessagesLoading"
