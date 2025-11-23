@@ -102,7 +102,20 @@ function handleReply(message: Chat['messages'][0]) {
 	emit('reply', message)
 }
 
-function handleScrollToMessage(messageId: string | number) {
+async function handleScrollToMessage(messageId: string | number) {
+	if (!selectedChat.value) return
+
+	// Sprawdź czy wiadomość jest już załadowana
+	const messageExists = selectedChat.value.messages.some((msg) => {
+		return String(msg.id) === String(messageId)
+	})
+
+	// Jeśli wiadomość nie istnieje, spróbuj załadować więcej wiadomości
+	if (!messageExists && props.canLoadMore && !props.isLoadingMore) {
+		// Możemy spróbować załadować więcej, ale to może być skomplikowane
+		// Na razie po prostu spróbujmy scrollować
+	}
+
 	const messageElement = messagesContainerRef.value?.querySelector(
 		`[data-message-id="${messageId}"]`
 	)
@@ -112,8 +125,11 @@ function handleScrollToMessage(messageId: string | number) {
 		setTimeout(() => {
 			highlightedMessageId.value = null
 		}, 2000)
+	} else {
+		// Jeśli element nie istnieje, może trzeba załadować więcej wiadomości
+		// Na razie po prostu wyemituj event
+		emit('scroll-to-message', messageId)
 	}
-	emit('scroll-to-message', messageId)
 }
 
 function handleForwardMessage(targetChatId: string, messageId: string | number) {
@@ -154,7 +170,7 @@ onUnmounted(() => {
 	}
 })
 
-defineExpose({ scrollToBottom })
+defineExpose({ scrollToBottom, handleScrollToMessage })
 </script>
 
 <template>

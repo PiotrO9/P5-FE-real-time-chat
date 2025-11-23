@@ -1,11 +1,11 @@
-import type { Friend } from '~/types/Chat'
+import type { Friend, User } from '~/types/Chat'
 import type { FriendResponse } from '~/types/FriendsApi'
-import type { User } from '~/types/Chat'
 import type { FriendInviteAcceptedEvent } from '~/types/socket'
 import {
 	fetchFriends as fetchFriendsFromService,
 	sendFriendInvite,
-	deleteFriend as deleteFriendFromService
+	deleteFriend as deleteFriendFromService,
+	searchFriends as searchFriendsFromService
 } from '~/services/friendsService'
 import { getErrorMessage } from '~/utils/errorHelpers'
 import { findById, compareIds } from '~/utils/idHelpers'
@@ -17,6 +17,10 @@ export function useFriends() {
 	const friends = ref<Friend[]>([])
 	const friendsLoading = ref(false)
 	const friendsError = ref<string | null>(null)
+	const searchQuery = ref('')
+	const searchResults = ref<Friend[]>([])
+	const searchLoading = ref(false)
+	const searchError = ref<string | null>(null)
 
 	function mapFriendResponse(friend: FriendResponse): Friend {
 		return {
@@ -94,7 +98,7 @@ export function useFriends() {
 		return findById(friends.value, friendId)
 	}
 
-	function mapUserToFriend(user: User, isRequester: boolean = false): Friend {
+	function mapUserToFriend(user: User, _isRequester: boolean = false): Friend {
 		return {
 			id: user.id,
 			username: user.username,
@@ -106,9 +110,12 @@ export function useFriends() {
 		}
 	}
 
-	function addFriendFromEvent(friendship: FriendInviteAcceptedEvent['friendship'], currentUserId: string | number) {
+	function addFriendFromEvent(
+		friendship: FriendInviteAcceptedEvent['friendship'],
+		currentUserId: string | number
+	) {
 		const isCurrentUserRequester = compareIds(friendship.requester.id, currentUserId)
-		const newFriend = isCurrentUserRequester 
+		const newFriend = isCurrentUserRequester
 			? mapUserToFriend(friendship.addressee, false)
 			: mapUserToFriend(friendship.requester, true)
 
@@ -125,16 +132,77 @@ export function useFriends() {
 		}
 	}
 
+	async function searchFriends(query: string) {
+		if (!query.trim()) {
+			searchResults.value = []
+			searchError.value = null
+			searchQuery.value = ''
+			return
+		}
+
+		try {
+			searchLoading.value = true
+			searchError.value = null
+
+			const res = await searchFriendsFromService(query.trim())
+			const raw = res?.data
+			const friendsList: FriendResponse[] = Array.isArray(raw?.friends) ? raw.friends : []
+
+			searchResults.value = friendsList.map(mapFriendResponse)
+		} catch (err: any) {
+			searchError.value = getErrorMessage(err, 'Failed to search friends')
+			toastError(searchError.value || 'Error')
+		} finally {
+			searchLoading.value = false
+		}
+	}
+
+	function clearSearch() {
+		searchQuery.value = ''
+		searchResults.value = []
+		searchError.value = null
+	}
+
+	const displayedFriends = computed(() => {
+		if (searchQuery.value.trim() && searchResults.value.length > 0) {
+			return searchResults.value
+		}
+		if (searchQuery.value.trim() && !searchLoading.value) {
+			return []
+		}
+		return friends.value
+	})
+
+	watch(searchQuery, (query: string) => {
+		if (query.trim()) {
+			// Debounce search
+			setTimeout(() => {
+				if (searchQuery.value === query) {
+					searchFriends(query)
+				}
+			}, 300)
+		} else {
+			clearSearch()
+		}
+	})
+
 	return {
 		friends,
 		friendsLoading,
 		friendsError,
+		searchQuery,
+		searchResults,
+		searchLoading,
+		searchError,
+		displayedFriends,
 		fetchFriends,
 		addFriend,
 		removeFriend,
 		updateFriendStatus,
 		findFriendById,
 		addFriendFromEvent,
-		removeFriendFromList
+		removeFriendFromList,
+		searchFriends,
+		clearSearch
 	}
 }

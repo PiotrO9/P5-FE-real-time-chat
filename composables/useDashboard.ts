@@ -269,8 +269,14 @@ export function useDashboard() {
 		replyToMessage.value = null
 	}
 
-	function handleScrollToMessage(_messageId: string | number) {
+	function handleScrollToMessage(messageId: string | number) {
 		// Event jest obsługiwany w ChatPanel
+		nextTick(() => {
+			const chatPanel = chatPanelRef.value
+			if (chatPanel && chatPanel.handleScrollToMessage) {
+				chatPanel.handleScrollToMessage(messageId)
+			}
+		})
 	}
 
 	function handlePinUpdated(messageId: string | number, isPinned: boolean) {
@@ -311,9 +317,18 @@ export function useDashboard() {
 		replyToMessage.value = null
 	}
 
+	function handleMessageSearchScroll(messageId: string | number) {
+		handleScrollToMessage(messageId)
+	}
+
 	async function initialize() {
 		connect()
 		socketHandlers.setupListeners()
+
+		// Listen for custom scroll-to-message events from ChatActionsPanel
+		window.addEventListener('scroll-to-message', ((event: CustomEvent) => {
+			handleMessageSearchScroll(event.detail.messageId)
+		}) as EventListener)
 
 		await chatsComposable.fetchChats()
 
@@ -331,6 +346,9 @@ export function useDashboard() {
 	}
 
 	function cleanup() {
+		window.removeEventListener('scroll-to-message', ((event: CustomEvent) => {
+			handleMessageSearchScroll(event.detail.messageId)
+		}) as EventListener)
 		typingUsersComposable.cleanup()
 		socketHandlers.cleanupListeners()
 		disconnect()

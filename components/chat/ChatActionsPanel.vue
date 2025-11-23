@@ -17,6 +17,7 @@ import PinnedMessagesList from './PinnedMessagesList.vue'
 import AddUserSection from './AddUserSection.vue'
 import ChatMembersList from './ChatMembersList.vue'
 import UserInfoSection from './UserInfoSection.vue'
+import MessageSearchResults from './MessageSearchResults.vue'
 
 interface Props {
 	chat: Chat | null
@@ -50,6 +51,9 @@ const selectedMemberId = ref<string | null>(null)
 const selectedNewRole = ref<Role | null>(null)
 const selectedMemberName = ref<string>('')
 const pinnedMessagesLoading = ref(false)
+const messageSearchComposable = useMessageSearch()
+const showMessageSearch = ref(false)
+let searchDebounceTimer: NodeJS.Timeout | null = null
 
 const chat = computed(() => props.chat)
 const currentUserId = computed(() => props.currentUserId)
@@ -101,8 +105,27 @@ watch(isOpen, (newValue) => {
 	if (newValue) {
 		fetchChatDetails()
 		fetchPinnedMessagesList()
+	} else {
+		messageSearchComposable.clearSearch()
+		showMessageSearch.value = false
 	}
 })
+
+watch(
+	() => messageSearchComposable.searchQuery.value,
+	(query: string) => {
+		if (searchDebounceTimer) {
+			clearTimeout(searchDebounceTimer)
+		}
+		searchDebounceTimer = setTimeout(() => {
+			if (!chat.value || !query.trim()) {
+				messageSearchComposable.clearSearch()
+				return
+			}
+			messageSearchComposable.searchMessages(chat.value.id, query)
+		}, 300)
+	}
+)
 
 watch(
 	() => chatStore.pinnedMessages,
@@ -390,8 +413,26 @@ onMounted(() => {
 	})
 })
 
+function handleMessageSearchClick(messageId: string | number) {
+	if (!chat.value) return
+	emit('close')
+	// Emit event to scroll to message - will be handled in dashboard
+	nextTick(() => {
+		const event = new CustomEvent('scroll-to-message', { detail: { messageId } })
+		window.dispatchEvent(event)
+	})
+}
+
+function handleLoadMoreSearchResults() {
+	if (!chat.value) return
+	messageSearchComposable.loadMoreResults(chat.value.id)
+}
+
 onUnmounted(() => {
 	document.removeEventListener('click', handleClickOutside)
+	if (searchDebounceTimer) {
+		clearTimeout(searchDebounceTimer)
+	}
 })
 </script>
 
@@ -417,6 +458,42 @@ onUnmounted(() => {
 								:is-loading="pinnedMessagesLoading"
 								@message-click="handlePinnedMessageClick"
 							/>
+
+							<div class="border-t border-gray-200 px-4 py-3">
+								<div class="flex items-center justify-between mb-2">
+									<h3 class="text-sm font-semibold text-gray-900">Wyszukiwanie wiadomości</h3>
+									<button
+										v-if="messageSearchComposable.searchQuery.value"
+										type="button"
+										tabindex="0"
+										aria-label="Wyczyść wyszukiwanie"
+										class="text-xs text-blue-600 hover:text-blue-700"
+										@click="messageSearchComposable.clearSearch()"
+										@keydown.enter="messageSearchComposable.clearSearch()"
+										@keydown.space.prevent="messageSearchComposable.clearSearch()"
+									>
+										Wyczyść
+									</button>
+								</div>
+								<label for="message-search" class="sr-only">Wyszukaj wiadomości</label>
+								<input
+									id="message-search"
+									v-model="messageSearchComposable.searchQuery.value"
+									type="text"
+									placeholder="Wyszukaj wiadomości..."
+									class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+								/>
+								<MessageSearchResults
+									v-if="messageSearchComposable.searchQuery.value"
+									:messages="messageSearchComposable.searchResults.value"
+									:is-loading="messageSearchComposable.searchLoading.value"
+									:has-more="messageSearchComposable.searchHasMore.value"
+									:total="messageSearchComposable.searchTotal.value"
+									:query="messageSearchComposable.searchQuery.value"
+									@message-click="handleMessageSearchClick"
+									@load-more="handleLoadMoreSearchResults"
+								/>
+							</div>
 
 							<template v-if="isGroupChat && isOwner">
 								<AddUserSection
@@ -475,6 +552,41 @@ onUnmounted(() => {
 						:is-loading="pinnedMessagesLoading"
 						@message-click="handlePinnedMessageClick"
 					/>
+
+					<div class="border-t border-gray-200 px-4 py-3">
+						<div class="flex items-center justify-between mb-2">
+							<h3 class="text-sm font-semibold text-gray-900">Wyszukiwanie wiadomości</h3>
+							<button
+								v-if="messageSearchComposable.searchQuery.value"
+								type="button"
+								tabindex="0"
+								aria-label="Wyczyść wyszukiwanie"
+								class="text-xs text-blue-600 hover:text-blue-700"
+								@click="messageSearchComposable.clearSearch()"
+								@keydown.enter="messageSearchComposable.clearSearch()"
+								@keydown.space.prevent="messageSearchComposable.clearSearch()"
+							>
+								Wyczyść
+							</button>
+						</div>
+						<label for="message-search-desktop" class="sr-only">Wyszukaj wiadomości</label>
+						<input
+							id="message-search-desktop"
+							v-model="messageSearchComposable.searchQuery.value"
+							type="text"
+							placeholder="Wyszukaj wiadomości..."
+							class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+						/>
+						<MessageSearchResults
+							v-if="messageSearchComposable.searchQuery.value"
+							:messages="messageSearchComposable.searchResults.value"
+							:is-loading="messageSearchComposable.searchLoading.value"
+							:has-more="messageSearchComposable.searchHasMore.value"
+							:total="messageSearchComposable.searchTotal.value"
+							@message-click="handleMessageSearchClick"
+							@load-more="handleLoadMoreSearchResults"
+						/>
+					</div>
 
 					<template v-if="isGroupChat && isOwner">
 						<AddUserSection

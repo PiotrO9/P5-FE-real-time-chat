@@ -37,3 +37,11 @@ export async function rejectInvite(inviteId: string) {
 export async function deleteFriend(friendId: string) {
 	return await useApi<ApiResponse<DeleteFriendResponse>>('DELETE', `/api/friends/${friendId}`)
 }
+
+export async function searchFriends(query: string) {
+	const params = new URLSearchParams({ query })
+	return await useApi<ApiResponse<FriendsListResponse>>(
+		'GET',
+		`/api/friends/search?${params.toString()}`
+	)
+}

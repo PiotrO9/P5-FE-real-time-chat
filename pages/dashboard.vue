@@ -206,6 +206,18 @@ onUnmounted(() => {
 						<template
 							v-else-if="dashboard.viewModeComposable.viewMode.value === 'friends'"
 						>
+							<template
+								v-if="dashboard.viewModeComposable.friendsSubView.value === 'list'"
+							>
+								<label for="friends-search" class="sr-only">Wyszukaj znajomych</label>
+								<input
+									id="friends-search"
+									v-model="dashboard.friendsComposable.searchQuery.value"
+									type="text"
+									placeholder="Wyszukaj znajomych..."
+									class="w-full px-3 py-2 text-xs md:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-3"
+								/>
+							</template>
 							<div
 								v-if="dashboard.viewModeComposable.friendsSubView.value === 'list'"
 								class="h-full"
@@ -224,7 +236,7 @@ onUnmounted(() => {
 								</div>
 								<FriendsList
 									v-else
-									:friends="dashboard.friendsComposable.friends.value"
+									:friends="dashboard.friendsComposable.displayedFriends.value"
 									@remove-friend="dashboard.handleRemoveFriend"
 									@start-chat="dashboard.handleStartChat"
 								/>

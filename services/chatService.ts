@@ -98,3 +98,20 @@ export async function forwardMessage(targetChatId: string, messageId: string | n
 		messageId
 	})
 }
+
+export async function searchMessages(
+	chatId: string,
+	query: string,
+	limit: number = 20,
+	offset: number = 0
+) {
+	const params = new URLSearchParams({
+		query,
+		limit: String(limit),
+		offset: String(offset)
+	})
+	return await useApi<ApiResponse<MessagesResponse>>(
+		'GET',
+		`/api/messages/${chatId}/search?${params.toString()}`
+	)
+}
