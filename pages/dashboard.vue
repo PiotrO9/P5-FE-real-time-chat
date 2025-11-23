@@ -258,7 +258,7 @@ onUnmounted(() => {
 					</div>
 				</aside>
 
-				<div :class="['w-full py-4 bg-gray']">
+				<div class="w-full py-4 pr-4 bg-gray">
 					<div class="flex-1 flex flex-col min-h-0 w-full h-full">
 						<ChatPanel
 							:ref="(el) => (dashboard.chatPanelRef.value = el)"

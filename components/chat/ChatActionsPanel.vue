@@ -395,7 +395,7 @@ onUnmounted(() => {
 
 <template>
 	<aside v-if="chat && isOpen" class="md:min-w-96 bg-white flex flex-col">
-		<div class="flex flex-col p-4 bg-gray flex-1">
+		<div class="flex flex-col py-4 pr-4 bg-gray flex-1">
 			<ChatActionsHeader
 				:is-group-chat="isGroupChat"
 				:is-owner="isOwner"
