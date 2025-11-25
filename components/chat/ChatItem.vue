@@ -50,8 +50,8 @@ const displayMessage = computed(() => {
 const hasUnread = computed(() => Number(chatData.value.unreadCount) > 0)
 const itemClasses = computed(() => {
 	const base =
-		'flex items-center gap-3 px-4 py-3 hover:bg-slate-50 focus-visible:bg-slate-50 outline-none transition-colors'
-	return selected.value ? `${base} bg-green-50` : base
+		'flex items-center gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-gray-800 focus-visible:bg-slate-50 dark:focus-visible:bg-gray-800 outline-none transition-colors'
+	return selected.value ? `${base} bg-green-50 dark:bg-green-900/20` : base
 })
 const ariaLabel = computed(() => `Open chat: ${chatName.value}`)
 
@@ -80,7 +80,9 @@ function handleKeyDown(event: KeyboardEvent) {
 			<ChatInitial :chat-initial="chatInitial" />
 			<div class="min-w-0 flex-1 flex flex-col">
 				<div class="flex items-center justify-between gap-2 min-w-0">
-					<p class="font-medium text-sm md:text-base text-slate-900 truncate min-w-0">
+					<p
+						class="font-medium text-sm md:text-base text-slate-900 dark:text-gray-100 truncate min-w-0"
+					>
 						{{ chatName }}
 					</p>
 				</div>
@@ -106,7 +108,12 @@ function handleKeyDown(event: KeyboardEvent) {
 					</div>
 					<span class="truncate">{{ typingText }}</span>
 				</div>
-				<p v-else :class="['text-xs md:text-sm truncate min-w-0 text-slate-600']">
+				<p
+					v-else
+					:class="[
+						'text-xs md:text-sm truncate min-w-0 text-slate-600 dark:text-gray-400'
+					]"
+				>
 					<span v-if="senderName" class="font-semibold">{{ senderName }}</span
 					><span v-if="senderName">: </span>{{ displayMessage }}
 				</p>

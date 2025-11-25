@@ -77,25 +77,25 @@ function handleBackKeyDown(event: KeyboardEvent) {
 
 <template>
 	<div
-		class="border-b rounded-t-[1.125rem] border-gray-200 px-3 md:px-4 py-4 flex items-center justify-between bg-white backdrop-blur supports-[backdrop-filter]:bg-white"
+		class="border-b rounded-t-[1.125rem] border-gray-200 dark:border-gray-700 px-3 md:px-4 py-4 flex items-center justify-between bg-white dark:bg-gray-900 backdrop-blur supports-[backdrop-filter]:bg-white dark:supports-[backdrop-filter]:bg-gray-900"
 	>
 		<div class="flex items-center gap-3 min-w-0 flex-1">
 			<button
 				type="button"
 				tabindex="0"
 				aria-label="Wróć do listy chatów"
-				class="md:hidden p-1.5 rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0"
+				class="md:hidden p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex-shrink-0"
 				@click="handleBack"
 				@keydown="handleBackKeyDown"
 			>
-				<Icon name="arrow-left" class="h-5 w-5 text-gray-600" />
+				<Icon name="arrow-left" class="h-5 w-5 text-gray-600 dark:text-gray-400" />
 			</button>
 			<ChatInitial :chat-initial />
 			<div class="flex flex-col min-w-0">
-				<h2 class="text-base md:text-lg font-semibold text-gray-900 truncate min-w-0">
+				<h2 class="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100 truncate min-w-0">
 					{{ displayName }}
 				</h2>
-				<p v-if="lastSeenText" class="text-xs text-gray-500">{{ lastSeenText }}</p>
+				<p v-if="lastSeenText" class="text-xs text-gray-500 dark:text-gray-400">{{ lastSeenText }}</p>
 			</div>
 		</div>
 		<ActionsMenu

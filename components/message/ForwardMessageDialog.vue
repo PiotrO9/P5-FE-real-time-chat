@@ -95,7 +95,7 @@ onMounted(() => {
 		<dialog
 			v-show="open"
 			ref="dialogRef"
-			class="dialog-content backdrop:bg-black backdrop:bg-opacity-50 backdrop:backdrop-blur-sm rounded-xl border-0 p-0 max-w-md w-full bg-white shadow-2xl"
+			class="dialog-content backdrop:bg-black backdrop:bg-opacity-50 backdrop:backdrop-blur-sm rounded-xl border-0 p-0 max-w-md w-full bg-white dark:bg-gray-800 shadow-2xl"
 			aria-labelledby="forward-dialog-title"
 			aria-describedby="forward-dialog-description"
 			@keydown="handleKeyDown"
@@ -103,10 +103,10 @@ onMounted(() => {
 		>
 			<div class="p-6 flex flex-col max-h-[80vh]">
 				<header class="mb-4">
-					<h2 id="forward-dialog-title" class="text-xl font-semibold text-gray-900 mb-2">
+					<h2 id="forward-dialog-title" class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
 						Przekaż wiadomość
 					</h2>
-					<p id="forward-dialog-description" class="text-sm text-gray-600">
+					<p id="forward-dialog-description" class="text-sm text-gray-600 dark:text-gray-400">
 						Wybierz czat, do którego chcesz przekazać wiadomość
 					</p>
 				</header>
@@ -116,20 +116,20 @@ onMounted(() => {
 						v-model="searchQuery"
 						type="text"
 						placeholder="Szukaj czatu..."
-						class="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+						class="w-full px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 						aria-label="Szukaj czatu"
 					/>
 				</div>
 
 				<div class="flex-1 overflow-y-auto mb-4">
 					<div v-if="filteredChats.length === 0" class="p-8 text-center">
-						<p class="text-gray-500 text-sm">
+						<p class="text-gray-500 dark:text-gray-400 text-sm">
 							{{ searchQuery ? 'Nie znaleziono czatów' : 'Brak dostępnych czatów' }}
 						</p>
 					</div>
 					<ul
 						v-else
-						class="divide-y divide-gray-100"
+						class="divide-y divide-gray-100 dark:divide-gray-800"
 						role="listbox"
 						aria-label="Lista czatów"
 					>
@@ -162,7 +162,7 @@ onMounted(() => {
 					<button
 						type="button"
 						tabindex="0"
-						class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 transition-colors duration-150"
+						class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 transition-colors duration-150"
 						aria-label="Anuluj"
 						@click="handleCancel"
 						@keydown="(e) => e.key === 'Enter' && handleCancel()"

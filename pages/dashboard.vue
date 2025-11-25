@@ -34,21 +34,21 @@ onUnmounted(() => {
 			></div>
 		</div>
 
-		<div class="h-full w-full flex flex-col relative z-10 bg-white">
+		<div class="h-full w-full flex flex-col relative z-10 bg-white dark:bg-gray-900">
 			<AppHeader />
 			<div class="flex-1 flex overflow-hidden">
 				<SideNavigation />
 				<div class="flex-1 flex overflow-hidden">
 					<aside
 						:class="[
-							'w-full md:max-w-96 h-full border-r border-gray-200 flex flex-col bg-white transition-transform duration-300 ease-in-out',
+							'w-full md:max-w-96 h-full border-r border-gray-200 dark:border-gray-700 flex flex-col bg-white dark:bg-gray-900 transition-transform duration-300 ease-in-out',
 							dashboard.chatsComposable.selectedChat.value ? 'hidden md:flex' : 'flex'
 						]"
 					>
 						<div class="flex flex-col h-full">
-							<div class="p-4 border-b border-gray-200 bg-white gap-2 flex flex-col">
+							<div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 gap-2 flex flex-col">
 								<div class="flex items-center justify-between">
-									<h1 class="text-lg md:text-xl font-semibold text-slate-900">
+									<h1 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-gray-100">
 										{{
 											dashboard.viewModeComposable.viewMode.value === 'chats'
 												? 'Chats'
@@ -67,10 +67,10 @@ onUnmounted(() => {
 											v-model="dashboard.searchQuery.value"
 											type="text"
 											placeholder="Search..."
-											class="w-full pl-10 pr-3 py-2 text-xs md:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+											class="w-full pl-10 pr-3 py-2 text-xs md:text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 										/>
 										<svg
-											class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+											class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500"
 											fill="none"
 											stroke="currentColor"
 											viewBox="0 0 24 24"
@@ -91,13 +91,13 @@ onUnmounted(() => {
 							>
 								<div
 									v-if="dashboard.chatsComposable.chatsLoading.value"
-									class="p-4 text-sm text-slate-600"
+									class="p-4 text-sm text-slate-600 dark:text-gray-400"
 								>
 									Loading chats...
 								</div>
 								<div
 									v-else-if="dashboard.chatsComposable.chatsError.value"
-									class="p-4 text-sm text-red-600"
+									class="p-4 text-sm text-red-600 dark:text-red-400"
 								>
 									{{ dashboard.chatsComposable.chatsError.value }}
 								</div>
@@ -126,7 +126,7 @@ onUnmounted(() => {
 									<div class="px-4 py-3">
 										<label
 											for="friends-search"
-											class="block text-sm font-medium text-gray-900 mb-2"
+											class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2"
 											>Wyszukaj znajomych</label
 										>
 										<input
@@ -134,9 +134,9 @@ onUnmounted(() => {
 											v-model="dashboard.friendsComposable.searchQuery.value"
 											type="text"
 											placeholder="Wyszukaj znajomych..."
-											class="w-full px-3 py-2 text-xs md:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+											class="w-full px-3 py-2 text-xs md:text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 										/>
-										<p class="mt-2 text-xs text-gray-500">
+										<p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
 											Enter the username of the person you want to search
 										</p>
 									</div>
@@ -149,13 +149,13 @@ onUnmounted(() => {
 								>
 									<div
 										v-if="dashboard.friendsComposable.friendsLoading.value"
-										class="p-4 text-sm text-slate-600"
+										class="p-4 text-sm text-slate-600 dark:text-gray-400"
 									>
 										Loading friends...
 									</div>
 									<div
 										v-else-if="dashboard.friendsComposable.friendsError.value"
-										class="p-4 text-sm text-red-600"
+										class="p-4 text-sm text-red-600 dark:text-red-400"
 									>
 										{{ dashboard.friendsComposable.friendsError.value }}
 									</div>
@@ -176,13 +176,13 @@ onUnmounted(() => {
 								>
 									<div
 										v-if="dashboard.invitesComposable.invitesLoading.value"
-										class="p-4 text-sm text-slate-600"
+										class="p-4 text-sm text-slate-600 dark:text-gray-400"
 									>
 										Loading invitations...
 									</div>
 									<div
 										v-else-if="dashboard.invitesComposable.invitesError.value"
-										class="p-4 text-sm text-red-600"
+										class="p-4 text-sm text-red-600 dark:text-red-400"
 									>
 										{{ dashboard.invitesComposable.invitesError.value }}
 									</div>
@@ -206,7 +206,7 @@ onUnmounted(() => {
 
 					<div
 						:class="[
-							'w-full flex-1 flex flex-col min-h-0 bg-white transition-transform duration-300 ease-in-out',
+							'w-full flex-1 flex flex-col min-h-0 bg-white dark:bg-gray-900 transition-transform duration-300 ease-in-out',
 							dashboard.chatsComposable.selectedChat.value ? 'flex' : 'hidden md:flex'
 						]"
 					>

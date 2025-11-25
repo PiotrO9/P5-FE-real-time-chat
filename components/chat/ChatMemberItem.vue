@@ -49,13 +49,13 @@ function handleRemoveUser() {
 
 <template>
 	<div
-		class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 transition-colors"
+		class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
 	>
 		<div class="flex items-center gap-2 flex-1 min-w-0">
 			<ChatInitial :chat-initial="member.username.charAt(0).toUpperCase()" />
 
 			<div class="min-w-0 flex-1">
-				<p class="text-sm font-medium text-gray-900 truncate">
+				<p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
 					{{ member.username }}
 				</p>
 				<div class="flex items-center gap-2 mt-0.5">
@@ -91,7 +91,7 @@ function handleRemoveUser() {
 						</span>
 						<div
 							v-if="isMenuOpen && member.role !== 'OWNER'"
-							class="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-32"
+							class="absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 min-w-32"
 						>
 							<button
 								v-for="role in getAvailableRoles(member.role)"
@@ -105,8 +105,8 @@ function handleRemoveUser() {
 								:class="[
 									'w-full text-left px-3 py-2 text-sm transition-colors',
 									member.role === role
-										? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-										: 'hover:bg-gray-50 text-gray-900',
+										? 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+										: 'hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100',
 									isUpdatingRole === String(member.id)
 										? 'opacity-50 cursor-not-allowed'
 										: ''
@@ -142,7 +142,7 @@ function handleRemoveUser() {
 				tabindex="0"
 				:aria-label="`Remove ${member.username} from chat`"
 				:disabled="isRemovingUser === String(member.id)"
-				class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+				class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors disabled:opacity-50"
 				@click="handleRemoveUser"
 				@keydown.enter="handleRemoveUser"
 			>

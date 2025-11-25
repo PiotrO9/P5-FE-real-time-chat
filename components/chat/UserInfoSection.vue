@@ -59,7 +59,7 @@ function handleTabClick(tab: 'photos' | 'files') {
 
 <template>
 	<div class="flex flex-col">
-		<div class="px-4 py-6 border-b border-gray-200">
+		<div class="px-4 py-6 border-b border-gray-200 dark:border-gray-700">
 			<div class="flex flex-col items-center gap-4">
 				<div class="relative flex-shrink-0">
 					<div
@@ -75,16 +75,16 @@ function handleTabClick(tab: 'photos' | 'files') {
 				</div>
 
 				<div class="flex flex-col items-center gap-2 w-full">
-					<h3 class="text-lg font-semibold text-gray-900">{{ userData.username }}</h3>
-					<p class="text-sm text-gray-500 text-center">Head Of Design at Logoipsum</p>
-					<p class="text-sm text-gray-500">Bangladesh</p>
-					<p class="text-xs text-gray-400">{{ localTime }}</p>
+					<h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ userData.username }}</h3>
+					<p class="text-sm text-gray-500 dark:text-gray-400 text-center">Head Of Design at Logoipsum</p>
+					<p class="text-sm text-gray-500 dark:text-gray-400">Bangladesh</p>
+					<p class="text-xs text-gray-400 dark:text-gray-500">{{ localTime }}</p>
 				</div>
 			</div>
 		</div>
 
-		<div class="border-b border-gray-200">
-			<div class="flex border-b border-gray-200">
+		<div class="border-b border-gray-200 dark:border-gray-700">
+			<div class="flex border-b border-gray-200 dark:border-gray-700">
 				<button
 					type="button"
 					tabindex="0"
@@ -92,8 +92,8 @@ function handleTabClick(tab: 'photos' | 'files') {
 					:class="[
 						'flex-1 px-4 py-3 text-sm font-medium transition-colors',
 						activeTab === 'photos'
-							? 'text-blue-600 border-b-2 border-blue-600'
-							: 'text-gray-600 hover:text-gray-900'
+							? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+							: 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
 					]"
 					@click="handleTabClick('photos')"
 					@keydown.enter="handleTabClick('photos')"
@@ -108,8 +108,8 @@ function handleTabClick(tab: 'photos' | 'files') {
 					:class="[
 						'flex-1 px-4 py-3 text-sm font-medium transition-colors',
 						activeTab === 'files'
-							? 'text-blue-600 border-b-2 border-blue-600'
-							: 'text-gray-600 hover:text-gray-900'
+							? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+							: 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
 					]"
 					@click="handleTabClick('files')"
 					@keydown.enter="handleTabClick('files')"
@@ -124,16 +124,16 @@ function handleTabClick(tab: 'photos' | 'files') {
 					<div
 						v-for="i in 10"
 						:key="i"
-						class="aspect-square bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg flex items-center justify-center"
+						class="aspect-square bg-gradient-to-br from-gray-200 dark:from-gray-700 to-gray-300 dark:to-gray-800 rounded-lg flex items-center justify-center"
 					>
-						<span class="text-xs text-gray-500">{{ i }}</span>
+						<span class="text-xs text-gray-500 dark:text-gray-400">{{ i }}</span>
 					</div>
 				</div>
 			</div>
 
 			<div v-else class="p-4">
 				<div class="text-center py-8">
-					<p class="text-sm text-gray-500">No files shared</p>
+					<p class="text-sm text-gray-500 dark:text-gray-400">No files shared</p>
 				</div>
 			</div>
 		</div>

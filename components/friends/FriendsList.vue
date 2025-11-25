@@ -61,16 +61,25 @@ function formatLastSeen(lastSeen?: string): string {
 </script>
 
 <template>
-	<div class="flex-1 overflow-y-auto bg-white rounded-b-[1.125rem] max-h-[calc(100vh-150px)]">
+	<div
+		class="flex-1 overflow-y-auto bg-white dark:bg-gray-900 rounded-b-[1.125rem] max-h-[calc(100vh-150px)]"
+	>
 		<div v-if="friendsList.length === 0" class="p-8 text-center">
-			<p class="text-gray-500 text-sm">You don't have any friends yet</p>
-			<p class="text-gray-400 text-xs mt-2">Add friends to start chatting</p>
+			<p class="text-gray-500 dark:text-gray-400 text-sm">You don't have any friends yet</p>
+			<p class="text-gray-400 dark:text-gray-500 text-xs mt-2">
+				Add friends to start chatting
+			</p>
 		</div>
-		<ul v-else class="divide-y divide-gray-100" role="listbox" aria-label="Friends list">
+		<ul
+			v-else
+			class="divide-y divide-gray-100 dark:divide-gray-800"
+			role="listbox"
+			aria-label="Friends list"
+		>
 			<li
 				v-for="friend in friendsList"
 				:key="friend.id"
-				class="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors"
+				class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
 				tabindex="0"
 				role="option"
 				:aria-label="`Friend ${friend.username}`"
@@ -86,12 +95,14 @@ function formatLastSeen(lastSeen?: string): string {
 					</div>
 					<div class="flex-1 min-w-0">
 						<div class="flex items-center justify-between">
-							<p class="text-sm font-medium text-gray-900 truncate">
+							<p
+								class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate"
+							>
 								{{ friend.username }}
 							</p>
 							<button
 								type="button"
-								class="ml-2 p-1 text-gray-400 hover:text-red-500 transition-colors rounded"
+								class="ml-2 p-1 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors rounded"
 								tabindex="0"
 								aria-label="Remove friend"
 								@click.stop="handleRemoveFriend(friend.id, $event)"
@@ -101,7 +112,7 @@ function formatLastSeen(lastSeen?: string): string {
 								<Icon name="remove" class="w-5 h-5" />
 							</button>
 						</div>
-						<p class="text-xs text-gray-500 truncate">
+						<p class="text-xs text-gray-500 dark:text-gray-400 truncate">
 							{{
 								friend.isOnline
 									? 'Online'

@@ -186,7 +186,7 @@ defineExpose({ scrollToBottom, handleScrollToMessage })
 
 		<div
 			ref="messagesContainerRef"
-			class="flex-1 overflow-y-auto overflow-x-hidden px-3 md:px-6 py-4 space-y-4 bg-white min-h-0"
+			class="flex-1 overflow-y-auto overflow-x-hidden px-3 md:px-6 py-4 space-y-4 bg-white dark:bg-gray-900 min-h-0"
 		>
 			<LoadMoreButton
 				v-if="canLoadMore"

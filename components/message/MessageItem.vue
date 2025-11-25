@@ -344,7 +344,7 @@ function handleSelectChatForForward(chatId: string) {
 
 					<div class="min-w-0 flex-1 flex items-start gap-2">
 						<div class="flex-1">
-							<p class="text-xs font-medium text-gray-700 mb-1">
+							<p class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
 								{{ senderDisplayName }}
 							</p>
 

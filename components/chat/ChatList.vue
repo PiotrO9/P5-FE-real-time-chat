@@ -33,13 +33,13 @@ function getTypingUsers(chatId: string): string[] {
 </script>
 
 <template>
-	<div class="flex-1 overflow-y-auto bg-white max-h-full">
+	<div class="flex-1 overflow-y-auto bg-white dark:bg-gray-900 max-h-full">
 		<div v-if="chatsList.length === 0">
 			<div class="p-8 text-center">
-				<p class="text-gray-500 text-sm">You don't have any chats yet</p>
+				<p class="text-gray-500 dark:text-gray-400 text-sm">You don't have any chats yet</p>
 			</div>
 		</div>
-		<ul v-else class="divide-y divide-gray-100" role="listbox" aria-label="Chat list">
+		<ul v-else class="divide-y divide-gray-100 dark:divide-gray-800" role="listbox" aria-label="Chat list">
 			<ChatItem
 				v-for="chat in chatsList"
 				:key="chat.id"

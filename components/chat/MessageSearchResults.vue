@@ -43,28 +43,28 @@ function handleLoadMoreKeyDown(event: KeyboardEvent) {
 function highlightText(text: string, query: string): string {
 	if (!query.trim()) return text
 	const regex = new RegExp(`(${query})`, 'gi')
-	return text.replace(regex, '<mark class="bg-yellow-200">$1</mark>')
+	return text.replace(regex, '<mark class="bg-yellow-200 dark:bg-yellow-600/50">$1</mark>')
 }
 </script>
 
 <template>
 	<div class="flex flex-col">
-		<div v-if="isLoading" class="p-4 text-sm text-gray-600 text-center">
+		<div v-if="isLoading" class="p-4 text-sm text-gray-600 dark:text-gray-400 text-center">
 			Wyszukiwanie...
 		</div>
-		<div v-else-if="messages.length === 0" class="p-4 text-sm text-gray-500 text-center">
+		<div v-else-if="messages.length === 0" class="p-4 text-sm text-gray-500 dark:text-gray-400 text-center">
 			Brak wyników
 		</div>
 		<div v-else class="flex flex-col">
-			<div class="px-4 py-2 text-xs text-gray-500 border-b border-gray-200">
+			<div class="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
 				Znaleziono {{ total }} {{ total === 1 ? 'wiadomość' : 'wiadomości' }}
 			</div>
 			<div class="max-h-96 overflow-y-auto">
-				<ul class="divide-y divide-gray-100" role="listbox" aria-label="Search results">
+				<ul class="divide-y divide-gray-100 dark:divide-gray-800" role="listbox" aria-label="Search results">
 					<li
 						v-for="message in messages"
 						:key="message.id"
-						class="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors"
+						class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
 						tabindex="0"
 						role="option"
 						:aria-label="`Message from ${message.senderUsername}`"
@@ -73,15 +73,15 @@ function highlightText(text: string, query: string): string {
 					>
 						<div class="flex flex-col gap-1">
 							<div class="flex items-center justify-between">
-								<span class="text-xs font-medium text-gray-700">
+								<span class="text-xs font-medium text-gray-700 dark:text-gray-300">
 									{{ message.senderUsername }}
 								</span>
-								<span class="text-xs text-gray-500">
+								<span class="text-xs text-gray-500 dark:text-gray-400">
 									{{ formatDate(message.createdAt) }}
 								</span>
 							</div>
 							<p
-								class="text-sm text-gray-900 line-clamp-2"
+								class="text-sm text-gray-900 dark:text-gray-100 line-clamp-2"
 								v-html="highlightText(message.content, props.query || '')"
 							></p>
 						</div>
@@ -91,7 +91,7 @@ function highlightText(text: string, query: string): string {
 			<button
 				v-if="hasMore"
 				type="button"
-				class="px-4 py-2 text-sm text-blue-600 hover:bg-gray-50 transition-colors border-t border-gray-200"
+				class="px-4 py-2 text-sm text-blue-600 dark:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-t border-gray-200 dark:border-gray-700"
 				tabindex="0"
 				aria-label="Load more results"
 				@click="handleLoadMore"

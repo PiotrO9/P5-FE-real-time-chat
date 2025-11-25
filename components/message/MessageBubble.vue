@@ -31,18 +31,18 @@ const bubbleClasses = computed(() => {
 	if (props.isOwnMessage) {
 		return {
 			'opacity-50': props.isDeleting || isDeleted,
-			'bg-blue-100 text-gray-900': !props.isPinned && !isDeleted,
-			'bg-yellow-500 text-white': props.isPinned && !isDeleted,
-			'bg-gray-400 text-white': isDeleted,
-			'ring-2 ring-gray-900 ring-offset-2': props.highlighted,
+			'bg-blue-100 dark:bg-blue-900 text-gray-900 dark:text-gray-100': !props.isPinned && !isDeleted,
+			'bg-yellow-500 dark:bg-yellow-500 text-white dark:text-yellow-50': props.isPinned && !isDeleted,
+			'bg-gray-400 dark:bg-gray-600 text-white': isDeleted,
+			'ring-2 ring-gray-900 dark:ring-gray-100 ring-offset-2 dark:ring-offset-gray-900': props.highlighted,
 			'rounded-br-none': true
 		}
 	} else {
 		return {
-			'bg-gray-100 border-gray-200 text-gray-900': !props.isPinned && !isDeleted,
-			'bg-yellow-50 border-yellow-300': props.isPinned && !isDeleted,
-			'bg-gray-100 border-gray-300': isDeleted,
-			'ring-2 ring-gray-900 ring-offset-2': props.highlighted,
+			'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100': !props.isPinned && !isDeleted,
+			'bg-yellow-50 dark:bg-yellow-900/50 border-yellow-300 dark:border-yellow-500 text-gray-900 dark:text-yellow-50': props.isPinned && !isDeleted,
+			'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600': isDeleted,
+			'ring-2 ring-gray-900 dark:ring-gray-100 ring-offset-2 dark:ring-offset-gray-900': props.highlighted,
 			'rounded-bl-none': true
 		}
 	}
@@ -81,8 +81,8 @@ const ariaLabel = computed(() => {
 				:class="[
 					'w-full bg-transparent resize-none focus:outline-none focus:ring-0 border-none p-0 m-0',
 					isOwnMessage
-						? 'text-gray-900 placeholder-gray-500'
-						: 'text-gray-900 placeholder-gray-500'
+						? 'text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400'
+						: 'text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400'
 				]"
 				rows="3"
 				aria-label="Edit message"
@@ -98,8 +98,8 @@ const ariaLabel = computed(() => {
 					:class="[
 						'px-3 py-1 text-xs rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
 						isOwnMessage
-							? 'bg-gray-200 hover:bg-gray-300 text-gray-900 focus-visible:ring-gray-400'
-							: 'bg-gray-200 hover:bg-gray-300 text-gray-900 focus-visible:ring-gray-400'
+							? 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 focus-visible:ring-gray-400 dark:focus-visible:ring-gray-500'
+							: 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 focus-visible:ring-gray-400 dark:focus-visible:ring-gray-500'
 					]"
 					@mousedown.prevent
 					@click.stop="emit('cancel-edit')"
