@@ -33,7 +33,7 @@ function handleKeyDown(event: KeyboardEvent, action: 'delete' | 'pin' | 'forward
 
 <template>
 	<div
-		class="absolute bottom-full mb-1 bg-white rounded-lg shadow-lg border border-gray-200 z-50 min-w-40 overflow-hidden"
+		class="absolute bottom-full mb-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 min-w-40 overflow-hidden"
 		:class="position === 'left' ? 'left-0' : 'right-0'"
 		@mouseenter="emit('mouseenter')"
 		@mouseleave="emit('mouseleave')"
@@ -44,7 +44,7 @@ function handleKeyDown(event: KeyboardEvent, action: 'delete' | 'pin' | 'forward
 			tabindex="0"
 			aria-label="Usuń wiadomość"
 			:disabled="isDeleted"
-			class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+			class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent dark:disabled:hover:bg-transparent"
 			@mousedown.stop.prevent
 			@click.stop.prevent="!isDeleted && emit('delete')"
 			@keydown="(e) => !isDeleted && handleKeyDown(e, 'delete')"
@@ -56,7 +56,7 @@ function handleKeyDown(event: KeyboardEvent, action: 'delete' | 'pin' | 'forward
 			tabindex="0"
 			:aria-label="isPinned ? 'Odepnij wiadomość' : 'Przypnij wiadomość'"
 			:disabled="isDeleted"
-			class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+			class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent dark:disabled:hover:bg-transparent"
 			@mousedown.stop.prevent
 			@click.stop.prevent="!isDeleted && emit('pin')"
 			@keydown="(e) => !isDeleted && handleKeyDown(e, 'pin')"
@@ -68,7 +68,7 @@ function handleKeyDown(event: KeyboardEvent, action: 'delete' | 'pin' | 'forward
 			tabindex="0"
 			aria-label="Przekaż wiadomość"
 			:disabled="isDeleted"
-			class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+			class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent dark:disabled:hover:bg-transparent"
 			@mousedown.stop.prevent
 			@click.stop.prevent="!isDeleted && emit('forward')"
 			@keydown="(e) => !isDeleted && handleKeyDown(e, 'forward')"

@@ -44,15 +44,15 @@ function handleReactionBadgeKeyDown(event: KeyboardEvent, emoji: string) {
 			type="button"
 			tabindex="0"
 			:aria-label="`${getReactionCount(emoji)} reactions ${emoji}, click to ${hasUserReaction(emoji) ? 'remove' : 'add'} reaction`"
-			class="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-gray-100 hover:bg-gray-200 border border-gray-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+			class="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
 			:class="{
-				'bg-blue-100 border-blue-300': hasUserReaction(emoji)
+				'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-600': hasUserReaction(emoji)
 			}"
 			@click="handleReactionBadgeClick(emoji, $event)"
 			@keydown="handleReactionBadgeKeyDown($event, emoji)"
 		>
 			<span>{{ emoji }}</span>
-			<span class="font-medium text-gray-700">{{ getReactionCount(emoji) }}</span>
+			<span class="font-medium text-gray-700 dark:text-gray-300">{{ getReactionCount(emoji) }}</span>
 		</button>
 	</div>
 </template>

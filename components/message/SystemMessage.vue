@@ -34,8 +34,10 @@ function getSystemMessageText(): string {
 
 <template>
 	<div v-if="message.isSystem" class="w-full flex items-center justify-center py-2">
-		<div class="px-4 py-1.5 rounded-full bg-gray-100 border border-gray-200">
-			<p class="text-xs font-medium text-gray-600 text-center">
+		<div
+			class="px-4 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+		>
+			<p class="text-xs font-medium text-gray-600 dark:text-gray-400 text-center">
 				{{ systemText }}
 			</p>
 		</div>

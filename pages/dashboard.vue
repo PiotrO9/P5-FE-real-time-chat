@@ -11,8 +11,6 @@ import SideNavigation from '~/components/layout/SideNavigation.vue'
 
 const dashboard = useDashboard()
 
-console.log(dashboard)
-
 onMounted(async () => {
 	await dashboard.initialize()
 })
@@ -46,9 +44,13 @@ onUnmounted(() => {
 						]"
 					>
 						<div class="flex flex-col h-full">
-							<div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 gap-2 flex flex-col">
+							<div
+								class="p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 gap-2 flex flex-col"
+							>
 								<div class="flex items-center justify-between">
-									<h1 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-gray-100">
+									<h1
+										class="text-lg md:text-xl font-semibold text-slate-900 dark:text-gray-100"
+									>
 										{{
 											dashboard.viewModeComposable.viewMode.value === 'chats'
 												? 'Chats'

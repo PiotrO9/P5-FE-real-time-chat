@@ -91,7 +91,6 @@ export function useSocketHandlers(
 	}
 
 	function handleMessageUpdated(data: { chatId: string; message: any }) {
-		console.log('WebSocket: message:updated event received', data)
 		const chatId = String(data.chatId)
 		const chat = chatsComposable.findChatById(chatId)
 
@@ -101,7 +100,6 @@ export function useSocketHandlers(
 		}
 
 		const mappedMessage = mapMessageFromBackend(data.message)
-		console.log('WebSocket: Mapped message', mappedMessage)
 		messages.updateMessage(chatId, mappedMessage)
 	}
 

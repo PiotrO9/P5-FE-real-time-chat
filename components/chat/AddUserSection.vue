@@ -36,7 +36,7 @@ function handleKeyDown(event: KeyboardEvent) {
 </script>
 
 <template>
-	<div class="p-4 border-b border-gray-200 dark:border-gray-700">
+	<div class="p-4 border-b border-t border-gray-200 dark:border-gray-700 dark:bg-gray-900">
 		<h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Add user</h3>
 		<div class="space-y-2">
 			<label for="add-user-input" class="sr-only">Username</label>
@@ -52,20 +52,20 @@ function handleKeyDown(event: KeyboardEvent) {
 				type="button"
 				tabindex="0"
 				aria-label="Add user"
-				:disabled="isAddingUser || !addUserUsername.trim()"
+				:disabled="props.isAddingUser || !addUserUsername.trim()"
 				class="w-full px-4 py-2 bg-blue-500 dark:bg-blue-600 text-white rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
 				@click="handleAddUser"
 				@keydown.enter="handleAddUser"
 			>
-				{{ isAddingUser ? 'Adding...' : 'Add' }}
+				{{ props.isAddingUser ? 'Adding...' : 'Add' }}
 			</button>
 		</div>
 
-		<div v-if="availableFriends.length > 0" class="mt-4">
+		<div v-if="props.availableFriends.length > 0" class="mt-4">
 			<p class="text-xs text-gray-600 dark:text-gray-400 mb-2">Available friends:</p>
 			<div class="space-y-1 max-h-32 overflow-y-auto">
 				<button
-					v-for="friend in availableFriends"
+					v-for="friend in props.availableFriends"
 					:key="friend.id"
 					type="button"
 					tabindex="0"
@@ -74,7 +74,9 @@ function handleKeyDown(event: KeyboardEvent) {
 					@click="handleAddUserClick(friend)"
 					@keydown.enter="handleAddUserClick(friend)"
 				>
-					<span class="font-medium">{{ friend.username }}</span>
+					<span class="font-medium text-gray-900 dark:text-gray-100">
+						{{ friend.username }}
+					</span>
 					<span
 						v-if="friend.isOnline"
 						class="h-2 w-2 rounded-full bg-green-500"

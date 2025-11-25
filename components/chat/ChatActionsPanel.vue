@@ -448,20 +448,18 @@ onUnmounted(() => {
 							@close="handleToggleState"
 						/>
 
-						<div class="flex-1 overflow-y-auto bg-white dark:bg-gray-900 rounded-b-[1.125rem]">
+						<div
+							class="flex-1 min-h-0 overflow-y-auto bg-white dark:bg-gray-900 rounded-b-[1.125rem]"
+						>
 							<template v-if="!isGroupChat && chat?.otherUser">
 								<UserInfoSection :user="chat.otherUser" />
 							</template>
 
-							<PinnedMessagesList
-								:pinned-messages="pinnedMessagesList"
-								:is-loading="pinnedMessagesLoading"
-								@message-click="handlePinnedMessageClick"
-							/>
-
-							<div class="border-t border-gray-200 dark:border-gray-700 px-4 py-3">
+							<div class="border-gray-200 dark:border-gray-700 px-4 py-3">
 								<div class="flex items-center justify-between mb-2">
-									<h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+									<h3
+										class="text-sm font-semibold text-gray-900 dark:text-gray-100"
+									>
 										Wyszukiwanie wiadomości
 									</h3>
 									<button
@@ -500,6 +498,12 @@ onUnmounted(() => {
 									@load-more="handleLoadMoreSearchResults"
 								/>
 							</div>
+
+							<PinnedMessagesList
+								:pinned-messages="pinnedMessagesList"
+								:is-loading="pinnedMessagesLoading"
+								@message-click="handlePinnedMessageClick"
+							/>
 
 							<template v-if="isGroupChat && isOwner">
 								<AddUserSection
@@ -540,28 +544,28 @@ onUnmounted(() => {
 			</div>
 		</Teleport>
 
-		<aside class="hidden xl:flex md:min-w-96 bg-white dark:bg-gray-800 flex-col border-l dark:border-gray-700">
-			<div class="flex flex-col bg-gray dark:bg-gray-900 flex-1">
+		<aside
+			class="hidden xl:flex max-w-[400px] md:min-w-96 bg-white dark:bg-gray-800 flex-col border-l dark:border-gray-700 h-full"
+		>
+			<div class="flex flex-col bg-gray dark:bg-gray-900 flex-1 min-h-0 overflow-hidden">
 				<ChatActionsHeader
 					:is-group-chat="isGroupChat"
 					:is-owner="isOwner"
 					@close="handleToggleState"
 				/>
 
-				<div class="flex-1 overflow-y-auto bg-white rounded-b-[1.125rem]">
+				<div
+					class="flex-1 min-h-0 overflow-y-auto bg-white dark:bg-gray-900 rounded-b-[1.125rem]"
+				>
 					<template v-if="!isGroupChat && chat?.otherUser">
 						<UserInfoSection :user="chat.otherUser" />
 					</template>
 
-					<PinnedMessagesList
-						:pinned-messages="pinnedMessagesList"
-						:is-loading="pinnedMessagesLoading"
-						@message-click="handlePinnedMessageClick"
-					/>
-
-					<div class="border-t border-gray-200 px-4 py-3">
+					<div
+						class="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3"
+					>
 						<div class="flex items-center justify-between mb-2">
-							<h3 class="text-sm font-semibold text-gray-900">
+							<h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
 								Wyszukiwanie wiadomości
 							</h3>
 							<button
@@ -585,7 +589,7 @@ onUnmounted(() => {
 							v-model="messageSearchComposable.searchQuery.value"
 							type="text"
 							placeholder="Wyszukaj wiadomości..."
-							class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+							class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 						/>
 						<MessageSearchResults
 							v-if="messageSearchComposable.searchQuery.value"
@@ -597,6 +601,12 @@ onUnmounted(() => {
 							@load-more="handleLoadMoreSearchResults"
 						/>
 					</div>
+
+					<PinnedMessagesList
+						:pinned-messages="pinnedMessagesList"
+						:is-loading="pinnedMessagesLoading"
+						@message-click="handlePinnedMessageClick"
+					/>
 
 					<template v-if="isGroupChat && isOwner">
 						<AddUserSection

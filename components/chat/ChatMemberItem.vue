@@ -4,6 +4,19 @@ import { getRoleLabel, getRoleColor, getAvailableRoles } from '~/utils/roleHelpe
 import { compareIds } from '~/utils/idHelpers'
 import ChatInitial from './ChatInitial.vue'
 
+function getRoleColorDark(role: Role): string {
+	switch (role) {
+		case 'OWNER':
+			return 'dark:bg-purple-900/50 dark:text-purple-200 dark:border-purple-600'
+		case 'MODERATOR':
+			return 'dark:bg-blue-900/50 dark:text-blue-200 dark:border-blue-600'
+		case 'MEMBER':
+			return 'dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600'
+		default:
+			return 'dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600'
+	}
+}
+
 interface Props {
 	member: ChatMember
 	currentUserId: number | string
@@ -70,6 +83,7 @@ function handleRemoveUser() {
 							:class="[
 								'px-2 py-0.5 text-xs font-medium rounded border cursor-pointer transition-colors',
 								getRoleColor(member.role),
+								getRoleColorDark(member.role),
 								isUpdatingRole === String(member.id)
 									? 'opacity-50 cursor-not-allowed'
 									: 'hover:opacity-80'
@@ -84,7 +98,8 @@ function handleRemoveUser() {
 							v-else
 							:class="[
 								'px-2 py-0.5 text-xs font-medium rounded border',
-								getRoleColor(member.role)
+								getRoleColor(member.role),
+								getRoleColorDark(member.role)
 							]"
 						>
 							{{ getRoleLabel(member.role) }}
@@ -122,7 +137,8 @@ function handleRemoveUser() {
 						v-else
 						:class="[
 							'px-2 py-0.5 text-xs font-medium rounded border',
-							getRoleColor(member.role)
+							getRoleColor(member.role),
+							getRoleColorDark(member.role)
 						]"
 					>
 						{{ getRoleLabel(member.role) }}
@@ -142,11 +158,11 @@ function handleRemoveUser() {
 				tabindex="0"
 				:aria-label="`Remove ${member.username} from chat`"
 				:disabled="isRemovingUser === String(member.id)"
-				class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors disabled:opacity-50"
+				class="size-8 flex justify-center items-center p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full transition-colors disabled:opacity-50"
 				@click="handleRemoveUser"
 				@keydown.enter="handleRemoveUser"
 			>
-				<Icon name="bin" class="h-4 w-4" />
+				<Icon name="bin" class="size-4" />
 			</button>
 		</div>
 	</div>

@@ -77,7 +77,7 @@ function handleBackKeyDown(event: KeyboardEvent) {
 
 <template>
 	<div
-		class="border-b rounded-t-[1.125rem] border-gray-200 dark:border-gray-700 px-3 md:px-4 py-4 flex items-center justify-between bg-white dark:bg-gray-900 backdrop-blur supports-[backdrop-filter]:bg-white dark:supports-[backdrop-filter]:bg-gray-900"
+		class="border-b rounded-t-[1.125rem] border-gray-200 dark:border-gray-700 px-3 md:px-4 py-4 flex items-start justify-between bg-white dark:bg-gray-900 backdrop-blur supports-[backdrop-filter]:bg-white dark:supports-[backdrop-filter]:bg-gray-900"
 	>
 		<div class="flex items-center gap-3 min-w-0 flex-1">
 			<button
@@ -92,10 +92,14 @@ function handleBackKeyDown(event: KeyboardEvent) {
 			</button>
 			<ChatInitial :chat-initial />
 			<div class="flex flex-col min-w-0">
-				<h2 class="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100 truncate min-w-0">
+				<h2
+					class="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100 truncate min-w-0"
+				>
 					{{ displayName }}
 				</h2>
-				<p v-if="lastSeenText" class="text-xs text-gray-500 dark:text-gray-400">{{ lastSeenText }}</p>
+				<p v-if="lastSeenText" class="text-xs text-gray-500 dark:text-gray-400">
+					{{ lastSeenText }}
+				</p>
 			</div>
 		</div>
 		<ActionsMenu

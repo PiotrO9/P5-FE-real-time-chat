@@ -116,7 +116,7 @@ defineExpose({
 	<div
 		v-if="showReactionPicker"
 		ref="reactionsContainerRef"
-		class="absolute top-1/2 -translate-y-1/2 flex flex-col gap-1 bg-white rounded-2xl p-1.5 shadow-xl border border-gray-200 z-20 w-64 max-h-44 overflow-y-auto"
+		class="absolute top-1/2 -translate-y-1/2 flex flex-col gap-1 bg-white dark:bg-gray-800 rounded-2xl p-1.5 shadow-xl border border-gray-200 dark:border-gray-700 z-20 w-64 max-h-44 overflow-y-auto"
 		:class="{
 			'left-0 -translate-y-[120%]': position === 'left',
 			'right-0 -translate-y-[120%]': position === 'right'
@@ -125,7 +125,9 @@ defineExpose({
 		@mouseleave="handleReactionPickerMouseLeave"
 	>
 		<div v-for="group in groupedEmojiCategories" :key="group.label" class="flex flex-col">
-			<p class="text-xs font-medium text-gray-500 mb-0.5 ml-1">{{ group.label }}</p>
+			<p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-0.5 ml-1">
+				{{ group.label }}
+			</p>
 			<div class="flex flex-wrap gap-1">
 				<button
 					v-for="emoji in group.emojis"
@@ -133,9 +135,9 @@ defineExpose({
 					type="button"
 					tabindex="0"
 					:aria-label="`Add reaction ${emoji}`"
-					class="w-8 h-8 flex items-center justify-center text-lg transition-transform rounded-full hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+					class="w-8 h-8 flex items-center justify-center text-lg transition-transform rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
 					:class="{
-						'bg-blue-50': hasUserReaction(emoji),
+						'bg-blue-50 dark:bg-blue-900': hasUserReaction(emoji),
 						'hover:scale-110': true
 					}"
 					@click="handleReactionClick(emoji)"
@@ -156,5 +158,11 @@ defineExpose({
 ::-webkit-scrollbar-thumb {
 	background-color: #ccc;
 	border-radius: 3px;
+}
+
+@media (prefers-color-scheme: dark) {
+	::-webkit-scrollbar-thumb {
+		background-color: #4b5563;
+	}
 }
 </style>

@@ -17,8 +17,7 @@ interface Props {
 }
 
 interface Emits {
-	(e: 'cancel-edit'): void
-	(e: 'save-edit'): void
+	(e: 'cancel-edit' | 'save-edit'): void
 	(e: 'keydown', event: KeyboardEvent): void
 	(e: 'update:editContent', value: string): void
 }
@@ -28,22 +27,27 @@ const emit = defineEmits<Emits>()
 
 const bubbleClasses = computed(() => {
 	const isDeleted = props.message.isDeleted === true
+
 	if (props.isOwnMessage) {
 		return {
 			'opacity-50': props.isDeleting || isDeleted,
-			'bg-blue-100 dark:bg-blue-900 text-gray-900 dark:text-gray-100': !props.isPinned && !isDeleted,
-			'bg-yellow-500 dark:bg-yellow-500 text-white dark:text-yellow-50': props.isPinned && !isDeleted,
+			'bg-blue-100 dark:bg-blue-900 text-gray-900 dark:text-gray-100':
+				!props.isPinned && !isDeleted,
+			'bg-yellow-500 dark:bg-yellow-500 text-white dark:text-yellow-50':
+				props.isPinned && !isDeleted,
 			'bg-gray-400 dark:bg-gray-600 text-white': isDeleted,
-			'ring-2 ring-gray-900 dark:ring-gray-100 ring-offset-2 dark:ring-offset-gray-900': props.highlighted,
-			'rounded-br-none': true
+			'ring-2 ring-gray-900 dark:ring-gray-100 ring-offset-2 dark:ring-offset-gray-900':
+				props.highlighted
 		}
 	} else {
 		return {
-			'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100': !props.isPinned && !isDeleted,
-			'bg-yellow-50 dark:bg-yellow-900/50 border-yellow-300 dark:border-yellow-500 text-gray-900 dark:text-yellow-50': props.isPinned && !isDeleted,
+			'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100':
+				!props.isPinned && !isDeleted,
+			'bg-yellow-50 dark:bg-yellow-900/50 border-yellow-300 dark:border-yellow-500 text-gray-900 dark:text-yellow-50':
+				props.isPinned && !isDeleted,
 			'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600': isDeleted,
-			'ring-2 ring-gray-900 dark:ring-gray-100 ring-offset-2 dark:ring-offset-gray-900': props.highlighted,
-			'rounded-bl-none': true
+			'ring-2 ring-gray-900 dark:ring-gray-100 ring-offset-2 dark:ring-offset-gray-900':
+				props.highlighted
 		}
 	}
 })
@@ -63,10 +67,7 @@ const ariaLabel = computed(() => {
 <template>
 	<div
 		class="relative rounded-2xl px-3 md:px-4 py-2 text-xs md:text-sm shadow-sm transition-all duration-300 w-fit"
-		:class="[
-			isOwnMessage ? 'rounded-br-none' : 'max-w-full border rounded-bl-none',
-			bubbleClasses
-		]"
+		:class="[isOwnMessage ? '' : 'max-w-full border', bubbleClasses]"
 		:aria-label="ariaLabel"
 	>
 		<p v-if="isDeleting" class="whitespace-pre-wrap break-words italic">Deleting...</p>
@@ -129,13 +130,15 @@ const ariaLabel = computed(() => {
 		<template v-else>
 			<div
 				v-if="message.forwardedFrom"
-				class="mb-2 pb-2 border-b border-current border-opacity-20"
+				class="mb-2 pb-2 border-b border-current border-opacity-20 dark:border-opacity-30"
 			>
-				<p class="text-xs opacity-80 font-medium">
+				<p
+					class="text-xs opacity-80 dark:opacity-90 font-medium text-gray-700 dark:text-gray-300"
+				>
 					Przekazane z:
 					{{ message.forwardedFrom.chatName || 'Czat prywatny' }}
 				</p>
-				<p class="text-[10px] opacity-60">
+				<p class="text-[10px] opacity-60 dark:opacity-70 text-gray-600 dark:text-gray-400">
 					{{ message.forwardedFrom.senderUsername }} •
 					{{
 						new Date(message.forwardedFrom.originalCreatedAt).toLocaleString('pl-PL', {
@@ -149,9 +152,11 @@ const ariaLabel = computed(() => {
 				</p>
 			</div>
 			<p class="whitespace-pre-wrap break-words">{{ message.content }}</p>
-			<p class="mt-1 text-[10px] opacity-70 flex items-center gap-1">
+			<p
+				class="mt-1 text-[10px] opacity-70 dark:opacity-80 flex items-center gap-1 text-gray-600 dark:text-gray-400"
+			>
 				{{ formattedTime }}
-				<span v-if="isEdited" class="italic opacity-60">(edited)</span>
+				<span v-if="isEdited" class="italic opacity-60 dark:opacity-70">(edited)</span>
 			</p>
 		</template>
 	</div>

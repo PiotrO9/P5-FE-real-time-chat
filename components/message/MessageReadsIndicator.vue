@@ -118,7 +118,7 @@ const hasReads = computed(() => props.reads.length > 0)
 		<div
 			v-for="(read, index) in visibleReads"
 			:key="read.userId"
-			class="w-4 h-4 rounded-full bg-blue-500 border border-white flex items-center justify-center text-[8px] text-white font-medium cursor-help transition-transform hover:scale-110"
+			class="w-4 h-4 rounded-full bg-blue-500 border border-white dark:border-gray-800 flex items-center justify-center text-[8px] text-white font-medium cursor-help transition-transform hover:scale-110"
 			:class="index > 0 ? '-ml-1' : ''"
 			:aria-label="`Read by ${read.username} ${formatReadDateTime(read.readAt)}`"
 			@mouseenter="handleReadMouseEnter(read)"
@@ -128,7 +128,7 @@ const hasReads = computed(() => props.reads.length > 0)
 		</div>
 		<div
 			v-if="hiddenReadsCount > 0"
-			class="w-4 h-4 rounded-full bg-gray-400 border border-white flex items-center justify-center text-[8px] text-white font-medium -ml-1 cursor-help transition-transform hover:scale-110"
+			class="w-4 h-4 rounded-full bg-gray-400 dark:bg-gray-600 border border-white dark:border-gray-800 flex items-center justify-center text-[8px] text-white font-medium -ml-1 cursor-help transition-transform hover:scale-110"
 			:aria-label="`And ${hiddenReadsCount} more`"
 			@mouseenter="handleMoreMouseEnter"
 			@mouseleave="handleMoreMouseLeave"

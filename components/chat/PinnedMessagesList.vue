@@ -21,12 +21,15 @@ function handlePinnedMessageClick(messageId: string | number) {
 </script>
 
 <template>
-	<div class="p-4 border-b border-gray-200 dark:border-gray-700">
+	<div class="p-4 border-t border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-700">
 		<h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
 			Pinned messages ({{ pinnedMessages.length }})
 		</h3>
 		<div v-if="isLoading" class="text-sm text-gray-600 dark:text-gray-400">Loading...</div>
-		<div v-else-if="pinnedMessages.length === 0" class="text-sm text-gray-500 dark:text-gray-400">
+		<div
+			v-else-if="pinnedMessages.length === 0"
+			class="text-sm text-gray-500 dark:text-gray-100"
+		>
 			No pinned messages
 		</div>
 		<div v-else class="space-y-2 max-h-96 overflow-y-auto">
@@ -46,7 +49,10 @@ function handlePinnedMessageClick(messageId: string | number) {
 							<p class="font-medium text-gray-900 dark:text-gray-100">
 								{{ pinnedMessage.senderUsername }}
 							</p>
-							<span v-if="pinnedMessage.pinnedBy" class="text-gray-400 dark:text-gray-500 text-[10px]">
+							<span
+								v-if="pinnedMessage.pinnedBy"
+								class="text-gray-400 dark:text-gray-500 text-[10px]"
+							>
 								pinned by {{ pinnedMessage.pinnedBy.username }}
 							</span>
 						</div>
@@ -63,7 +69,10 @@ function handlePinnedMessageClick(messageId: string | number) {
 							</span>
 						</div>
 					</div>
-					<Icon name="pin" class="h-4 w-4 flex-shrink-0 text-gray-500 dark:text-gray-400" />
+					<Icon
+						name="pin"
+						class="h-4 w-4 flex-shrink-0 text-gray-500 dark:text-gray-400"
+					/>
 				</div>
 			</button>
 		</div>

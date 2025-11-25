@@ -24,18 +24,18 @@ function handleKeyDown(event: KeyboardEvent) {
 </script>
 
 <template>
-	<div class="p-4 bg-white dark:bg-gray-800 backdrop-blur">
+	<div class="p-4 bg-white dark:bg-gray-900 backdrop-blur border-b dark:border-gray-700">
 		<div class="flex items-center justify-between mb-2">
 			<h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Chat actions</h2>
 			<button
 				type="button"
 				tabindex="0"
 				aria-label="Close actions panel"
-				class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+				class="p-2 size-8 rounded-full bg-gray-100 dark:bg-gray-700 transition-colors flex items-center justify-center"
 				@click="handleToggleState"
 				@keydown="handleKeyDown"
 			>
-				<Icon name="remove" class="size-5 text-gray-600 dark:text-gray-400" />
+				<Icon name="remove" class="size-4 text-gray-600 dark:text-gray-300" />
 			</button>
 		</div>
 		<p class="text-sm text-gray-600 dark:text-gray-400">
