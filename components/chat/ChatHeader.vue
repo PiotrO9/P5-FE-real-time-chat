@@ -21,7 +21,35 @@ const chatInitial = computed(() => {
 		? (selectedChat?.name[0]?.toUpperCase() ?? '?')
 		: (selectedChat?.otherUser.username[0]?.toUpperCase() ?? '?')
 })
-const displayName = computed(() => selectedChat?.name ?? 'Czat')
+const displayName = computed(() => {
+	if (!selectedChat) return 'Czat'
+	return selectedChat.isGroup
+		? selectedChat.name
+		: selectedChat.otherUser?.username || selectedChat.name || 'Czat'
+})
+
+function formatLastSeen(lastSeen?: string): string {
+	if (!lastSeen) return 'Never'
+
+	const date = new Date(lastSeen)
+	const now = new Date()
+	const diffMs = now.getTime() - date.getTime()
+	const diffMins = Math.floor(diffMs / 60000)
+
+	if (diffMins < 1) return 'Now'
+	if (diffMins < 60) return `Last seen ${diffMins} min ago`
+	if (diffMins < 1440) return `Last seen ${Math.floor(diffMins / 60)} hrs ago`
+
+	return `Last seen ${date.toLocaleDateString('en-US', {
+		day: 'numeric',
+		month: 'short'
+	})}`
+}
+
+const lastSeenText = computed(() => {
+	if (isGroup.value || !selectedChat?.otherUser?.lastSeen) return null
+	return formatLastSeen(selectedChat.otherUser.lastSeen)
+})
 
 function handleToggleActions() {
 	if (!selectedChat) return
@@ -49,7 +77,7 @@ function handleBackKeyDown(event: KeyboardEvent) {
 
 <template>
 	<div
-		class="border-b rounded-t-[1.125rem] border-gray-200 px-3 md:px-6 py-4 flex items-center justify-between bg-white backdrop-blur supports-[backdrop-filter]:bg-white"
+		class="border-b rounded-t-[1.125rem] border-gray-200 px-3 md:px-4 py-4 flex items-center justify-between bg-white backdrop-blur supports-[backdrop-filter]:bg-white"
 	>
 		<div class="flex items-center gap-3 min-w-0 flex-1">
 			<button
@@ -63,9 +91,12 @@ function handleBackKeyDown(event: KeyboardEvent) {
 				<Icon name="arrow-left" class="h-5 w-5 text-gray-600" />
 			</button>
 			<ChatInitial :chat-initial />
-			<h2 class="text-base md:text-lg font-semibold text-gray-900 truncate min-w-0">
-				{{ displayName }}
-			</h2>
+			<div class="flex flex-col min-w-0">
+				<h2 class="text-base md:text-lg font-semibold text-gray-900 truncate min-w-0">
+					{{ displayName }}
+				</h2>
+				<p v-if="lastSeenText" class="text-xs text-gray-500">{{ lastSeenText }}</p>
+			</div>
 		</div>
 		<ActionsMenu
 			v-if="selectedChat"

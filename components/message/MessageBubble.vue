@@ -31,7 +31,7 @@ const bubbleClasses = computed(() => {
 	if (props.isOwnMessage) {
 		return {
 			'opacity-50': props.isDeleting || isDeleted,
-			'bg-blue-600 text-white': !props.isPinned && !isDeleted,
+			'bg-blue-100 text-gray-900': !props.isPinned && !isDeleted,
 			'bg-yellow-500 text-white': props.isPinned && !isDeleted,
 			'bg-gray-400 text-white': isDeleted,
 			'ring-2 ring-gray-900 ring-offset-2': props.highlighted,
@@ -39,7 +39,7 @@ const bubbleClasses = computed(() => {
 		}
 	} else {
 		return {
-			'bg-white border-gray-200': !props.isPinned && !isDeleted,
+			'bg-gray-100 border-gray-200 text-gray-900': !props.isPinned && !isDeleted,
 			'bg-yellow-50 border-yellow-300': props.isPinned && !isDeleted,
 			'bg-gray-100 border-gray-300': isDeleted,
 			'ring-2 ring-gray-900 ring-offset-2': props.highlighted,
@@ -62,7 +62,7 @@ const ariaLabel = computed(() => {
 
 <template>
 	<div
-		class="relative rounded-2xl px-3 md:px-4 py-2 text-xs md:text-sm shadow-sm transition-all duration-300 max-w-[85%] md:max-w-[75%]"
+		class="relative rounded-2xl px-3 md:px-4 py-2 text-xs md:text-sm shadow-sm transition-all duration-300 w-fit"
 		:class="[
 			isOwnMessage ? 'rounded-br-none' : 'max-w-full border rounded-bl-none',
 			bubbleClasses
@@ -78,7 +78,12 @@ const ariaLabel = computed(() => {
 				:ref="editTextareaRef"
 				:value="editContent"
 				:disabled="isUpdating"
-				class="w-full bg-transparent text-white placeholder-white/70 resize-none focus:outline-none focus:ring-0 border-none p-0 m-0"
+				:class="[
+					'w-full bg-transparent resize-none focus:outline-none focus:ring-0 border-none p-0 m-0',
+					isOwnMessage
+						? 'text-gray-900 placeholder-gray-500'
+						: 'text-gray-900 placeholder-gray-500'
+				]"
 				rows="3"
 				aria-label="Edit message"
 				@keydown="emit('keydown', $event)"
@@ -90,7 +95,12 @@ const ariaLabel = computed(() => {
 					type="button"
 					tabindex="0"
 					aria-label="Cancel edit"
-					class="px-3 py-1 text-xs bg-white/20 hover:bg-white/30 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-blue-600"
+					:class="[
+						'px-3 py-1 text-xs rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+						isOwnMessage
+							? 'bg-gray-200 hover:bg-gray-300 text-gray-900 focus-visible:ring-gray-400'
+							: 'bg-gray-200 hover:bg-gray-300 text-gray-900 focus-visible:ring-gray-400'
+					]"
 					@mousedown.prevent
 					@click.stop="emit('cancel-edit')"
 					@keydown="(e) => e.key === 'Enter' && emit('cancel-edit')"
@@ -102,7 +112,12 @@ const ariaLabel = computed(() => {
 					tabindex="0"
 					aria-label="Save changes"
 					:disabled="isUpdating || !editContent || editContent.trim() === message.content"
-					class="px-3 py-1 text-xs bg-white text-blue-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-blue-600"
+					:class="[
+						'px-3 py-1 text-xs rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+						isOwnMessage
+							? 'bg-blue-600 text-white hover:bg-blue-700 focus-visible:ring-blue-500'
+							: 'bg-blue-600 text-white hover:bg-blue-700 focus-visible:ring-blue-500'
+					]"
 					@mousedown.prevent
 					@click.stop="emit('save-edit')"
 					@keydown="(e) => e.key === 'Enter' && emit('save-edit')"

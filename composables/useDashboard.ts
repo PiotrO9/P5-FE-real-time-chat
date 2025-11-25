@@ -74,6 +74,17 @@ export function useDashboard() {
 		replyToMessage.value = null
 	})
 
+	watch(
+		() => [viewModeComposable.viewMode.value, viewModeComposable.friendsSubView.value],
+		([viewMode, friendsSubView]) => {
+			if (viewMode === 'friends') {
+				friendsComposable.fetchFriends()
+				invitesComposable.fetchInvites()
+			}
+		},
+		{ immediate: false }
+	)
+
 	useDynamicTitle({
 		selectedChat: chatsComposable.selectedChat,
 		viewMode: viewModeComposable.viewMode,
@@ -96,8 +107,8 @@ export function useDashboard() {
 		handleScrollToBottom
 	)
 
-	function handleViewModeChange(mode: 'chats' | 'friends') {
-		viewModeComposable.setViewMode(mode)
+	function handleViewModeChange(mode: 'chats' | 'friends', subView?: 'list' | 'add' | 'invites') {
+		viewModeComposable.setViewMode(mode, subView)
 		if (mode === 'friends') {
 			friendsComposable.fetchFriends()
 			invitesComposable.fetchInvites()

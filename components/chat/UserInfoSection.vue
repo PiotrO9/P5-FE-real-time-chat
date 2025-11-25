@@ -8,6 +8,7 @@ interface Props {
 const props = defineProps<Props>()
 
 const userData = computed(() => props.user)
+const activeTab = ref<'photos' | 'files'>('photos')
 
 function getInitials(username: string): string {
 	return username
@@ -18,42 +19,27 @@ function getInitials(username: string): string {
 		.slice(0, 2)
 }
 
-function formatLastSeen(lastSeen?: string): string {
-	if (!lastSeen) return 'Never'
-
-	const date = new Date(lastSeen)
+function getLocalTime(): string {
 	const now = new Date()
-	const diffMs = now.getTime() - date.getTime()
-	const diffMins = Math.floor(diffMs / 60000)
+	const timezoneOffset = now.getTimezoneOffset()
+	const localHours = now.getHours()
+	const localMinutes = now.getMinutes()
 
-	if (diffMins < 1) return 'Now'
-	if (diffMins < 60) return `${diffMins} min ago`
-	if (diffMins < 1440) return `${Math.floor(diffMins / 60)} hrs ago`
+	const minutes = localMinutes.toString().padStart(2, '0')
+	const period = localHours >= 12 ? 'PM' : 'AM'
+	const displayHours = localHours > 12 ? localHours - 12 : localHours === 0 ? 12 : localHours
+	const timezone = `UTC ${timezoneOffset > 0 ? '-' : '+'}${Math.abs(timezoneOffset / 60)
+		.toString()
+		.padStart(2, '0')}:00`
 
-	return date.toLocaleDateString('en-US', {
-		day: 'numeric',
-		month: 'short'
-	})
-}
-
-function formatCreatedAt(createdAt?: string): string {
-	if (!createdAt) return ''
-
-	const date = new Date(createdAt)
-	return date.toLocaleDateString('en-US', {
-		day: 'numeric',
-		month: 'long',
-		year: 'numeric'
-	})
+	return `Local Time ${displayHours}:${minutes}${period} (${timezone})`
 }
 
 const isOnline = computed(() => {
-	// Używamy isOnline z danych jeśli dostępne, w przeciwnym razie sprawdzamy lastSeen
 	if (userData.value.isOnline !== undefined) {
 		return userData.value.isOnline
 	}
 
-	// Fallback: sprawdzamy czy lastSeen jest bardzo świeże (mniej niż 5 minut)
 	if (!userData.value.lastSeen) return false
 
 	const lastSeenDate = new Date(userData.value.lastSeen)
@@ -63,44 +49,93 @@ const isOnline = computed(() => {
 
 	return diffMins < 5
 })
+
+const localTime = computed(() => getLocalTime())
+
+function handleTabClick(tab: 'photos' | 'files') {
+	activeTab.value = tab
+}
 </script>
 
 <template>
-	<div class="px-4 py-6 border-b border-gray-200">
-		<div class="flex flex-col items-center gap-4">
-			<div class="relative flex-shrink-0">
-				<div
-					class="h-20 w-20 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-2xl"
-				>
-					{{ getInitials(userData.username) }}
+	<div class="flex flex-col">
+		<div class="px-4 py-6 border-b border-gray-200">
+			<div class="flex flex-col items-center gap-4">
+				<div class="relative flex-shrink-0">
+					<div
+						class="h-20 w-20 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-2xl"
+					>
+						{{ getInitials(userData.username) }}
+					</div>
+					<div
+						v-if="isOnline"
+						class="absolute bottom-0 right-0 h-4 w-4 bg-green-500 border-2 border-white rounded-full"
+						aria-label="Online"
+					></div>
 				</div>
-				<div
-					v-if="isOnline"
-					class="absolute bottom-0 right-0 h-4 w-4 bg-green-500 border-2 border-white rounded-full"
-					aria-label="Online"
-				></div>
+
+				<div class="flex flex-col items-center gap-2 w-full">
+					<h3 class="text-lg font-semibold text-gray-900">{{ userData.username }}</h3>
+					<p class="text-sm text-gray-500 text-center">Head Of Design at Logoipsum</p>
+					<p class="text-sm text-gray-500">Bangladesh</p>
+					<p class="text-xs text-gray-400">{{ localTime }}</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="border-b border-gray-200">
+			<div class="flex border-b border-gray-200">
+				<button
+					type="button"
+					tabindex="0"
+					aria-label="Photos tab"
+					:class="[
+						'flex-1 px-4 py-3 text-sm font-medium transition-colors',
+						activeTab === 'photos'
+							? 'text-blue-600 border-b-2 border-blue-600'
+							: 'text-gray-600 hover:text-gray-900'
+					]"
+					@click="handleTabClick('photos')"
+					@keydown.enter="handleTabClick('photos')"
+					@keydown.space.prevent="handleTabClick('photos')"
+				>
+					Photos
+				</button>
+				<button
+					type="button"
+					tabindex="0"
+					aria-label="Files tab"
+					:class="[
+						'flex-1 px-4 py-3 text-sm font-medium transition-colors',
+						activeTab === 'files'
+							? 'text-blue-600 border-b-2 border-blue-600'
+							: 'text-gray-600 hover:text-gray-900'
+					]"
+					@click="handleTabClick('files')"
+					@keydown.enter="handleTabClick('files')"
+					@keydown.space.prevent="handleTabClick('files')"
+				>
+					Files
+				</button>
 			</div>
 
-			<div class="flex flex-col items-center gap-2 w-full">
-				<h3 class="text-lg font-semibold text-gray-900">{{ userData.username }}</h3>
-				<p class="text-sm text-gray-500">{{ userData.email }}</p>
+			<div v-if="activeTab === 'photos'" class="p-4">
+				<div class="grid grid-cols-3 gap-2">
+					<div
+						v-for="i in 10"
+						:key="i"
+						class="aspect-square bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg flex items-center justify-center"
+					>
+						<span class="text-xs text-gray-500">{{ i }}</span>
+					</div>
+				</div>
 			</div>
 
-			<div class="w-full pt-4 border-t border-gray-100">
-				<div class="flex flex-col gap-3">
-					<div class="flex items-center justify-between">
-						<span class="text-sm text-gray-600">Status</span>
-						<span class="text-sm font-medium text-gray-900">
-							{{ isOnline ? 'Online' : `Last active: ${formatLastSeen(userData.lastSeen)}` }}
-						</span>
-					</div>
-					<div v-if="userData.createdAt" class="flex items-center justify-between">
-						<span class="text-sm text-gray-600">Joined</span>
-						<span class="text-sm text-gray-900">{{ formatCreatedAt(userData.createdAt) }}</span>
-					</div>
+			<div v-else class="p-4">
+				<div class="text-center py-8">
+					<p class="text-sm text-gray-500">No files shared</p>
 				</div>
 			</div>
 		</div>
 	</div>
 </template>
-

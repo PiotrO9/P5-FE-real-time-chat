@@ -50,8 +50,8 @@ const displayMessage = computed(() => {
 const hasUnread = computed(() => Number(chatData.value.unreadCount) > 0)
 const itemClasses = computed(() => {
 	const base =
-		'flex items-center gap-3 px-4 py-3 hover:bg-slate-50 focus-visible:bg-slate-50 outline-none rounded-[0.625rem]'
-	return selected.value ? `${base} bg-blue-50` : base
+		'flex items-center gap-3 px-4 py-3 hover:bg-slate-50 focus-visible:bg-slate-50 outline-none transition-colors'
+	return selected.value ? `${base} bg-green-50` : base
 })
 const ariaLabel = computed(() => `Open chat: ${chatName.value}`)
 
@@ -77,7 +77,7 @@ function handleKeyDown(event: KeyboardEvent) {
 			@click="handleClick"
 			@keydown="handleKeyDown"
 		>
-			<ChatInitial :chat-initial />
+			<ChatInitial :chat-initial="chatInitial" />
 			<div class="min-w-0 flex-1 flex flex-col">
 				<div class="flex items-center justify-between gap-2 min-w-0">
 					<p class="font-medium text-sm md:text-base text-slate-900 truncate min-w-0">
@@ -111,7 +111,6 @@ function handleKeyDown(event: KeyboardEvent) {
 					><span v-if="senderName">: </span>{{ displayMessage }}
 				</p>
 			</div>
-			<ActionsMenu classes="chat-item-action-menu" />
 			<UnreadMessages :unread-count :has-unread variant="simple" />
 		</div>
 	</li>

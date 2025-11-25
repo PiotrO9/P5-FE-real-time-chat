@@ -45,7 +45,8 @@ function handleKeyDown(event: KeyboardEvent, action: 'delete' | 'pin' | 'forward
 			aria-label="Usuń wiadomość"
 			:disabled="isDeleted"
 			class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-			@click.stop="!isDeleted && emit('delete')"
+			@mousedown.stop.prevent
+			@click.stop.prevent="!isDeleted && emit('delete')"
 			@keydown="(e) => !isDeleted && handleKeyDown(e, 'delete')"
 		>
 			Usuń
@@ -56,7 +57,8 @@ function handleKeyDown(event: KeyboardEvent, action: 'delete' | 'pin' | 'forward
 			:aria-label="isPinned ? 'Odepnij wiadomość' : 'Przypnij wiadomość'"
 			:disabled="isDeleted"
 			class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-			@click.stop="!isDeleted && emit('pin')"
+			@mousedown.stop.prevent
+			@click.stop.prevent="!isDeleted && emit('pin')"
 			@keydown="(e) => !isDeleted && handleKeyDown(e, 'pin')"
 		>
 			{{ isPinned ? 'Odepnij' : 'Przypnij' }}
@@ -67,7 +69,8 @@ function handleKeyDown(event: KeyboardEvent, action: 'delete' | 'pin' | 'forward
 			aria-label="Przekaż wiadomość"
 			:disabled="isDeleted"
 			class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-			@click.stop="!isDeleted && emit('forward')"
+			@mousedown.stop.prevent
+			@click.stop.prevent="!isDeleted && emit('forward')"
 			@keydown="(e) => !isDeleted && handleKeyDown(e, 'forward')"
 		>
 			Przekaż

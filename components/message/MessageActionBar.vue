@@ -57,10 +57,11 @@ defineExpose({
 <template>
 	<div
 		v-if="shouldShow"
-		class="flex items-center gap-1 transition-opacity duration-200"
+		class="flex items-center gap-1 transition-opacity duration-200 shrink-0"
 		:class="{
 			'opacity-100': shouldShow,
-			'opacity-0': !shouldShow
+			'opacity-0': !shouldShow,
+			'top-0': isOwnMessage
 		}"
 		@mouseenter="emit('mouseenter')"
 		@mouseleave="emit('mouseleave')"

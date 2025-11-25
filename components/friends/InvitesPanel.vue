@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Invite } from '~/types/FriendsApi'
+import ChatInitial from '../chat/ChatInitial.vue'
 
 interface Props {
 	sentInvites: Invite[]
@@ -111,11 +112,9 @@ function getStatusText(status: string): string {
 						>
 							<div class="flex items-center justify-between gap-3">
 								<div class="flex items-center gap-3 flex-1 min-w-0">
-									<div
-										class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-sm flex-shrink-0"
-									>
-										{{ getInitials(invite.sender?.username || '') }}
-									</div>
+									<ChatInitial
+										:chat-initial="getInitials(invite.sender?.username || '')"
+									/>
 									<div class="flex-1 min-w-0">
 										<p class="text-sm font-medium text-gray-900 truncate">
 											{{ invite.sender?.username }}
@@ -167,7 +166,7 @@ function getStatusText(status: string): string {
 					</ul>
 				</div>
 
-				<div v-if="sentInvites.length > 0" class="pt-4">
+				<div v-if="sentInvites.length > 0">
 					<h3 class="px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-50">
 						Sent invitations ({{ sentInvites.length }})
 					</h3>
@@ -185,11 +184,9 @@ function getStatusText(status: string): string {
 						>
 							<div class="flex items-center justify-between gap-3">
 								<div class="flex items-center gap-3 flex-1 min-w-0">
-									<div
-										class="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-semibold text-sm flex-shrink-0"
-									>
-										{{ getInitials(invite.receiver?.username || '') }}
-									</div>
+									<ChatInitial
+										:chat-initial="getInitials(invite.receiver?.username || '')"
+									/>
 									<div class="flex-1 min-w-0">
 										<p class="text-sm font-medium text-gray-900 truncate">
 											{{ invite.receiver?.username }}

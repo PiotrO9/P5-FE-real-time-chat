@@ -32,9 +32,9 @@ function handleKeyDown(event: KeyboardEvent) {
 </script>
 
 <template>
-	<div class="flex flex-col h-full">
-		<div class="p-4 border-b border-gray-200">
-			<label for="username-input" class="block text-sm font-medium text-gray-700 mb-2">
+	<div class="flex flex-col h-full bg-white rounded-b-[1.125rem]">
+		<div class="px-4 py-3 border-b border-gray-200">
+			<label for="username-input" class="block text-sm font-medium text-gray-900 mb-2">
 				Add friend
 			</label>
 			<div class="flex gap-2">
@@ -64,7 +64,7 @@ function handleKeyDown(event: KeyboardEvent) {
 			</p>
 		</div>
 
-		<div class="flex-1 overflow-y-auto p-4">
+		<div class="flex-1 overflow-y-auto px-4 py-4">
 			<div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
 				<h4 class="text-sm font-semibold text-blue-900 mb-2">How it works?</h4>
 				<ul class="text-xs text-blue-800 space-y-1 list-disc list-inside">

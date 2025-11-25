@@ -1,9 +1,10 @@
 <script setup lang="ts">
 interface Props {
 	chatInitial: string
+	isOnline?: boolean
 }
 
-const { chatInitial } = defineProps<Props>()
+const { chatInitial, isOnline } = defineProps<Props>()
 </script>
 
 <template>
@@ -12,4 +13,9 @@ const { chatInitial } = defineProps<Props>()
 	>
 		{{ chatInitial }}
 	</div>
+	<div
+		v-if="isOnline"
+		class="absolute bottom-0 right-0 h-3 w-3 bg-green-500 border-2 border-white rounded-full"
+		aria-label="Online"
+	></div>
 </template>

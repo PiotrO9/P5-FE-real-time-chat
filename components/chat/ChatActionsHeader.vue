@@ -24,7 +24,7 @@ function handleKeyDown(event: KeyboardEvent) {
 </script>
 
 <template>
-	<div class="p-4 border-b border-gray-200 bg-white backdrop-blur rounded-t-[1.125rem]">
+	<div class="p-4 bg-white backdrop-blur">
 		<div class="flex items-center justify-between mb-2">
 			<h2 class="text-lg font-semibold text-gray-900">Chat actions</h2>
 			<button

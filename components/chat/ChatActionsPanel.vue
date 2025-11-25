@@ -439,9 +439,9 @@ onUnmounted(() => {
 <template>
 	<template v-if="chat && isOpen">
 		<Teleport to="body">
-			<div class="lg:hidden fixed inset-0 z-50 bg-black/50" @click.self="handleToggleState">
+			<div class="xl:hidden fixed inset-0 z-50 bg-black/50" @click.self="handleToggleState">
 				<div class="bg-white flex flex-col h-full shadow-xl">
-					<div class="flex flex-col p-4 bg-gray flex-1 overflow-hidden">
+					<div class="flex flex-col bg-gray flex-1 overflow-hidden">
 						<ChatActionsHeader
 							:is-group-chat="isGroupChat"
 							:is-owner="isOwner"
@@ -461,7 +461,9 @@ onUnmounted(() => {
 
 							<div class="border-t border-gray-200 px-4 py-3">
 								<div class="flex items-center justify-between mb-2">
-									<h3 class="text-sm font-semibold text-gray-900">Wyszukiwanie wiadomości</h3>
+									<h3 class="text-sm font-semibold text-gray-900">
+										Wyszukiwanie wiadomości
+									</h3>
 									<button
 										v-if="messageSearchComposable.searchQuery.value"
 										type="button"
@@ -470,12 +472,16 @@ onUnmounted(() => {
 										class="text-xs text-blue-600 hover:text-blue-700"
 										@click="messageSearchComposable.clearSearch()"
 										@keydown.enter="messageSearchComposable.clearSearch()"
-										@keydown.space.prevent="messageSearchComposable.clearSearch()"
+										@keydown.space.prevent="
+											messageSearchComposable.clearSearch()
+										"
 									>
 										Wyczyść
 									</button>
 								</div>
-								<label for="message-search" class="sr-only">Wyszukaj wiadomości</label>
+								<label for="message-search" class="sr-only"
+									>Wyszukaj wiadomości</label
+								>
 								<input
 									id="message-search"
 									v-model="messageSearchComposable.searchQuery.value"
@@ -534,8 +540,8 @@ onUnmounted(() => {
 			</div>
 		</Teleport>
 
-		<aside class="hidden lg:flex md:min-w-96 bg-white flex-col">
-			<div class="flex flex-col py-4 pr-4 bg-gray flex-1">
+		<aside class="hidden xl:flex md:min-w-96 bg-white flex-col border-l">
+			<div class="flex flex-col bg-gray flex-1">
 				<ChatActionsHeader
 					:is-group-chat="isGroupChat"
 					:is-owner="isOwner"
@@ -555,7 +561,9 @@ onUnmounted(() => {
 
 					<div class="border-t border-gray-200 px-4 py-3">
 						<div class="flex items-center justify-between mb-2">
-							<h3 class="text-sm font-semibold text-gray-900">Wyszukiwanie wiadomości</h3>
+							<h3 class="text-sm font-semibold text-gray-900">
+								Wyszukiwanie wiadomości
+							</h3>
 							<button
 								v-if="messageSearchComposable.searchQuery.value"
 								type="button"
@@ -569,7 +577,9 @@ onUnmounted(() => {
 								Wyczyść
 							</button>
 						</div>
-						<label for="message-search-desktop" class="sr-only">Wyszukaj wiadomości</label>
+						<label for="message-search-desktop" class="sr-only"
+							>Wyszukaj wiadomości</label
+						>
 						<input
 							id="message-search-desktop"
 							v-model="messageSearchComposable.searchQuery.value"

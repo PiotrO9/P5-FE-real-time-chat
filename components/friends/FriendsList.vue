@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Friend } from '~/types/Chat'
+import ChatInitial from '../chat/ChatInitial.vue'
 
 interface Props {
 	friends: Friend[]
@@ -78,16 +79,10 @@ function formatLastSeen(lastSeen?: string): string {
 			>
 				<div class="flex items-center gap-3">
 					<div class="relative flex-shrink-0">
-						<div
-							class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-sm"
-						>
-							{{ getInitials(friend.username) }}
-						</div>
-						<div
-							v-if="friend.isOnline"
-							class="absolute bottom-0 right-0 h-3 w-3 bg-green-500 border-2 border-white rounded-full"
-							aria-label="Online"
-						></div>
+						<ChatInitial
+							:chat-initial="getInitials(friend.username)"
+							:is-online="friend.isOnline"
+						/>
 					</div>
 					<div class="flex-1 min-w-0">
 						<div class="flex items-center justify-between">

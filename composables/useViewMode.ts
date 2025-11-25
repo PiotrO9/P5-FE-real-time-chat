@@ -2,13 +2,17 @@ export type ViewMode = 'chats' | 'friends'
 export type SubView = 'list' | 'add' | 'invites'
 
 export function useViewMode() {
-	const viewMode = ref<ViewMode>('chats')
-	const friendsSubView = ref<SubView>('list')
+	const viewMode = useState<ViewMode>('viewMode', () => 'chats')
+	const friendsSubView = useState<SubView>('friendsSubView', () => 'list')
 
-	function setViewMode(mode: ViewMode) {
+	function setViewMode(mode: ViewMode, subView?: SubView) {
 		viewMode.value = mode
 		if (mode === 'friends') {
-			friendsSubView.value = 'list'
+			if (subView !== undefined) {
+				friendsSubView.value = subView
+			} else {
+				friendsSubView.value = 'list'
+			}
 		}
 	}
 

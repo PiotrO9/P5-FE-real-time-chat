@@ -64,7 +64,7 @@ watch(
 </script>
 
 <template>
-	<div class="border-t border-gray-200 bg-white rounded-b-[1.125rem]">
+	<div class="border-t border-gray-200 bg-white">
 		<div
 			v-if="hasReplyTo && replyTo"
 			class="px-3 pt-3 pb-2 flex items-start justify-between gap-2 bg-gray-50 border-b border-gray-200"
@@ -91,10 +91,7 @@ watch(
 				<Icon name="remove" class="h-4 w-4 text-gray-600" />
 			</button>
 		</div>
-		<form
-			class="px-3 md:px-3 py-3 flex items-end gap-2 md:gap-3"
-			@submit.prevent="handleSubmit"
-		>
+		<form class="p-4 flex items-end gap-2" @submit.prevent="handleSubmit">
 			<label for="message" class="sr-only">Message</label>
 			<textarea
 				id="message"
@@ -102,19 +99,25 @@ watch(
 				:aria-label="'Message'"
 				:tabindex="0"
 				:rows="1"
-				:placeholder="hasReplyTo ? 'Napisz odpowiedź...' : 'Type a message...'"
+				:placeholder="hasReplyTo ? 'Napisz odpowiedź...' : 'Type a message'"
 				:value="props.modelValue"
-				class="flex-1 min-w-0 text-sm md:text-base resize-none border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+				class="flex-1 min-w-0 text-sm resize-none border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 				@input="handleInput"
 				@keydown="handleKeyDown"
 			></textarea>
 			<button
 				type="submit"
-				class="inline-flex items-center justify-center px-3 md:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm md:text-base font-medium rounded-lg transition-colors flex-shrink-0"
+				class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
 				aria-label="Send message"
 			>
-				<span class="hidden sm:inline">Send</span>
-				<span class="sm:hidden">→</span>
+				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+					/>
+				</svg>
 			</button>
 		</form>
 	</div>

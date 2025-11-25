@@ -44,7 +44,8 @@ const uiState = reactive({
 	showDeleteDialog: false,
 	showForwardDialog: false,
 	justClosedDialog: false,
-	isEmojiTooltipOpen: false
+	isEmojiTooltipOpen: false,
+	isContextMenuActionExecuting: false
 })
 
 const actionBarRef = ref<InstanceType<typeof MessageActionBar> | null>(null)
@@ -182,13 +183,26 @@ function handleToggleContextMenu() {
 }
 
 function handleContextMenuMouseEnter() {
+	if (contextMenuLeaveTimeout) {
+		clearTimeout(contextMenuLeaveTimeout)
+		contextMenuLeaveTimeout = null
+	}
 	uiState.showContextMenu = true
 }
 
+let contextMenuLeaveTimeout: ReturnType<typeof setTimeout> | null = null
+
 function handleContextMenuMouseLeave() {
+	if (uiState.isContextMenuActionExecuting) return
+	
 	const containerRef = actionBarRef.value?.emojiTooltipContainerRef?.value
 	if (!containerRef?.matches(':hover')) {
-		uiState.showContextMenu = false
+		contextMenuLeaveTimeout = setTimeout(() => {
+			if (!uiState.isContextMenuActionExecuting) {
+				uiState.showContextMenu = false
+			}
+			contextMenuLeaveTimeout = null
+		}, 100)
 	}
 }
 
@@ -213,8 +227,13 @@ function handleDeleteClick() {
 	if (!isOwnMessage.value || isDeleted.value || uiState.isDeleting || uiState.justClosedDialog)
 		return
 
+	uiState.isContextMenuActionExecuting = true
 	uiState.showContextMenu = false
-	uiState.showDeleteDialog = true
+	
+	nextTick(() => {
+		uiState.showDeleteDialog = true
+		uiState.isContextMenuActionExecuting = false
+	})
 }
 
 function handleConfirmDelete() {
@@ -259,16 +278,28 @@ async function handleReactionClick(emoji: string) {
 
 async function handlePinClick() {
 	if (isDeleted.value || isPinning.value || uiState.isDeleting) return
+	
+	uiState.isContextMenuActionExecuting = true
 	uiState.showContextMenu = false
 
 	const newPinState = await togglePin()
 	emit('pin-updated', props.message.id, newPinState)
+	
+	nextTick(() => {
+		uiState.isContextMenuActionExecuting = false
+	})
 }
 
 function handleForwardClick() {
 	if (isDeleted.value || uiState.isDeleting) return
+	
+	uiState.isContextMenuActionExecuting = true
 	uiState.showContextMenu = false
-	uiState.showForwardDialog = true
+	
+	nextTick(() => {
+		uiState.showForwardDialog = true
+		uiState.isContextMenuActionExecuting = false
+	})
 }
 
 function handleForwardDialogUpdate(open: boolean) {
@@ -386,43 +417,43 @@ function handleSelectChatForForward(chatId: string) {
 					@focusin="handleFocus"
 					@focusout="handleBlur"
 				>
-					<div class="relative flex items-center gap-2">
-						<MessageActionBar
-							ref="actionBarRef"
-							v-bind="actionBarProps"
-							@emoji-click="handleEmojiButtonClick"
-							@reply-click="handleReplyClick"
-							@context-menu-toggle="handleToggleContextMenu"
-							@reaction-click="handleReactionClick"
-							@tooltip-show-change="handleTooltipShowChange"
-							@mouseenter="handleActionBarMouseEnter"
-							@mouseleave="handleActionBarMouseLeave"
-							@delete="handleDeleteClick"
-							@pin="handlePinClick"
-							@forward="handleForwardClick"
-							@context-menu-mouseenter="handleContextMenuMouseEnter"
-							@context-menu-mouseleave="handleContextMenuMouseLeave"
-						/>
-
-						<MessageBubble
-							:message="message"
-							:is-own-message="true"
-							:is-pinned="isPinned"
-							:is-deleting="uiState.isDeleting"
-							:is-editing="isEditing"
-							:edit-content="editContent"
-							:is-updating="isUpdating"
-							:highlighted="highlighted"
-							:sender-display-name="senderDisplayName"
-							:formatted-time="formattedTime"
-							:is-edited="isEdited"
-							:edit-textarea-ref="handleEditTextareaRef"
-							@cancel-edit="editState.cancelEdit"
-							@save-edit="editState.saveEdit"
-							@keydown="editState.handleKeyDown"
-							@update:edit-content="(value) => (editContent = value)"
-						/>
-
+					<div class="relative flex flex-col">
+						<div class="flex items-center gap-2">
+							<MessageActionBar
+								ref="actionBarRef"
+								v-bind="actionBarProps"
+								@emoji-click="handleEmojiButtonClick"
+								@reply-click="handleReplyClick"
+								@context-menu-toggle="handleToggleContextMenu"
+								@reaction-click="handleReactionClick"
+								@tooltip-show-change="handleTooltipShowChange"
+								@mouseenter="handleActionBarMouseEnter"
+								@mouseleave="handleActionBarMouseLeave"
+								@delete="handleDeleteClick"
+								@pin="handlePinClick"
+								@forward="handleForwardClick"
+								@context-menu-mouseenter="handleContextMenuMouseEnter"
+								@context-menu-mouseleave="handleContextMenuMouseLeave"
+							/>
+							<MessageBubble
+								:message="message"
+								:is-own-message="true"
+								:is-pinned="isPinned"
+								:is-deleting="uiState.isDeleting"
+								:is-editing="isEditing"
+								:edit-content="editContent"
+								:is-updating="isUpdating"
+								:highlighted="highlighted"
+								:sender-display-name="senderDisplayName"
+								:formatted-time="formattedTime"
+								:is-edited="isEdited"
+								:edit-textarea-ref="handleEditTextareaRef"
+								@cancel-edit="editState.cancelEdit"
+								@save-edit="editState.saveEdit"
+								@keydown="editState.handleKeyDown"
+								@update:edit-content="(value) => (editContent = value)"
+							/>
+						</div>
 						<ReactionBadges
 							v-if="hasReactions && !isDeleted"
 							:grouped-reactions="groupedReactions"
