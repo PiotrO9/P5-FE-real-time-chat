@@ -22,10 +22,10 @@ const chatInitial = computed(() => {
 		: (selectedChat?.otherUser.username[0]?.toUpperCase() ?? '?')
 })
 const displayName = computed(() => {
-	if (!selectedChat) return 'Czat'
+	if (!selectedChat) return 'Chat'
 	return selectedChat.isGroup
 		? selectedChat.name
-		: selectedChat.otherUser?.username || selectedChat.name || 'Czat'
+		: selectedChat.otherUser?.username || selectedChat.name || 'Chat'
 })
 
 function formatLastSeen(lastSeen?: string): string {
@@ -83,7 +83,7 @@ function handleBackKeyDown(event: KeyboardEvent) {
 			<button
 				type="button"
 				tabindex="0"
-				aria-label="Wróć do listy chatów"
+				aria-label="Back to chats list"
 				class="md:hidden p-1.5 rounded-full flex justify-center items-center bg-gray-100 dark:hover:bg-gray-800 transition-colors flex-shrink-0"
 				@click="handleBack"
 				@keydown="handleBackKeyDown"

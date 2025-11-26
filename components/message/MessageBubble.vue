@@ -72,7 +72,7 @@ const ariaLabel = computed(() => {
 	>
 		<p v-if="isDeleting" class="whitespace-pre-wrap break-words italic">Deleting...</p>
 		<p v-else-if="isDeleted" class="whitespace-pre-wrap break-words italic opacity-70">
-			Wiadomość została usunięta
+			Message has been deleted
 		</p>
 		<template v-else-if="isEditing">
 			<textarea
@@ -135,13 +135,13 @@ const ariaLabel = computed(() => {
 				<p
 					class="text-xs opacity-80 dark:opacity-90 font-medium text-gray-700 dark:text-gray-300"
 				>
-					Przekazane z:
-					{{ message.forwardedFrom.chatName || 'Czat prywatny' }}
+					Forwarded from:
+					{{ message.forwardedFrom.chatName || 'Private chat' }}
 				</p>
 				<p class="text-[10px] opacity-60 dark:opacity-70 text-gray-600 dark:text-gray-400">
 					{{ message.forwardedFrom.senderUsername }} •
 					{{
-						new Date(message.forwardedFrom.originalCreatedAt).toLocaleString('pl-PL', {
+						new Date(message.forwardedFrom.originalCreatedAt).toLocaleString('en-US', {
 							day: '2-digit',
 							month: '2-digit',
 							year: 'numeric',

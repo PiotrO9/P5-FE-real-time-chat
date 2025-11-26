@@ -41,7 +41,7 @@ export function useSocketHandlers(
 
 		const mappedMessage = mapMessageFromBackend(data.message)
 
-		// Ignoruj wiadomości od aktualnego użytkownika - zostały już dodane w sendMessage
+		// Ignore messages from current user - they were already added in sendMessage
 		if (compareIds(mappedMessage.senderId, currentUserId.value)) {
 			return
 		}
@@ -107,9 +107,9 @@ export function useSocketHandlers(
 		const userId = toNumber(data.userId)
 		friendsComposable.updateFriendStatus(userId, data.isOnline, data.lastSeen)
 
-		// Aktualizuj status online w czatach
+		// Update online status in chats
 		chats.value.forEach((chat) => {
-			// Dla czatów 1-on-1: aktualizuj otherUser.isOnline
+			// For 1-on-1 chats: update otherUser.isOnline
 			if (!chat.isGroup && chat.otherUser && compareIds(chat.otherUser.id, userId)) {
 				chat.otherUser.isOnline = data.isOnline
 				if (data.lastSeen) {
@@ -117,11 +117,11 @@ export function useSocketHandlers(
 						? data.lastSeen.toISOString() 
 						: String(data.lastSeen)
 				}
-				// Aktualizuj hasOnlineMembers na podstawie isOnline
+				// Update hasOnlineMembers based on isOnline
 				chat.hasOnlineMembers = data.isOnline
 			}
 
-			// Dla czatów grupowych: aktualizuj status członka i hasOnlineMembers
+			// For group chats: update member status and hasOnlineMembers
 			if (chat.isGroup && chat.members) {
 				const member = chat.members.find((m) => compareIds(m.id, userId))
 				if (member) {
@@ -131,7 +131,7 @@ export function useSocketHandlers(
 							? data.lastSeen.toISOString() 
 							: String(data.lastSeen)
 					}
-					// Aktualizuj hasOnlineMembers - sprawdź czy jakikolwiek członek jest online
+					// Update hasOnlineMembers - check if any member is online
 					chat.hasOnlineMembers = chat.members.some((m) => m.isOnline === true)
 				}
 			}
@@ -302,21 +302,21 @@ export function useSocketHandlers(
 				? data.reader.userId
 				: toNumber(data.reader.userId)
 
-		// Dodaj odczyt do wiadomości
+		// Add read to message
 		messageReads.addReadToMessage(chatId, data.messageId, {
 			userId: readerUserId,
 			username: data.reader.username,
 			readAt: data.reader.readAt
 		})
 
-		// Usuń odczyt z poprzednich wiadomości tego użytkownika w tym chacie
+		// Remove read from previous messages of this user in this chat
 		const chat = chatsComposable.findChatById(chatId)
 		if (!chat) return
 
 		const currentMessageIndex = findIndexById(chat.messages, data.messageId)
 		if (currentMessageIndex === -1) return
 
-		// Usuń odczyty z wszystkich wiadomości przed tą (starszych)
+		// Remove reads from all messages before this one (older)
 		for (let i = 0; i < currentMessageIndex; i++) {
 			const message = chat.messages[i]
 			if (message && message.reads) {

@@ -72,7 +72,7 @@ watch(
 			<div class="flex-1 min-w-0">
 				<div class="flex items-center gap-2 mb-1">
 					<span class="text-xs font-medium text-gray-700 dark:text-gray-300"
-						>Odpowiedź na:</span
+						>Reply to:</span
 					>
 					<span class="text-xs font-semibold text-blue-600 dark:text-blue-400">
 						{{ replyTo.senderUsername }}
@@ -85,7 +85,7 @@ watch(
 			<button
 				type="button"
 				tabindex="0"
-				aria-label="Anuluj odpowiedź"
+				aria-label="Cancel reply"
 				class="flex-shrink-0 size-6 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
 				@click="handleCancelReply"
 				@keydown="(e) => (e.key === 'Enter' || e.key === ' ') && handleCancelReply()"
@@ -101,7 +101,7 @@ watch(
 				:aria-label="'Message'"
 				:tabindex="0"
 				:rows="1"
-				:placeholder="hasReplyTo ? 'Napisz odpowiedź...' : 'Type a message'"
+				:placeholder="hasReplyTo ? 'Write a reply...' : 'Type a message'"
 				:value="props.modelValue"
 				class="flex-1 min-w-0 text-sm resize-none border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 				@input="handleInput"

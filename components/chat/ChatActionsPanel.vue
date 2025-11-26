@@ -460,13 +460,13 @@ onUnmounted(() => {
 									<h3
 										class="text-sm font-semibold text-gray-900 dark:text-gray-100"
 									>
-										Wyszukiwanie wiadomości
+										Message search
 									</h3>
 									<button
 										v-if="messageSearchComposable.searchQuery.value"
 										type="button"
 										tabindex="0"
-										aria-label="Wyczyść wyszukiwanie"
+										aria-label="Clear search"
 										class="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-500"
 										@click="messageSearchComposable.clearSearch()"
 										@keydown.enter="messageSearchComposable.clearSearch()"
@@ -474,17 +474,17 @@ onUnmounted(() => {
 											messageSearchComposable.clearSearch()
 										"
 									>
-										Wyczyść
+										Clear
 									</button>
 								</div>
 								<label for="message-search" class="sr-only"
-									>Wyszukaj wiadomości</label
+									>Search messages</label
 								>
 								<input
 									id="message-search"
 									v-model="messageSearchComposable.searchQuery.value"
 									type="text"
-									placeholder="Wyszukaj wiadomości..."
+									placeholder="Search messages..."
 									class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 								/>
 								<MessageSearchResults
@@ -566,29 +566,29 @@ onUnmounted(() => {
 					>
 						<div class="flex items-center justify-between mb-2">
 							<h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-								Wyszukiwanie wiadomości
+								Message search
 							</h3>
 							<button
 								v-if="messageSearchComposable.searchQuery.value"
 								type="button"
 								tabindex="0"
-								aria-label="Wyczyść wyszukiwanie"
+								aria-label="Clear search"
 								class="text-xs text-blue-600 hover:text-blue-700"
 								@click="messageSearchComposable.clearSearch()"
 								@keydown.enter="messageSearchComposable.clearSearch()"
 								@keydown.space.prevent="messageSearchComposable.clearSearch()"
 							>
-								Wyczyść
+								Clear
 							</button>
 						</div>
 						<label for="message-search-desktop" class="sr-only"
-							>Wyszukaj wiadomości</label
+							>Search messages</label
 						>
 						<input
 							id="message-search-desktop"
 							v-model="messageSearchComposable.searchQuery.value"
 							type="text"
-							placeholder="Wyszukaj wiadomości..."
+							placeholder="Search messages..."
 							class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 						/>
 						<MessageSearchResults

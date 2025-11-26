@@ -105,15 +105,15 @@ function handleReply(message: Chat['messages'][0]) {
 async function handleScrollToMessage(messageId: string | number) {
 	if (!selectedChat.value) return
 
-	// Sprawdź czy wiadomość jest już załadowana
+	// Check if message is already loaded
 	const messageExists = selectedChat.value.messages.some((msg) => {
 		return String(msg.id) === String(messageId)
 	})
 
-	// Jeśli wiadomość nie istnieje, spróbuj załadować więcej wiadomości
+	// If message doesn't exist, try to load more messages
 	if (!messageExists && props.canLoadMore && !props.isLoadingMore) {
-		// Możemy spróbować załadować więcej, ale to może być skomplikowane
-		// Na razie po prostu spróbujmy scrollować
+		// We can try to load more, but it might be complicated
+		// For now just try to scroll
 	}
 
 	const messageElement = messagesContainerRef.value?.querySelector(
@@ -126,8 +126,8 @@ async function handleScrollToMessage(messageId: string | number) {
 			highlightedMessageId.value = null
 		}, 2000)
 	} else {
-		// Jeśli element nie istnieje, może trzeba załadować więcej wiadomości
-		// Na razie po prostu wyemituj event
+		// If element doesn't exist, might need to load more messages
+		// For now just emit event
 		emit('scroll-to-message', messageId)
 	}
 }
@@ -144,12 +144,12 @@ function handleBack() {
 	emit('back')
 }
 
-function handleScroll() {
-	const el = messagesContainerRef.value
-	if (!el) return
+	function handleScroll() {
+		const el = messagesContainerRef.value
+		if (!el) return
 
-	// Sprawdź czy użytkownik jest blisko dołu (w promieniu 100px)
-	const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 100
+		// Check if user is near bottom (within 100px radius)
+		const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 100
 
 	if (isNearBottom) {
 		emit('mark-latest-as-read')

@@ -50,19 +50,19 @@ function highlightText(text: string, query: string): string {
 <template>
 	<div class="flex flex-col">
 		<div v-if="isLoading" class="p-4 text-sm text-gray-600 dark:text-gray-400 text-center">
-			Wyszukiwanie...
+			Searching...
 		</div>
 		<div
 			v-else-if="messages.length === 0"
 			class="p-4 text-sm text-gray-500 dark:text-gray-400 text-center"
 		>
-			Brak wyników
+			No results
 		</div>
 		<div v-else class="flex flex-col">
 			<div
 				class="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700"
 			>
-				Znaleziono {{ total }} {{ total === 1 ? 'wiadomość' : 'wiadomości' }}
+				Found {{ total }} {{ total === 1 ? 'message' : 'messages' }}
 			</div>
 			<div class="max-h-96 overflow-y-auto">
 				<ul
@@ -106,7 +106,7 @@ function highlightText(text: string, query: string): string {
 				@click="handleLoadMore"
 				@keydown="handleLoadMoreKeyDown"
 			>
-				Załaduj więcej
+				Load more
 			</button>
 		</div>
 	</div>

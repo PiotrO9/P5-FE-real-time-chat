@@ -42,38 +42,38 @@ function handleKeyDown(event: KeyboardEvent, action: 'delete' | 'pin' | 'forward
 			v-if="isOwnMessage"
 			type="button"
 			tabindex="0"
-			aria-label="Usuń wiadomość"
+			aria-label="Delete message"
 			:disabled="isDeleted"
 			class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent dark:disabled:hover:bg-transparent"
 			@mousedown.stop.prevent
 			@click.stop.prevent="!isDeleted && emit('delete')"
 			@keydown="(e) => !isDeleted && handleKeyDown(e, 'delete')"
 		>
-			Usuń
+			Delete
 		</button>
 		<button
 			type="button"
 			tabindex="0"
-			:aria-label="isPinned ? 'Odepnij wiadomość' : 'Przypnij wiadomość'"
+			:aria-label="isPinned ? 'Unpin message' : 'Pin message'"
 			:disabled="isDeleted"
 			class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent dark:disabled:hover:bg-transparent"
 			@mousedown.stop.prevent
 			@click.stop.prevent="!isDeleted && emit('pin')"
 			@keydown="(e) => !isDeleted && handleKeyDown(e, 'pin')"
 		>
-			{{ isPinned ? 'Odepnij' : 'Przypnij' }}
+			{{ isPinned ? 'Unpin' : 'Pin' }}
 		</button>
 		<button
 			type="button"
 			tabindex="0"
-			aria-label="Przekaż wiadomość"
+			aria-label="Forward message"
 			:disabled="isDeleted"
 			class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent dark:disabled:hover:bg-transparent"
 			@mousedown.stop.prevent
 			@click.stop.prevent="!isDeleted && emit('forward')"
 			@keydown="(e) => !isDeleted && handleKeyDown(e, 'forward')"
 		>
-			Przekaż
+			Forward
 		</button>
 	</div>
 </template>

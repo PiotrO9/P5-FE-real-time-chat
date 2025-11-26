@@ -148,7 +148,7 @@ export function useDashboard() {
 		await pinnedMessagesService.fetchPinnedMessagesForChat(chatId)
 		nextTick(() => {
 			handleScrollToBottom()
-			// Oznacz najnowszą wiadomość jako przeczytaną po załadowaniu chatu
+			// Mark latest message as read after loading chat
 			setTimeout(() => {
 				handleMarkLatestMessageAsRead()
 			}, 500)
@@ -184,7 +184,7 @@ export function useDashboard() {
 
 	function handleScrollToBottom() {
 		chatPanelRef.value?.scrollToBottom?.()
-		// Oznacz najnowszą wiadomość jako przeczytaną po scroll do dołu
+		// Mark latest message as read after scrolling to bottom
 		nextTick(() => {
 			handleMarkLatestMessageAsRead()
 		})
@@ -231,7 +231,7 @@ export function useDashboard() {
 		const chat = chatsComposable.selectedChat.value
 		if (!chat || !chat.messages || chat.messages.length === 0) return
 
-		// Znajdź najnowszą wiadomość, która nie jest systemowa i nie jest własna
+		// Find latest message that is not system and not own
 		const nonSystemMessages = chat.messages.filter(
 			(msg) => !msg.isSystem && !compareIds(msg.senderId, currentUserId.value)
 		)
@@ -241,7 +241,7 @@ export function useDashboard() {
 		const latestMessage = nonSystemMessages[nonSystemMessages.length - 1]
 		if (!latestMessage) return
 
-		// Sprawdź czy już przeczytana
+		// Check if already read
 		const hasRead = messageReadsComposable.hasUserReadMessage(
 			latestMessage,
 			currentUserId.value
@@ -252,7 +252,7 @@ export function useDashboard() {
 		try {
 			await markMessageAsRead(latestMessage.id)
 		} catch (error) {
-			// Cicho ignoruj błędy - nie chcemy przeszkadzać użytkownikowi
+			// Silently ignore errors - we don't want to disturb the user
 			console.warn('Failed to mark message as read:', error)
 		}
 	}

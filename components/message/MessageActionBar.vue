@@ -70,7 +70,7 @@ defineExpose({
 			<button
 				type="button"
 				tabindex="0"
-				aria-label="Dodaj reakcję"
+				aria-label="Add reaction"
 				:disabled="props.isDeleted"
 				class="size-8 rounded-full bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white dark:disabled:hover:bg-gray-800"
 				@click.stop="handleEmojiButtonClick"
@@ -93,7 +93,7 @@ defineExpose({
 		<button
 			type="button"
 			tabindex="0"
-			aria-label="Odpowiedz na wiadomość"
+			aria-label="Reply to message"
 			:disabled="props.isDeleted"
 			class="size-8 rounded-full bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white dark:disabled:hover:bg-gray-800"
 			@click.stop="!props.isDeleted && emit('reply-click')"
@@ -108,7 +108,7 @@ defineExpose({
 			<button
 				type="button"
 				tabindex="0"
-				aria-label="Menu kontekstowe"
+				aria-label="Context menu"
 				:disabled="props.isDeleted"
 				class="size-8 rounded-full bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white dark:disabled:hover:bg-gray-800"
 				@click.stop="!props.isDeleted && emit('context-menu-toggle')"
