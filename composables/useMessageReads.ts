@@ -19,20 +19,17 @@ export function useMessageReads(chats: Ref<Chat[]>) {
 			message.reads = []
 		}
 
-		// Check if user has already read this message
 		const existingReadIndex = message.reads.findIndex((read) =>
 			compareIds(read.userId, reader.userId)
 		)
 
 		if (existingReadIndex !== -1) {
-			// Update existing read
 			message.reads[existingReadIndex] = {
 				userId: reader.userId,
 				username: reader.username,
 				readAt: reader.readAt
 			}
 		} else {
-			// Add new read
 			message.reads.push({
 				userId: reader.userId,
 				username: reader.username,

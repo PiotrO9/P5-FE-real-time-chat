@@ -416,7 +416,6 @@ onMounted(() => {
 function handleMessageSearchClick(messageId: string | number) {
 	if (!chat.value) return
 	emit('close')
-	// Emit event to scroll to message - will be handled in dashboard
 	nextTick(() => {
 		const event = new CustomEvent('scroll-to-message', { detail: { messageId } })
 		window.dispatchEvent(event)

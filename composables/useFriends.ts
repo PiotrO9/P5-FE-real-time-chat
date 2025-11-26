@@ -175,7 +175,6 @@ export function useFriends() {
 
 	watch(searchQuery, (query: string) => {
 		if (query.trim()) {
-			// Debounce search
 			setTimeout(() => {
 				if (searchQuery.value === query) {
 					searchFriends(query)

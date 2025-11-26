@@ -105,15 +105,11 @@ function handleReply(message: Chat['messages'][0]) {
 async function handleScrollToMessage(messageId: string | number) {
 	if (!selectedChat.value) return
 
-	// Check if message is already loaded
 	const messageExists = selectedChat.value.messages.some((msg) => {
 		return String(msg.id) === String(messageId)
 	})
 
-	// If message doesn't exist, try to load more messages
 	if (!messageExists && props.canLoadMore && !props.isLoadingMore) {
-		// We can try to load more, but it might be complicated
-		// For now just try to scroll
 	}
 
 	const messageElement = messagesContainerRef.value?.querySelector(
@@ -126,8 +122,6 @@ async function handleScrollToMessage(messageId: string | number) {
 			highlightedMessageId.value = null
 		}, 2000)
 	} else {
-		// If element doesn't exist, might need to load more messages
-		// For now just emit event
 		emit('scroll-to-message', messageId)
 	}
 }
@@ -148,7 +142,6 @@ function handleBack() {
 		const el = messagesContainerRef.value
 		if (!el) return
 
-		// Check if user is near bottom (within 100px radius)
 		const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 100
 
 	if (isNearBottom) {

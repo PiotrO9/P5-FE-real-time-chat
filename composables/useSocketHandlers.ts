@@ -41,7 +41,6 @@ export function useSocketHandlers(
 
 		const mappedMessage = mapMessageFromBackend(data.message)
 
-		// Ignore messages from current user - they were already added in sendMessage
 		if (compareIds(mappedMessage.senderId, currentUserId.value)) {
 			return
 		}
@@ -107,9 +106,7 @@ export function useSocketHandlers(
 		const userId = toNumber(data.userId)
 		friendsComposable.updateFriendStatus(userId, data.isOnline, data.lastSeen)
 
-		// Update online status in chats
 		chats.value.forEach((chat) => {
-			// For 1-on-1 chats: update otherUser.isOnline
 			if (!chat.isGroup && chat.otherUser && compareIds(chat.otherUser.id, userId)) {
 				chat.otherUser.isOnline = data.isOnline
 				if (data.lastSeen) {
@@ -117,11 +114,9 @@ export function useSocketHandlers(
 						? data.lastSeen.toISOString() 
 						: String(data.lastSeen)
 				}
-				// Update hasOnlineMembers based on isOnline
 				chat.hasOnlineMembers = data.isOnline
 			}
 
-			// For group chats: update member status and hasOnlineMembers
 			if (chat.isGroup && chat.members) {
 				const member = chat.members.find((m) => compareIds(m.id, userId))
 				if (member) {
@@ -131,7 +126,6 @@ export function useSocketHandlers(
 							? data.lastSeen.toISOString() 
 							: String(data.lastSeen)
 					}
-					// Update hasOnlineMembers - check if any member is online
 					chat.hasOnlineMembers = chat.members.some((m) => m.isOnline === true)
 				}
 			}
@@ -302,21 +296,18 @@ export function useSocketHandlers(
 				? data.reader.userId
 				: toNumber(data.reader.userId)
 
-		// Add read to message
 		messageReads.addReadToMessage(chatId, data.messageId, {
 			userId: readerUserId,
 			username: data.reader.username,
 			readAt: data.reader.readAt
 		})
 
-		// Remove read from previous messages of this user in this chat
 		const chat = chatsComposable.findChatById(chatId)
 		if (!chat) return
 
 		const currentMessageIndex = findIndexById(chat.messages, data.messageId)
 		if (currentMessageIndex === -1) return
 
-		// Remove reads from all messages before this one (older)
 		for (let i = 0; i < currentMessageIndex; i++) {
 			const message = chat.messages[i]
 			if (message && message.reads) {

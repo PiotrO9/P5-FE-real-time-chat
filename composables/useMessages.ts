@@ -183,20 +183,16 @@ export function useMessages(chats: Ref<Chat[]>, _selectedChatId: Ref<string | nu
 		const messageIndex = findIndexById(chat.messages, message.id)
 
 		if (messageIndex !== -1) {
-			// Message already exists - update it with full data from WebSocket
 			const existingMessage = chat.messages[messageIndex]
 			if (existingMessage) {
 				updateMessageFields(existingMessage, message)
 			}
 
-			// Update lastMessage if this is the last message
 			syncLastMessage(chat, message)
 
 			return true
 		}
 
-		// New message - add it
-		// Use spread operator to ensure Vue reactivity
 		chat.messages = [...chat.messages, message]
 		chat.lastMessage = message
 		return true

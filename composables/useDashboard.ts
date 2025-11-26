@@ -148,7 +148,6 @@ export function useDashboard() {
 		await pinnedMessagesService.fetchPinnedMessagesForChat(chatId)
 		nextTick(() => {
 			handleScrollToBottom()
-			// Mark latest message as read after loading chat
 			setTimeout(() => {
 				handleMarkLatestMessageAsRead()
 			}, 500)
@@ -184,7 +183,6 @@ export function useDashboard() {
 
 	function handleScrollToBottom() {
 		chatPanelRef.value?.scrollToBottom?.()
-		// Mark latest message as read after scrolling to bottom
 		nextTick(() => {
 			handleMarkLatestMessageAsRead()
 		})
@@ -231,7 +229,6 @@ export function useDashboard() {
 		const chat = chatsComposable.selectedChat.value
 		if (!chat || !chat.messages || chat.messages.length === 0) return
 
-		// Find latest message that is not system and not own
 		const nonSystemMessages = chat.messages.filter(
 			(msg) => !msg.isSystem && !compareIds(msg.senderId, currentUserId.value)
 		)
@@ -241,7 +238,6 @@ export function useDashboard() {
 		const latestMessage = nonSystemMessages[nonSystemMessages.length - 1]
 		if (!latestMessage) return
 
-		// Check if already read
 		const hasRead = messageReadsComposable.hasUserReadMessage(
 			latestMessage,
 			currentUserId.value
@@ -252,7 +248,6 @@ export function useDashboard() {
 		try {
 			await markMessageAsRead(latestMessage.id)
 		} catch (error) {
-			// Silently ignore errors - we don't want to disturb the user
 			console.warn('Failed to mark message as read:', error)
 		}
 	}
@@ -281,7 +276,6 @@ export function useDashboard() {
 	}
 
 	function handleScrollToMessage(messageId: string | number) {
-		// Event jest obsługiwany w ChatPanel
 		nextTick(() => {
 			const chatPanel = chatPanelRef.value
 			if (chatPanel && chatPanel.handleScrollToMessage) {
@@ -305,7 +299,6 @@ export function useDashboard() {
 			await messagesComposable.forwardMessage(targetChatId, messageId)
 			nextTick(() => handleScrollToBottom())
 		} catch (error) {
-			// Błąd jest już obsłużony w forwardMessage
 		}
 	}
 
@@ -336,7 +329,6 @@ export function useDashboard() {
 		connect()
 		socketHandlers.setupListeners()
 
-		// Listen for custom scroll-to-message events from ChatActionsPanel
 		window.addEventListener('scroll-to-message', ((event: CustomEvent) => {
 			handleMessageSearchScroll(event.detail.messageId)
 		}) as EventListener)
@@ -366,15 +358,12 @@ export function useDashboard() {
 	}
 
 	return {
-		// Computed
 		currentUserId,
 		currentChat,
 		searchQuery,
 		currentTypingUsers,
 		typingUsersByChat,
 		pendingInvitesTotal,
-
-		// Composables
 		viewModeComposable,
 		chatsComposable,
 		messagesComposable,
@@ -383,13 +372,9 @@ export function useDashboard() {
 		typingUsersComposable,
 		reactionsComposable,
 		messageReadsComposable,
-
-		// Refs
 		chatPanelRef,
 		isActionsPanelOpen,
 		replyToMessage,
-
-		// Handlers
 		handleViewModeChange,
 		handleFriendsSubViewChange,
 		handleStartChat,
@@ -413,8 +398,6 @@ export function useDashboard() {
 		handleMarkLatestMessageAsRead,
 		handleForwardMessage,
 		handleBackToChats,
-
-		// Lifecycle
 		initialize,
 		cleanup
 	}

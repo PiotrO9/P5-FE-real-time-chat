@@ -7,7 +7,6 @@ export function useMessageHelpers() {
 			throw new Error('messageData is undefined or null')
 		}
 
-		// Obsługuj zarówno UUID (string) jak i liczby
 		const id =
 			typeof messageData.id === 'string' && isNaN(Number(messageData.id))
 				? messageData.id
