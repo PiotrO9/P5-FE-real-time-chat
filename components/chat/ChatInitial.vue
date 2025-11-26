@@ -15,7 +15,7 @@ const { chatInitial, isOnline } = defineProps<Props>()
 	</div>
 	<div
 		v-if="isOnline"
-		class="absolute bottom-0 right-0 h-3 w-3 bg-green-500 border-2 border-white rounded-full"
+		class="absolute bottom-0 right-0 size-3 bg-green-500 border-2 border-white rounded-full"
 		aria-label="Online"
 	></div>
 </template>

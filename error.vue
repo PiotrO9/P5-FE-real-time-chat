@@ -56,7 +56,7 @@ function handleKeyDown(event: KeyboardEvent, action: () => void) {
 			<div class="bg-white rounded-lg shadow-lg p-8 md:p-12">
 				<div class="mb-8">
 					<div
-						class="mx-auto w-24 h-24 mb-6 rounded-full flex items-center justify-center"
+						class="mx-auto size-24 mb-6 rounded-full flex items-center justify-center"
 						:class="
 							error.statusCode === 404
 								? 'bg-blue-100 text-blue-600'
@@ -65,7 +65,7 @@ function handleKeyDown(event: KeyboardEvent, action: () => void) {
 					>
 						<Icon
 							:name="error.statusCode === 404 ? 'status-info' : 'status-error'"
-							class="w-12 h-12"
+							class="size-12"
 							aria-hidden="true"
 						/>
 					</div>

@@ -6,7 +6,7 @@
 					to="/users"
 					class="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-2 mb-4"
 				>
-					<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+					<svg class="size-5" fill="currentColor" viewBox="0 0 20 20">
 						<path
 							fill-rule="evenodd"
 							d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
@@ -21,7 +21,7 @@
 				<div class="bg-white rounded-lg shadow-lg p-8">
 					<div class="flex flex-col items-center text-center">
 						<div
-							class="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-3xl mb-4"
+							class="size-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-3xl mb-4"
 						>
 							JK
 						</div>
@@ -31,7 +31,7 @@
 							<span
 								class="px-4 py-2 text-sm font-medium rounded-full border inline-flex items-center bg-green-100 text-green-800 border-green-200"
 							>
-								<span class="inline-block w-2 h-2 rounded-full mr-2 bg-green-500" />
+								<span class="inline-block size-2 rounded-full mr-2 bg-green-500" />
 								Online
 							</span>
 						</div>
@@ -96,7 +96,7 @@
 					<div class="flex items-start gap-4">
 						<div class="flex-shrink-0">
 							<svg
-								class="w-8 h-8 text-blue-600"
+								class="size-8 text-blue-600"
 								fill="currentColor"
 								viewBox="0 0 20 20"
 							>

@@ -79,7 +79,7 @@ function handleKeyDown(event: KeyboardEvent) {
 					</span>
 					<span
 						v-if="friend.isOnline"
-						class="h-2 w-2 rounded-full bg-green-500"
+						class="size-2 rounded-full bg-green-500"
 						aria-label="Online"
 					></span>
 				</button>

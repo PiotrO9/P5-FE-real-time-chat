@@ -109,7 +109,7 @@ function formatLastSeen(lastSeen?: string): string {
 								@keydown.enter.stop="handleRemoveFriend(friend.id, $event)"
 								@keydown.space.stop="handleRemoveFriend(friend.id, $event)"
 							>
-								<Icon name="remove" class="w-5 h-5" />
+								<Icon name="remove" class="size-5" />
 							</button>
 						</div>
 						<p class="text-xs text-gray-500 dark:text-gray-400 truncate">

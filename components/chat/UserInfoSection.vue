@@ -40,13 +40,13 @@ const isOnline = computed(() => {
 			<div class="flex flex-col items-center gap-4">
 				<div class="relative flex-shrink-0">
 					<div
-						class="h-20 w-20 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-2xl"
+						class="size-20 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-2xl"
 					>
 						{{ getInitials(userData.username) }}
 					</div>
 					<div
 						v-if="isOnline"
-						class="absolute bottom-0 right-0 h-4 w-4 bg-green-500 border-2 border-white rounded-full"
+						class="absolute bottom-0 right-0 size-4 bg-green-500 border-2 border-white rounded-full"
 						aria-label="Online"
 					></div>
 				</div>

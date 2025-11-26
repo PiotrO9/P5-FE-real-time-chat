@@ -86,11 +86,11 @@ watch(
 				type="button"
 				tabindex="0"
 				aria-label="Anuluj odpowiedź"
-				class="flex-shrink-0 h-6 w-6 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+				class="flex-shrink-0 size-6 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
 				@click="handleCancelReply"
 				@keydown="(e) => (e.key === 'Enter' || e.key === ' ') && handleCancelReply()"
 			>
-				<Icon name="remove" class="h-4 w-4 text-gray-600 dark:text-gray-400" />
+				<Icon name="remove" class="size-4 text-gray-600 dark:text-gray-400" />
 			</button>
 		</div>
 		<form class="p-4 flex items-end gap-2" @submit.prevent="handleSubmit">
@@ -109,10 +109,10 @@ watch(
 			></textarea>
 			<button
 				type="submit"
-				class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+				class="flex-shrink-0 size-10 rounded-lg flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
 				aria-label="Send message"
 			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
 						stroke-linecap="round"
 						stroke-linejoin="round"

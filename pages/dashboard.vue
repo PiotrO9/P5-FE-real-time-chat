@@ -25,10 +25,10 @@ onUnmounted(() => {
 		<!-- Gradient background -->
 		<div class="fixed inset-0 pointer-events-none z-0">
 			<div
-				class="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-pink-200/30 to-purple-200/30 rounded-full blur-3xl"
+				class="absolute top-0 left-0 size-96 bg-gradient-to-br from-pink-200/30 to-purple-200/30 rounded-full blur-3xl"
 			></div>
 			<div
-				class="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-pink-200/30 to-purple-200/30 rounded-full blur-3xl"
+				class="absolute bottom-0 right-0 size-96 bg-gradient-to-tl from-pink-200/30 to-purple-200/30 rounded-full blur-3xl"
 			></div>
 		</div>
 
@@ -72,7 +72,7 @@ onUnmounted(() => {
 											class="w-full pl-10 pr-3 py-2 text-xs md:text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 										/>
 										<svg
-											class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500"
+											class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400 dark:text-gray-500"
 											fill="none"
 											stroke="currentColor"
 											viewBox="0 0 24 24"

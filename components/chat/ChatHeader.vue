@@ -84,11 +84,11 @@ function handleBackKeyDown(event: KeyboardEvent) {
 				type="button"
 				tabindex="0"
 				aria-label="Wróć do listy chatów"
-				class="md:hidden p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex-shrink-0"
+				class="md:hidden p-1.5 rounded-full flex justify-center items-center bg-gray-100 dark:hover:bg-gray-800 transition-colors flex-shrink-0"
 				@click="handleBack"
 				@keydown="handleBackKeyDown"
 			>
-				<Icon name="arrow-left" class="h-5 w-5 text-gray-600 dark:text-gray-400" />
+				<Icon name="arrow-left" class="size-5 text-gray-600 dark:text-gray-400" />
 			</button>
 			<ChatInitial :chat-initial />
 			<div class="flex flex-col min-w-0">

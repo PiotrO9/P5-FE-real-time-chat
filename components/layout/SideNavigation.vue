@@ -77,7 +77,7 @@ function handleKeyDown(event: KeyboardEvent, item: NavView) {
 			:tabindex="0"
 			:aria-label="item.label"
 			:class="[
-				'w-12 h-12 rounded-lg flex items-center justify-center transition-colors relative',
+				'size-12 rounded-lg flex items-center justify-center transition-colors relative',
 				isActive(item.name)
 					? 'bg-blue-700 dark:bg-blue-600 text-white'
 					: 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
@@ -88,7 +88,7 @@ function handleKeyDown(event: KeyboardEvent, item: NavView) {
 			<!-- Chat icon -->
 			<svg
 				v-if="item.icon === 'chat'"
-				class="w-6 h-6"
+				class="size-6"
 				fill="none"
 				stroke="currentColor"
 				viewBox="0 0 24 24"
@@ -103,7 +103,7 @@ function handleKeyDown(event: KeyboardEvent, item: NavView) {
 			<!-- Friends icon -->
 			<svg
 				v-else-if="item.icon === 'friends'"
-				class="w-6 h-6"
+				class="size-6"
 				fill="none"
 				stroke="currentColor"
 				viewBox="0 0 24 24"
@@ -118,7 +118,7 @@ function handleKeyDown(event: KeyboardEvent, item: NavView) {
 			<!-- Invitations icon -->
 			<svg
 				v-else-if="item.icon === 'invitations'"
-				class="w-6 h-6"
+				class="size-6"
 				fill="none"
 				stroke="currentColor"
 				viewBox="0 0 24 24"
@@ -133,7 +133,7 @@ function handleKeyDown(event: KeyboardEvent, item: NavView) {
 			<!-- Add icon -->
 			<svg
 				v-else-if="item.icon === 'add'"
-				class="w-6 h-6"
+				class="size-6"
 				fill="none"
 				stroke="currentColor"
 				viewBox="0 0 24 24"
@@ -148,7 +148,7 @@ function handleKeyDown(event: KeyboardEvent, item: NavView) {
 			<!-- Badge for invitations -->
 			<span
 				v-if="item.name === 'invitations' && dashboard.pendingInvitesTotal.value > 0"
-				class="absolute -top-1 -right-1 h-5 w-5 bg-red-500 dark:bg-red-600 text-white text-xs font-bold rounded-full flex items-center justify-center"
+				class="absolute -top-1 -right-1 size-5 bg-red-500 dark:bg-red-600 text-white text-xs font-bold rounded-full flex items-center justify-center"
 			>
 				{{
 					dashboard.pendingInvitesTotal.value > 9

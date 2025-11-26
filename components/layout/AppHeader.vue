@@ -66,7 +66,7 @@ onUnmounted(() => {
 				@keydown.space.prevent="handleToggleDropdown"
 			>
 				<div
-					class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-sm"
+					class="size-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-sm"
 				>
 					{{ userInitials }}
 				</div>
@@ -74,7 +74,7 @@ onUnmounted(() => {
 					{{ user?.username }}
 				</span>
 				<svg
-					class="w-4 h-4 text-gray-600 dark:text-gray-400 transition-transform"
+					class="size-4 text-gray-600 dark:text-gray-400 transition-transform"
 					:class="{ 'rotate-180': showDropdown }"
 					fill="none"
 					stroke="currentColor"
@@ -103,7 +103,7 @@ onUnmounted(() => {
 					@keydown.space.prevent="handleToggleTheme"
 				>
 					<span>{{ isDark ? 'Tryb jasny' : 'Tryb ciemny' }}</span>
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							v-if="isDark"
 							stroke-linecap="round"

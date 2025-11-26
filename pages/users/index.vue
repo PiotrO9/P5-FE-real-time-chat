@@ -21,7 +21,7 @@
 					<div class="flex items-center justify-between flex-wrap gap-4">
 						<div class="flex items-center gap-4">
 							<div
-								class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg"
+								class="size-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg"
 							>
 								JD
 							</div>
@@ -39,7 +39,7 @@
 							<span
 								class="px-3 py-1 text-sm font-medium rounded-full border bg-green-100 text-green-800 border-green-200"
 							>
-								<span class="inline-block w-2 h-2 rounded-full mr-2 bg-green-500" />
+								<span class="inline-block size-2 rounded-full mr-2 bg-green-500" />
 								Online
 							</span>
 
@@ -57,7 +57,7 @@
 					<div class="flex items-center justify-between flex-wrap gap-4">
 						<div class="flex items-center gap-4">
 							<div
-								class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg"
+								class="size-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg"
 							>
 								AN
 							</div>
@@ -75,7 +75,7 @@
 							<span
 								class="px-3 py-1 text-sm font-medium rounded-full border bg-gray-100 text-gray-800 border-gray-200"
 							>
-								<span class="inline-block w-2 h-2 rounded-full mr-2 bg-gray-500" />
+								<span class="inline-block size-2 rounded-full mr-2 bg-gray-500" />
 								Offline
 							</span>
 

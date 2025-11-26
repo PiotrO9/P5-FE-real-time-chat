@@ -13,7 +13,7 @@ const avatarInitial = computed(() => {
 
 <template>
 	<div
-		class="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 font-semibold flex-shrink-0"
+		class="size-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 font-semibold flex-shrink-0"
 		:aria-label="`Avatar ${senderName}`"
 	>
 		{{ avatarInitial }}

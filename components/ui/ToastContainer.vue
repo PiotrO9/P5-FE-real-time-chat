@@ -57,18 +57,18 @@ function getIconClasses(type: string) {
 					<Icon
 						v-if="toast.type === 'success'"
 						name="status-success"
-						class="w-5 h-5"
+						class="size-5"
 					/><Icon
 						v-else-if="toast.type === 'error'"
 						name="status-error"
-						class="w-5 h-5"
+						class="size-5"
 					/>
 					<Icon
 						v-else-if="toast.type === 'warning'"
 						name="status-warning"
-						class="w-5 h-5"
+						class="size-5"
 					/>
-					<Icon v-else name="status-info" class="w-5 h-5" />
+					<Icon v-else name="status-info" class="size-5" />
 				</div>
 
 				<p class="flex-1 text-sm font-medium">{{ toast.message }}</p>
@@ -81,7 +81,7 @@ function getIconClasses(type: string) {
 					@click="handleRemoveToast(toast.id)"
 					@keydown="handleKeyDown($event, toast.id)"
 				>
-					<Icon class="w-4 h-4" name="remove" />
+					<Icon class="size-4" name="remove" />
 				</button>
 			</div>
 		</TransitionGroup>
