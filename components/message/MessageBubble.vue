@@ -151,7 +151,7 @@ const ariaLabel = computed(() => {
 					}}
 				</p>
 			</div>
-			<p class="whitespace-pre-wrap break-words">{{ message.content }}</p>
+			<p class="whitespace-pre-wrap break-words text-gray-600">{{ message.content }}</p>
 			<p
 				class="mt-1 text-[10px] opacity-70 dark:opacity-80 flex items-center gap-1 text-gray-600 dark:text-gray-400"
 			>

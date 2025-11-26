@@ -138,9 +138,6 @@ onUnmounted(() => {
 											placeholder="Wyszukaj znajomych..."
 											class="w-full px-3 py-2 text-xs md:text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 										/>
-										<p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-											Enter the username of the person you want to search
-										</p>
 									</div>
 								</template>
 								<div

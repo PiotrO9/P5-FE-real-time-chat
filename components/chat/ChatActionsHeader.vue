@@ -25,7 +25,7 @@ function handleKeyDown(event: KeyboardEvent) {
 
 <template>
 	<div class="p-4 bg-white dark:bg-gray-900 backdrop-blur border-b dark:border-gray-700">
-		<div class="flex items-center justify-between mb-2">
+		<div class="flex items-center justify-between">
 			<h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Chat actions</h2>
 			<button
 				type="button"
@@ -38,8 +38,5 @@ function handleKeyDown(event: KeyboardEvent) {
 				<Icon name="remove" class="size-4 text-gray-600 dark:text-gray-300" />
 			</button>
 		</div>
-		<p class="text-sm text-gray-600 dark:text-gray-400">
-			{{ isGroupChat ? (isOwner ? 'Manage chat members' : 'Chat members') : 'Chat details' }}
-		</p>
 	</div>
 </template>

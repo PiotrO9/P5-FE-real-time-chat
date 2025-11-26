@@ -8,7 +8,6 @@ interface Props {
 const props = defineProps<Props>()
 
 const userData = computed(() => props.user)
-const activeTab = ref<'photos' | 'files'>('photos')
 
 function getInitials(username: string): string {
 	return username
@@ -17,22 +16,6 @@ function getInitials(username: string): string {
 		.join('')
 		.toUpperCase()
 		.slice(0, 2)
-}
-
-function getLocalTime(): string {
-	const now = new Date()
-	const timezoneOffset = now.getTimezoneOffset()
-	const localHours = now.getHours()
-	const localMinutes = now.getMinutes()
-
-	const minutes = localMinutes.toString().padStart(2, '0')
-	const period = localHours >= 12 ? 'PM' : 'AM'
-	const displayHours = localHours > 12 ? localHours - 12 : localHours === 0 ? 12 : localHours
-	const timezone = `UTC ${timezoneOffset > 0 ? '-' : '+'}${Math.abs(timezoneOffset / 60)
-		.toString()
-		.padStart(2, '0')}:00`
-
-	return `Local Time ${displayHours}:${minutes}${period} (${timezone})`
 }
 
 const isOnline = computed(() => {
@@ -49,12 +32,6 @@ const isOnline = computed(() => {
 
 	return diffMins < 5
 })
-
-const localTime = computed(() => getLocalTime())
-
-function handleTabClick(tab: 'photos' | 'files') {
-	activeTab.value = tab
-}
 </script>
 
 <template>
@@ -82,62 +59,6 @@ function handleTabClick(tab: 'photos' | 'files') {
 						Head Of Design at Logoipsum
 					</p>
 					<p class="text-sm text-gray-500 dark:text-gray-400">Bangladesh</p>
-					<p class="text-xs text-gray-400 dark:text-gray-500">{{ localTime }}</p>
-				</div>
-			</div>
-		</div>
-
-		<div class="border-b border-gray-200 dark:border-gray-700">
-			<div class="flex border-b border-gray-200 dark:border-gray-700">
-				<button
-					type="button"
-					tabindex="0"
-					aria-label="Photos tab"
-					:class="[
-						'flex-1 px-4 py-3 text-sm font-medium transition-colors',
-						activeTab === 'photos'
-							? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
-							: 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
-					]"
-					@click="handleTabClick('photos')"
-					@keydown.enter="handleTabClick('photos')"
-					@keydown.space.prevent="handleTabClick('photos')"
-				>
-					Photos
-				</button>
-				<button
-					type="button"
-					tabindex="0"
-					aria-label="Files tab"
-					:class="[
-						'flex-1 px-4 py-3 text-sm font-medium transition-colors',
-						activeTab === 'files'
-							? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
-							: 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
-					]"
-					@click="handleTabClick('files')"
-					@keydown.enter="handleTabClick('files')"
-					@keydown.space.prevent="handleTabClick('files')"
-				>
-					Files
-				</button>
-			</div>
-
-			<div v-if="activeTab === 'photos'" class="p-4">
-				<div class="grid grid-cols-3 gap-2">
-					<div
-						v-for="i in 10"
-						:key="i"
-						class="aspect-square bg-gradient-to-br from-gray-200 dark:from-gray-700 to-gray-300 dark:to-gray-800 rounded-lg flex items-center justify-center"
-					>
-						<span class="text-xs text-gray-500 dark:text-gray-400">{{ i }}</span>
-					</div>
-				</div>
-			</div>
-
-			<div v-else class="p-4">
-				<div class="text-center py-8">
-					<p class="text-sm text-gray-500 dark:text-gray-400">No files shared</p>
 				</div>
 			</div>
 		</div>
