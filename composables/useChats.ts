@@ -44,7 +44,8 @@ export function useChats() {
 				unreadCount: Number.isFinite(chat?.unreadCount) ? Number(chat.unreadCount) : 0,
 				messages: Array.isArray(chat?.messages) ? chat.messages : [],
 				members: Array.isArray(chat?.members) ? chat.members : undefined,
-				currentUserRole: chat?.currentUserRole || chat?.memberRole || undefined
+				currentUserRole: chat?.currentUserRole || chat?.memberRole || undefined,
+				hasOnlineMembers: chat?.hasOnlineMembers ?? false
 			}))
 		} catch (err: any) {
 			chatsError.value = getErrorMessage(err, 'Failed to fetch chats list')

@@ -106,6 +106,36 @@ export function useSocketHandlers(
 	function handleUserStatus(data: { userId: string; isOnline: boolean; lastSeen?: Date }) {
 		const userId = toNumber(data.userId)
 		friendsComposable.updateFriendStatus(userId, data.isOnline, data.lastSeen)
+
+		// Aktualizuj status online w czatach
+		chats.value.forEach((chat) => {
+			// Dla czatów 1-on-1: aktualizuj otherUser.isOnline
+			if (!chat.isGroup && chat.otherUser && compareIds(chat.otherUser.id, userId)) {
+				chat.otherUser.isOnline = data.isOnline
+				if (data.lastSeen) {
+					chat.otherUser.lastSeen = data.lastSeen instanceof Date 
+						? data.lastSeen.toISOString() 
+						: String(data.lastSeen)
+				}
+				// Aktualizuj hasOnlineMembers na podstawie isOnline
+				chat.hasOnlineMembers = data.isOnline
+			}
+
+			// Dla czatów grupowych: aktualizuj status członka i hasOnlineMembers
+			if (chat.isGroup && chat.members) {
+				const member = chat.members.find((m) => compareIds(m.id, userId))
+				if (member) {
+					member.isOnline = data.isOnline
+					if (data.lastSeen) {
+						member.lastSeen = data.lastSeen instanceof Date 
+							? data.lastSeen.toISOString() 
+							: String(data.lastSeen)
+					}
+					// Aktualizuj hasOnlineMembers - sprawdź czy jakikolwiek członek jest online
+					chat.hasOnlineMembers = chat.members.some((m) => m.isOnline === true)
+				}
+			}
+		})
 	}
 
 	function handleChatCreated(_data: { chat: any }) {

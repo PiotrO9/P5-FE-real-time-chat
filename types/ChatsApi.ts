@@ -41,6 +41,7 @@ export interface GroupChatItem {
 	unreadCount: number
 	members: ChatMember[]
 	memberCount: number
+	hasOnlineMembers: boolean
 }
 
 export interface DirectChatItem {
@@ -52,6 +53,7 @@ export interface DirectChatItem {
 	lastMessage: LastMessage | null
 	unreadCount: number
 	otherUser: OtherUser
+	hasOnlineMembers: boolean
 }
 
 export interface ChatsResponse {

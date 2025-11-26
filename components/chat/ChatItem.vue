@@ -48,6 +48,12 @@ const displayMessage = computed(() => {
 	return lastMessageContent.value
 })
 const hasUnread = computed(() => Number(chatData.value.unreadCount) > 0)
+const isOnline = computed(() => {
+	if (chatData.value.isGroup) {
+		return chatData.value.hasOnlineMembers ?? false
+	}
+	return chatData.value.hasOnlineMembers ?? chatData.value.otherUser?.isOnline ?? false
+})
 const itemClasses = computed(() => {
 	const base =
 		'flex items-center gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-gray-800 focus-visible:bg-slate-50 dark:focus-visible:bg-gray-800 outline-none transition-colors'
@@ -77,7 +83,7 @@ function handleKeyDown(event: KeyboardEvent) {
 			@click="handleClick"
 			@keydown="handleKeyDown"
 		>
-			<ChatInitial :chat-initial="chatInitial" />
+			<ChatInitial :chat-initial="chatInitial" :is-online="isOnline" />
 			<div class="min-w-0 flex-1 flex flex-col">
 				<div class="flex items-center justify-between gap-2 min-w-0">
 					<p

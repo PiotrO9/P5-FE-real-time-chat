@@ -75,6 +75,7 @@ export type Chat = {
 	messages: Message[]
 	members?: ChatMember[]
 	currentUserRole?: Role
+	hasOnlineMembers?: boolean
 }
 
 export interface Friend {
