@@ -67,7 +67,9 @@ function handleKeyDown(event: KeyboardEvent, item: NavView) {
 </script>
 
 <template>
-	<nav class="w-16 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 flex flex-col items-center py-4 gap-4">
+	<nav
+		class="w-16 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 flex flex-col items-center py-4 gap-4"
+	>
 		<button
 			v-for="item in navItems"
 			:key="item.name"
@@ -76,7 +78,9 @@ function handleKeyDown(event: KeyboardEvent, item: NavView) {
 			:aria-label="item.label"
 			:class="[
 				'w-12 h-12 rounded-lg flex items-center justify-center transition-colors relative',
-				isActive(item.name) ? 'bg-blue-700 dark:bg-blue-600 text-white' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+				isActive(item.name)
+					? 'bg-blue-700 dark:bg-blue-600 text-white'
+					: 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
 			]"
 			@click="handleNavClick(item.name)"
 			@keydown="(e) => handleKeyDown(e, item.name)"

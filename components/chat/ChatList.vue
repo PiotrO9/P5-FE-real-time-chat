@@ -39,7 +39,12 @@ function getTypingUsers(chatId: string): string[] {
 				<p class="text-gray-500 dark:text-gray-400 text-sm">You don't have any chats yet</p>
 			</div>
 		</div>
-		<ul v-else class="divide-y divide-gray-100 dark:divide-gray-800" role="listbox" aria-label="Chat list">
+		<ul
+			v-else
+			class="divide-y divide-gray-100 dark:divide-gray-800"
+			role="listbox"
+			aria-label="Chat list"
+		>
 			<ChatItem
 				v-for="chat in chatsList"
 				:key="chat.id"

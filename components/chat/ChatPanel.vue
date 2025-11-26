@@ -212,5 +212,4 @@ defineExpose({ scrollToBottom, handleScrollToMessage })
 
 		<Typing v-if="typingText" :typing-text />
 	</section>
-
 </template>

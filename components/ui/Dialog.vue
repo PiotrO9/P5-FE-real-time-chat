@@ -107,7 +107,11 @@ onMounted(() => {
 					<slot />
 				</div>
 
-				<p v-else-if="message" id="dialog-message" class="text-gray-600 dark:text-gray-400 mb-6">
+				<p
+					v-else-if="message"
+					id="dialog-message"
+					class="text-gray-600 dark:text-gray-400 mb-6"
+				>
 					{{ message }}
 				</p>
 

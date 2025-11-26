@@ -75,8 +75,12 @@ function handleTabClick(tab: 'photos' | 'files') {
 				</div>
 
 				<div class="flex flex-col items-center gap-2 w-full">
-					<h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ userData.username }}</h3>
-					<p class="text-sm text-gray-500 dark:text-gray-400 text-center">Head Of Design at Logoipsum</p>
+					<h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+						{{ userData.username }}
+					</h3>
+					<p class="text-sm text-gray-500 dark:text-gray-400 text-center">
+						Head Of Design at Logoipsum
+					</p>
 					<p class="text-sm text-gray-500 dark:text-gray-400">Bangladesh</p>
 					<p class="text-xs text-gray-400 dark:text-gray-500">{{ localTime }}</p>
 				</div>

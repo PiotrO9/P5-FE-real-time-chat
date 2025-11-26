@@ -71,7 +71,9 @@ watch(
 		>
 			<div class="flex-1 min-w-0">
 				<div class="flex items-center gap-2 mb-1">
-					<span class="text-xs font-medium text-gray-700 dark:text-gray-300">Odpowiedź na:</span>
+					<span class="text-xs font-medium text-gray-700 dark:text-gray-300"
+						>Odpowiedź na:</span
+					>
 					<span class="text-xs font-semibold text-blue-600 dark:text-blue-400">
 						{{ replyTo.senderUsername }}
 					</span>

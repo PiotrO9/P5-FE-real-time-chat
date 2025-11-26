@@ -59,7 +59,7 @@ function formatDate(dateString: string): string {
 function getStatusBadgeClass(status: string): string {
 	switch (status) {
 		case 'PENDING':
-											return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border-yellow-200 dark:border-yellow-700'
+			return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border-yellow-200 dark:border-yellow-700'
 		case 'ACCEPTED':
 			return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-700'
 		case 'REJECTED':
@@ -95,7 +95,9 @@ function getStatusText(status: string): string {
 
 			<div v-else class="divide-y divide-gray-200 dark:divide-gray-700">
 				<div v-if="receivedInvites.length > 0" class="pb-4">
-					<h3 class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800">
+					<h3
+						class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800"
+					>
 						Received invitations ({{ receivedInvites.length }})
 					</h3>
 					<ul
@@ -116,10 +118,14 @@ function getStatusText(status: string): string {
 										:chat-initial="getInitials(invite.sender?.username || '')"
 									/>
 									<div class="flex-1 min-w-0">
-										<p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+										<p
+											class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate"
+										>
 											{{ invite.sender?.username }}
 										</p>
-										<p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+										<p
+											class="text-xs text-gray-500 dark:text-gray-400 truncate"
+										>
 											{{ invite.sender?.email }}
 										</p>
 										<p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
@@ -167,7 +173,9 @@ function getStatusText(status: string): string {
 				</div>
 
 				<div v-if="sentInvites.length > 0">
-					<h3 class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800">
+					<h3
+						class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800"
+					>
 						Sent invitations ({{ sentInvites.length }})
 					</h3>
 					<ul
@@ -188,10 +196,14 @@ function getStatusText(status: string): string {
 										:chat-initial="getInitials(invite.receiver?.username || '')"
 									/>
 									<div class="flex-1 min-w-0">
-										<p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+										<p
+											class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate"
+										>
 											{{ invite.receiver?.username }}
 										</p>
-										<p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+										<p
+											class="text-xs text-gray-500 dark:text-gray-400 truncate"
+										>
 											{{ invite.receiver?.email }}
 										</p>
 										<p class="text-xs text-gray-400 dark:text-gray-500 mt-1">

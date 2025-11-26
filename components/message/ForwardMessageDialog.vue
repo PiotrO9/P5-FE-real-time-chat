@@ -103,10 +103,16 @@ onMounted(() => {
 		>
 			<div class="p-6 flex flex-col max-h-[80vh]">
 				<header class="mb-4">
-					<h2 id="forward-dialog-title" class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+					<h2
+						id="forward-dialog-title"
+						class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2"
+					>
 						Przekaż wiadomość
 					</h2>
-					<p id="forward-dialog-description" class="text-sm text-gray-600 dark:text-gray-400">
+					<p
+						id="forward-dialog-description"
+						class="text-sm text-gray-600 dark:text-gray-400"
+					>
 						Wybierz czat, do którego chcesz przekazać wiadomość
 					</p>
 				</header>

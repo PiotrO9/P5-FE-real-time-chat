@@ -194,7 +194,7 @@ let contextMenuLeaveTimeout: ReturnType<typeof setTimeout> | null = null
 
 function handleContextMenuMouseLeave() {
 	if (uiState.isContextMenuActionExecuting) return
-	
+
 	const containerRef = actionBarRef.value?.emojiTooltipContainerRef?.value
 	if (!containerRef?.matches(':hover')) {
 		contextMenuLeaveTimeout = setTimeout(() => {
@@ -229,7 +229,7 @@ function handleDeleteClick() {
 
 	uiState.isContextMenuActionExecuting = true
 	uiState.showContextMenu = false
-	
+
 	nextTick(() => {
 		uiState.showDeleteDialog = true
 		uiState.isContextMenuActionExecuting = false
@@ -278,13 +278,13 @@ async function handleReactionClick(emoji: string) {
 
 async function handlePinClick() {
 	if (isDeleted.value || isPinning.value || uiState.isDeleting) return
-	
+
 	uiState.isContextMenuActionExecuting = true
 	uiState.showContextMenu = false
 
 	const newPinState = await togglePin()
 	emit('pin-updated', props.message.id, newPinState)
-	
+
 	nextTick(() => {
 		uiState.isContextMenuActionExecuting = false
 	})
@@ -292,10 +292,10 @@ async function handlePinClick() {
 
 function handleForwardClick() {
 	if (isDeleted.value || uiState.isDeleting) return
-	
+
 	uiState.isContextMenuActionExecuting = true
 	uiState.showContextMenu = false
-	
+
 	nextTick(() => {
 		uiState.showForwardDialog = true
 		uiState.isContextMenuActionExecuting = false

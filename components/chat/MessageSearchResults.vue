@@ -52,15 +52,24 @@ function highlightText(text: string, query: string): string {
 		<div v-if="isLoading" class="p-4 text-sm text-gray-600 dark:text-gray-400 text-center">
 			Wyszukiwanie...
 		</div>
-		<div v-else-if="messages.length === 0" class="p-4 text-sm text-gray-500 dark:text-gray-400 text-center">
+		<div
+			v-else-if="messages.length === 0"
+			class="p-4 text-sm text-gray-500 dark:text-gray-400 text-center"
+		>
 			Brak wyników
 		</div>
 		<div v-else class="flex flex-col">
-			<div class="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+			<div
+				class="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700"
+			>
 				Znaleziono {{ total }} {{ total === 1 ? 'wiadomość' : 'wiadomości' }}
 			</div>
 			<div class="max-h-96 overflow-y-auto">
-				<ul class="divide-y divide-gray-100 dark:divide-gray-800" role="listbox" aria-label="Search results">
+				<ul
+					class="divide-y divide-gray-100 dark:divide-gray-800"
+					role="listbox"
+					aria-label="Search results"
+				>
 					<li
 						v-for="message in messages"
 						:key="message.id"
@@ -102,4 +111,3 @@ function highlightText(text: string, query: string): string {
 		</div>
 	</div>
 </template>
-

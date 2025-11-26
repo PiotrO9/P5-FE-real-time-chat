@@ -88,9 +88,10 @@ export function useInvites() {
 		const invite: Invite = {
 			id: inviteData.id,
 			status: inviteData.status,
-			createdAt: typeof inviteData.createdAt === 'string' 
-				? inviteData.createdAt 
-				: inviteData.createdAt.toISOString(),
+			createdAt:
+				typeof inviteData.createdAt === 'string'
+					? inviteData.createdAt
+					: inviteData.createdAt.toISOString(),
 			sender: mapUserToInviteUser(inviteData.sender),
 			receiver: inviteData.receiver ? mapUserToInviteUser(inviteData.receiver) : undefined
 		}
@@ -129,7 +130,7 @@ export function useInvites() {
 	function updateInviteStatus(inviteData: FriendInviteRejectedEvent['invite']) {
 		const inviteId = inviteData.id
 		const sentIndex = findIndexById(invites.value.sentInvites, inviteId)
-		
+
 		if (sentIndex !== -1) {
 			const invite = invites.value.sentInvites[sentIndex]
 			if (invite.status === 'PENDING') {
