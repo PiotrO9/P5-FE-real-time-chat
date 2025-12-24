@@ -143,69 +143,69 @@ Zmień adres na adres swojego serwera backend.
 
 ```typescript
 const {
-	user,
-	isAuthenticated,
-	isLoading,
-	error,
-	login,
-	register,
-	logout,
-	checkAuth,
-	refreshToken,
-	clearError
-} = useAuth()
+    user,
+    isAuthenticated,
+    isLoading,
+    error,
+    login,
+    register,
+    logout,
+    checkAuth,
+    refreshToken,
+    clearError,
+} = useAuth();
 
-await login({ email: 'user@example.com', password: 'password' })
+await login({ email: 'user@example.com', password: 'password' });
 
 await register({
-	email: 'user@example.com',
-	username: 'username',
-	password: 'password'
-})
+    email: 'user@example.com',
+    username: 'username',
+    password: 'password',
+});
 
-await logout()
+await logout();
 ```
 
 ### useUser()
 
 ```typescript
 const {
-	isLoading,
-	error,
-	getUserProfile,
-	getAllUsers,
-	getUserStatus,
-	updateProfile,
-	updatePassword,
-	deleteUser,
-	clearError
-} = useUser()
+    isLoading,
+    error,
+    getUserProfile,
+    getAllUsers,
+    getUserStatus,
+    updateProfile,
+    updatePassword,
+    deleteUser,
+    clearError,
+} = useUser();
 
-const user = await getUserProfile('user-id')
+const user = await getUserProfile('user-id');
 
-const response = await getAllUsers(1, 10)
+const response = await getAllUsers(1, 10);
 
-const status = await getUserStatus('user-id')
+const status = await getUserStatus('user-id');
 
-await updateProfile('user-id', { username: 'newname' })
+await updateProfile('user-id', { username: 'newname' });
 
 await updatePassword('user-id', {
-	currentPassword: 'old',
-	newPassword: 'new'
-})
+    currentPassword: 'old',
+    newPassword: 'new',
+});
 ```
 
 ### useToast()
 
 ```typescript
-const { toasts, success, error, info, warning, clear } = useToast()
+const { toasts, success, error, info, warning, clear } = useToast();
 
-success('Operacja zakończona sukcesem!')
-error('Wystąpił błąd')
-info('Informacja')
-warning('Ostrzeżenie')
+success('Operacja zakończona sukcesem!');
+error('Wystąpił błąd');
+info('Informacja');
+warning('Ostrzeżenie');
 
-clear()
+clear();
 ```
 
 ## Użycie WebSocket
@@ -213,29 +213,31 @@ clear()
 ### Socket.IO
 
 ```typescript
-const { connect, disconnect, emit, on, isConnected } = useSocket()
+const { connect, disconnect, emit, on, isConnected } = useSocket();
 
-connect()
+connect();
 
-emit('message', { text: 'Hello' })
+emit('message', { text: 'Hello' });
 
 on('message', (data) => {
-	console.log('Otrzymano:', data)
-})
+    console.log('Otrzymano:', data);
+});
 
-disconnect()
+disconnect();
 ```
 
 ### Native WebSocket (VueUse)
 
 ```typescript
-const { status, data, send, open, close } = useNativeWebSocket('ws://localhost:8080')
+const { status, data, send, open, close } = useNativeWebSocket(
+    'ws://localhost:8080',
+);
 
-send('Hello')
+send('Hello');
 
 watch(status, (newStatus) => {
-	console.log('Status:', newStatus)
-})
+    console.log('Status:', newStatus);
+});
 ```
 
 ## Dokumentacja

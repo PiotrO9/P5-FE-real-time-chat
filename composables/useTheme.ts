@@ -1,24 +1,24 @@
 export function useTheme() {
-	const isDark = useDark({
-		selector: 'html',
-		attribute: 'class',
-		valueDark: 'dark',
-		valueLight: ''
-	})
+    const isDark = useDark({
+        selector: 'html',
+        attribute: 'class',
+        valueDark: 'dark',
+        valueLight: '',
+    });
 
-	const toggleDark = useToggle(isDark)
+    const toggleDark = useToggle(isDark);
 
-	function toggleTheme() {
-		toggleDark()
-	}
+    function toggleTheme() {
+        toggleDark();
+    }
 
-	function setTheme(theme: 'light' | 'dark') {
-		isDark.value = theme === 'dark'
-	}
+    function setTheme(theme: 'light' | 'dark') {
+        isDark.value = theme === 'dark';
+    }
 
-	return {
-		isDark,
-		toggleTheme,
-		setTheme
-	}
+    return {
+        isDark,
+        toggleTheme,
+        setTheme,
+    };
 }

@@ -1,9 +1,9 @@
 @layer base {
-	:root {
-		--gray-primary: #f5f5f5;
-	}
+    :root {
+        --gray-primary: #f5f5f5;
+    }
 
-	.bg-gray {
-		background-color: var(--gray-primary);
-	}
+    .bg-gray {
+        background-color: var(--gray-primary);
+    }
 }

@@ -1,116 +1,134 @@
 <template>
-	<div class="min-h-screen bg-gray-50 py-8 px-4">
-		<div class="max-w-6xl mx-auto">
-			<div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-				<div class="flex items-center justify-between flex-wrap gap-4">
-					<div>
-						<h1 class="text-3xl font-bold text-gray-900 mb-2">Users</h1>
-						<p class="text-gray-600">User List</p>
-					</div>
-					<NuxtLink
-						to="/dashboard"
-						class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
-					>
-						Back to Dashboard
-					</NuxtLink>
-				</div>
-			</div>
+    <div class="min-h-screen bg-gray-50 px-4 py-8">
+        <div class="mx-auto max-w-6xl">
+            <div class="mb-6 rounded-lg bg-white p-6 shadow-lg">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <h1 class="mb-2 text-3xl font-bold text-gray-900">
+                            Users
+                        </h1>
+                        <p class="text-gray-600">User List</p>
+                    </div>
+                    <NuxtLink
+                        to="/dashboard"
+                        class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
+                    >
+                        Back to Dashboard
+                    </NuxtLink>
+                </div>
+            </div>
 
-			<div class="space-y-4">
-				<div class="bg-white rounded-lg shadow-lg p-6">
-					<div class="flex items-center justify-between flex-wrap gap-4">
-						<div class="flex items-center gap-4">
-							<div
-								class="size-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg"
-							>
-								JD
-							</div>
+            <div class="space-y-4">
+                <div class="rounded-lg bg-white p-6 shadow-lg">
+                    <div
+                        class="flex flex-wrap items-center justify-between gap-4"
+                    >
+                        <div class="flex items-center gap-4">
+                            <div
+                                class="flex size-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-lg font-bold text-white"
+                            >
+                                JD
+                            </div>
 
-							<div>
-								<h3 class="text-lg font-bold text-gray-900">Jan Kowalski</h3>
-								<p class="text-gray-600">jan.kowalski@example.com</p>
-								<p class="text-sm text-gray-500">
-									Last activity: Jan 1, 2024, 10:30
-								</p>
-							</div>
-						</div>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900">
+                                    Jan Kowalski
+                                </h3>
+                                <p class="text-gray-600">
+                                    jan.kowalski@example.com
+                                </p>
+                                <p class="text-sm text-gray-500">
+                                    Last activity: Jan 1, 2024, 10:30
+                                </p>
+                            </div>
+                        </div>
 
-						<div class="flex items-center gap-3">
-							<span
-								class="px-3 py-1 text-sm font-medium rounded-full border bg-green-100 text-green-800 border-green-200"
-							>
-								<span class="inline-block size-2 rounded-full mr-2 bg-green-500" />
-								Online
-							</span>
+                        <div class="flex items-center gap-3">
+                            <span
+                                class="rounded-full border border-green-200 bg-green-100 px-3 py-1 text-sm font-medium text-green-800"
+                            >
+                                <span
+                                    class="mr-2 inline-block size-2 rounded-full bg-green-500"
+                                />
+                                Online
+                            </span>
 
-							<NuxtLink
-								to="/users/1"
-								class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium rounded-lg transition-colors"
-							>
-								View Profile
-							</NuxtLink>
-						</div>
-					</div>
-				</div>
+                            <NuxtLink
+                                to="/users/1"
+                                class="rounded-lg bg-gray-100 px-4 py-2 font-medium text-gray-900 transition-colors hover:bg-gray-200"
+                            >
+                                View Profile
+                            </NuxtLink>
+                        </div>
+                    </div>
+                </div>
 
-				<div class="bg-white rounded-lg shadow-lg p-6">
-					<div class="flex items-center justify-between flex-wrap gap-4">
-						<div class="flex items-center gap-4">
-							<div
-								class="size-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg"
-							>
-								AN
-							</div>
+                <div class="rounded-lg bg-white p-6 shadow-lg">
+                    <div
+                        class="flex flex-wrap items-center justify-between gap-4"
+                    >
+                        <div class="flex items-center gap-4">
+                            <div
+                                class="flex size-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-lg font-bold text-white"
+                            >
+                                AN
+                            </div>
 
-							<div>
-								<h3 class="text-lg font-bold text-gray-900">Anna Nowak</h3>
-								<p class="text-gray-600">anna.nowak@example.com</p>
-								<p class="text-sm text-gray-500">
-									Last activity: Dec 31, 2023, 15:45
-								</p>
-							</div>
-						</div>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900">
+                                    Anna Nowak
+                                </h3>
+                                <p class="text-gray-600">
+                                    anna.nowak@example.com
+                                </p>
+                                <p class="text-sm text-gray-500">
+                                    Last activity: Dec 31, 2023, 15:45
+                                </p>
+                            </div>
+                        </div>
 
-						<div class="flex items-center gap-3">
-							<span
-								class="px-3 py-1 text-sm font-medium rounded-full border bg-gray-100 text-gray-800 border-gray-200"
-							>
-								<span class="inline-block size-2 rounded-full mr-2 bg-gray-500" />
-								Offline
-							</span>
+                        <div class="flex items-center gap-3">
+                            <span
+                                class="rounded-full border border-gray-200 bg-gray-100 px-3 py-1 text-sm font-medium text-gray-800"
+                            >
+                                <span
+                                    class="mr-2 inline-block size-2 rounded-full bg-gray-500"
+                                />
+                                Offline
+                            </span>
 
-							<NuxtLink
-								to="/users/2"
-								class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium rounded-lg transition-colors"
-							>
-								View Profile
-							</NuxtLink>
-						</div>
-					</div>
-				</div>
-			</div>
+                            <NuxtLink
+                                to="/users/2"
+                                class="rounded-lg bg-gray-100 px-4 py-2 font-medium text-gray-900 transition-colors hover:bg-gray-200"
+                            >
+                                View Profile
+                            </NuxtLink>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-			<div class="mt-6 bg-white rounded-lg shadow-lg p-6">
-				<div class="flex items-center justify-between flex-wrap gap-4">
-					<div class="text-gray-600">Page 1 of 1</div>
+            <div class="mt-6 rounded-lg bg-white p-6 shadow-lg">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div class="text-gray-600">Page 1 of 1</div>
 
-					<div class="flex gap-3">
-						<button
-							type="button"
-							class="px-4 py-2 bg-gray-100 text-gray-400 font-medium rounded-lg cursor-not-allowed"
-						>
-							Previous
-						</button>
+                    <div class="flex gap-3">
+                        <button
+                            type="button"
+                            class="cursor-not-allowed rounded-lg bg-gray-100 px-4 py-2 font-medium text-gray-400"
+                        >
+                            Previous
+                        </button>
 
-						<button
-							type="button"
-							class="px-4 py-2 bg-gray-300 text-white font-medium rounded-lg cursor-not-allowed"
-						>
-							Next
-						</button>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+                        <button
+                            type="button"
+                            class="cursor-not-allowed rounded-lg bg-gray-300 px-4 py-2 font-medium text-white"
+                        >
+                            Next
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </template>
