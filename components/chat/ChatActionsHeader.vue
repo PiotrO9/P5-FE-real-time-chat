@@ -1,14 +1,8 @@
 <script setup lang="ts">
-interface Props {
-    isGroupChat: boolean;
-    isOwner: boolean;
-}
-
 interface Emits {
     (e: 'close'): void;
 }
 
-const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
 function handleToggleState() {
@@ -24,13 +18,9 @@ function handleKeyDown(event: KeyboardEvent) {
 </script>
 
 <template>
-    <div
-        class="border-b bg-white p-4 backdrop-blur dark:border-gray-700 dark:bg-gray-900"
-    >
+    <div class="border-b bg-white p-4 backdrop-blur dark:border-gray-700 dark:bg-gray-900">
         <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                Chat actions
-            </h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Chat actions</h2>
             <button
                 type="button"
                 tabindex="0"
@@ -39,10 +29,7 @@ function handleKeyDown(event: KeyboardEvent) {
                 @click="handleToggleState"
                 @keydown="handleKeyDown"
             >
-                <Icon
-                    name="remove"
-                    class="size-4 text-gray-600 dark:text-gray-300"
-                />
+                <Icon name="remove" class="size-4 text-gray-600 dark:text-gray-300" />
             </button>
         </div>
     </div>

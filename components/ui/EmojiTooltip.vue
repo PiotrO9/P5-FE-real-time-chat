@@ -59,14 +59,14 @@ const groupedEmojiCategories = [
 
 function hasUserReaction(emoji: string): boolean {
     const reactionGroup = props.groupedReactions[emoji];
+
     if (!reactionGroup) return false;
-    const foundReaction = reactionGroup.reactions.find(
-        (r) => r.emoji === emoji,
-    );
+
+    const foundReaction = reactionGroup.reactions.find((r) => r.emoji === emoji);
+
     if (!foundReaction) return false;
-    return foundReaction.userIds.some(
-        (userId) => String(userId) === String(props.currentUserId),
-    );
+
+    return foundReaction.userIds.some((userId) => String(userId) === String(props.currentUserId));
 }
 
 function handleReactionPickerMouseEnter() {
@@ -101,6 +101,7 @@ function showTooltip() {
 
 function hideTooltip() {
     if (!showReactionPicker.value) return;
+
     setTimeout(() => {
         if (!reactionsContainerRef.value?.matches(':hover')) {
             showReactionPicker.value = false;
@@ -128,14 +129,8 @@ defineExpose({
         @mouseenter="handleReactionPickerMouseEnter"
         @mouseleave="handleReactionPickerMouseLeave"
     >
-        <div
-            v-for="group in groupedEmojiCategories"
-            :key="group.label"
-            class="flex flex-col"
-        >
-            <p
-                class="mb-0.5 ml-1 text-xs font-medium text-gray-500 dark:text-gray-400"
-            >
+        <div v-for="group in groupedEmojiCategories" :key="group.label" class="flex flex-col">
+            <p class="mb-0.5 ml-1 text-xs font-medium text-gray-500 dark:text-gray-400">
                 {{ group.label }}
             </p>
             <div class="flex flex-wrap gap-1">

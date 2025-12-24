@@ -4,9 +4,7 @@
             <div class="mb-6 rounded-lg bg-white p-6 shadow-lg">
                 <div class="flex flex-wrap items-center justify-between gap-4">
                     <div>
-                        <h1 class="mb-2 text-3xl font-bold text-gray-900">
-                            Users
-                        </h1>
+                        <h1 class="mb-2 text-3xl font-bold text-gray-900">Users</h1>
                         <p class="text-gray-600">User List</p>
                     </div>
                     <NuxtLink
@@ -20,9 +18,7 @@
 
             <div class="space-y-4">
                 <div class="rounded-lg bg-white p-6 shadow-lg">
-                    <div
-                        class="flex flex-wrap items-center justify-between gap-4"
-                    >
+                    <div class="flex flex-wrap items-center justify-between gap-4">
                         <div class="flex items-center gap-4">
                             <div
                                 class="flex size-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-lg font-bold text-white"
@@ -31,12 +27,8 @@
                             </div>
 
                             <div>
-                                <h3 class="text-lg font-bold text-gray-900">
-                                    Jan Kowalski
-                                </h3>
-                                <p class="text-gray-600">
-                                    jan.kowalski@example.com
-                                </p>
+                                <h3 class="text-lg font-bold text-gray-900">Jan Kowalski</h3>
+                                <p class="text-gray-600">jan.kowalski@example.com</p>
                                 <p class="text-sm text-gray-500">
                                     Last activity: Jan 1, 2024, 10:30
                                 </p>
@@ -47,9 +39,7 @@
                             <span
                                 class="rounded-full border border-green-200 bg-green-100 px-3 py-1 text-sm font-medium text-green-800"
                             >
-                                <span
-                                    class="mr-2 inline-block size-2 rounded-full bg-green-500"
-                                />
+                                <span class="mr-2 inline-block size-2 rounded-full bg-green-500" />
                                 Online
                             </span>
 
@@ -64,9 +54,7 @@
                 </div>
 
                 <div class="rounded-lg bg-white p-6 shadow-lg">
-                    <div
-                        class="flex flex-wrap items-center justify-between gap-4"
-                    >
+                    <div class="flex flex-wrap items-center justify-between gap-4">
                         <div class="flex items-center gap-4">
                             <div
                                 class="flex size-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-lg font-bold text-white"
@@ -75,12 +63,8 @@
                             </div>
 
                             <div>
-                                <h3 class="text-lg font-bold text-gray-900">
-                                    Anna Nowak
-                                </h3>
-                                <p class="text-gray-600">
-                                    anna.nowak@example.com
-                                </p>
+                                <h3 class="text-lg font-bold text-gray-900">Anna Nowak</h3>
+                                <p class="text-gray-600">anna.nowak@example.com</p>
                                 <p class="text-sm text-gray-500">
                                     Last activity: Dec 31, 2023, 15:45
                                 </p>
@@ -91,9 +75,7 @@
                             <span
                                 class="rounded-full border border-gray-200 bg-gray-100 px-3 py-1 text-sm font-medium text-gray-800"
                             >
-                                <span
-                                    class="mr-2 inline-block size-2 rounded-full bg-gray-500"
-                                />
+                                <span class="mr-2 inline-block size-2 rounded-full bg-gray-500" />
                                 Offline
                             </span>
 

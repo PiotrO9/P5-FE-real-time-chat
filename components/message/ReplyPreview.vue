@@ -38,6 +38,7 @@ const replyText = computed(() => {
     if (props.isOwnMessage) {
         return 'Answered by';
     }
+
     return 'Answered by';
 });
 </script>
@@ -56,9 +57,7 @@ const replyText = computed(() => {
             <span class="text-[11px] text-gray-500 dark:text-gray-400">
                 {{ replyText }}
             </span>
-            <span
-                class="text-[11px] font-medium text-gray-600 dark:text-gray-300"
-            >
+            <span class="text-[11px] font-medium text-gray-600 dark:text-gray-300">
                 {{ replyToSenderName }}
             </span>
         </div>

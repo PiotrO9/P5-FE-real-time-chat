@@ -45,11 +45,7 @@ function getIconClasses(type: string) {
 </script>
 
 <template>
-    <div
-        class="fixed right-4 top-4 z-50 flex flex-col gap-3"
-        aria-live="polite"
-        aria-atomic="true"
-    >
+    <div class="fixed right-4 top-4 z-50 flex flex-col gap-3" aria-live="polite" aria-atomic="true">
         <TransitionGroup name="toast">
             <div
                 v-for="toast in toasts"
@@ -57,19 +53,12 @@ function getIconClasses(type: string) {
                 :class="getToastClasses(toast.type)"
                 role="alert"
             >
-                <div
-                    :class="getIconClasses(toast.type)"
-                    class="mt-0.5 flex-shrink-0"
-                >
+                <div :class="getIconClasses(toast.type)" class="mt-0.5 flex-shrink-0">
                     <Icon
                         v-if="toast.type === 'success'"
                         name="status-success"
                         class="size-5"
-                    /><Icon
-                        v-else-if="toast.type === 'error'"
-                        name="status-error"
-                        class="size-5"
-                    />
+                    /><Icon v-else-if="toast.type === 'error'" name="status-error" class="size-5" />
                     <Icon
                         v-else-if="toast.type === 'warning'"
                         name="status-warning"

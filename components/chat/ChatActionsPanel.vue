@@ -25,17 +25,15 @@ interface Props {
 }
 
 interface Emits {
-    (
-        e: 'chat-updated',
-        data: { members: ChatMember[]; currentUserRole?: Role },
-    ): void;
+    (e: 'chat-updated', data: { members: ChatMember[]; currentUserRole?: Role }): void;
     (e: 'close'): void;
 }
 
-const chatStore = useChatStore();
-
 const props = defineProps<Props>();
+
 const emit = defineEmits<Emits>();
+
+const chatStore = useChatStore();
 
 const { success: toastSuccess, error: toastError } = useToast();
 
@@ -62,9 +60,7 @@ const chat = computed(() => props.chat);
 const currentUserId = computed(() => props.currentUserId);
 const isGroupChat = computed(() => chat.value?.isGroup ?? false);
 const currentUserRole = computed(
-    () =>
-        chat.value?.members?.find((user) => user.id == currentUserId.value)
-            ?.role ?? null,
+    () => chat.value?.members?.find((user) => user.id == currentUserId.value)?.role ?? null,
 );
 const isOwner = computed(() => {
     const role = currentUserRole.value;
@@ -88,9 +84,7 @@ const members = computed(() => {
 const availableFriends = computed(() => {
     const memberIds = members.value.map((member) => String(member.id));
 
-    return friends.value.filter(
-        (friend) => !memberIds.includes(String(friend.id)),
-    );
+    return friends.value.filter((friend) => !memberIds.includes(String(friend.id)));
 });
 const pinnedMessagesList = computed(() => {
     if (!chat.value) return [];
@@ -98,12 +92,9 @@ const pinnedMessagesList = computed(() => {
     const messages = chatStore.getPinnedMessages(chat.value.id);
 
     return [...messages].sort((a, b) => {
-        const dateA = a.pinnedAt
-            ? new Date(a.pinnedAt).getTime()
-            : new Date(a.createdAt).getTime();
-        const dateB = b.pinnedAt
-            ? new Date(b.pinnedAt).getTime()
-            : new Date(b.createdAt).getTime();
+        const dateA = a.pinnedAt ? new Date(a.pinnedAt).getTime() : new Date(a.createdAt).getTime();
+        const dateB = b.pinnedAt ? new Date(b.pinnedAt).getTime() : new Date(b.createdAt).getTime();
+
         return dateB - dateA;
     });
 });
@@ -128,11 +119,14 @@ watch(
         if (searchDebounceTimer) {
             clearTimeout(searchDebounceTimer);
         }
+
         searchDebounceTimer = setTimeout(() => {
             if (!chat.value || !query.trim()) {
                 messageSearchComposable.clearSearch();
+
                 return;
             }
+
             messageSearchComposable.searchMessages(chat.value.id, query);
         }, 300);
     },
@@ -151,6 +145,7 @@ watch(
 function handleAddUserFromSection(username: string) {
     if (!chat.value || !username.trim()) {
         toastError('Please provide a username');
+
         return;
     }
 
@@ -160,14 +155,15 @@ function handleAddUserFromSection(username: string) {
 
     if (!friend) {
         toastError('User not found in friends');
+
         return;
     }
 
-    const isAlreadyMember = members.value.some((member) =>
-        compareIds(member.id, friend.id),
-    );
+    const isAlreadyMember = members.value.some((member) => compareIds(member.id, friend.id));
+
     if (isAlreadyMember) {
         toastError('User is already in the chat');
+
         return;
     }
 
@@ -202,16 +198,19 @@ function handleChangeRole(memberId: string, newRole: Role) {
     if (!chat.value) return;
 
     const member = findById(members.value, memberId);
+
     if (!member) return;
 
     if (member.role === newRole) {
         handleCloseRoleMenu();
+
         return;
     }
 
     if (member.role === 'OWNER') {
         toastError('You cannot change the owner role');
         handleCloseRoleMenu();
+
         return;
     }
 
@@ -254,9 +253,7 @@ function handlePinnedMessageClick(messageId: string | number) {
     const message = findById(chat.value.messages, messageId);
 
     if (message) {
-        const messageElement = document.querySelector(
-            `[data-message-id="${messageId}"]`,
-        );
+        const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
 
         if (messageElement) {
             messageElement.scrollIntoView({
@@ -281,10 +278,8 @@ async function handleAddUser(friend: Friend) {
         toastSuccess(`${friend.username} has been added to the chat`);
         await fetchChatDetails();
     } catch (err: any) {
-        const errorMessage =
-            err?.response?._data?.message ||
-            err?.message ||
-            'Failed to add user';
+        const errorMessage = err?.response?._data?.message || err?.message || 'Failed to add user';
+
         toastError(errorMessage);
     } finally {
         isAddingUser.value = false;
@@ -295,10 +290,12 @@ async function handleRemoveUser(userId: string) {
     if (!chat.value) return;
 
     const member = findById(members.value, userId);
+
     if (!member) return;
 
     if (String(userId) === String(currentUserId.value)) {
         toastError('You cannot remove yourself from the chat');
+
         return;
     }
 
@@ -309,9 +306,8 @@ async function handleRemoveUser(userId: string) {
         await fetchChatDetails();
     } catch (err: any) {
         const errorMessage =
-            err?.response?._data?.message ||
-            err?.message ||
-            'Failed to remove user';
+            err?.response?._data?.message || err?.message || 'Failed to remove user';
+
         toastError(errorMessage);
     } finally {
         isRemovingUser.value = null;
@@ -319,8 +315,7 @@ async function handleRemoveUser(userId: string) {
 }
 
 async function handleConfirmRoleChange() {
-    if (!chat.value || !selectedMemberId.value || !selectedNewRole.value)
-        return;
+    if (!chat.value || !selectedMemberId.value || !selectedNewRole.value) return;
 
     const memberId = selectedMemberId.value;
     const newRole = selectedNewRole.value;
@@ -330,16 +325,14 @@ async function handleConfirmRoleChange() {
         isUpdatingRole.value = memberId;
         const apiRole: 'USER' | 'MODERATOR' | 'OWNER' =
             newRole === 'MEMBER' ? 'USER' : (newRole as 'MODERATOR' | 'OWNER');
+
         await updateChatMemberRole(chat.value.id, String(memberId), apiRole);
-        toastSuccess(
-            `User ${memberName} role has been changed to ${getRoleLabel(newRole)}`,
-        );
+        toastSuccess(`User ${memberName} role has been changed to ${getRoleLabel(newRole)}`);
         await fetchChatDetails();
     } catch (err: any) {
         const errorMessage =
-            err?.response?._data?.message ||
-            err?.message ||
-            'Failed to change user role';
+            err?.response?._data?.message || err?.message || 'Failed to change user role';
+
         toastError(errorMessage);
     } finally {
         isUpdatingRole.value = null;
@@ -357,9 +350,8 @@ async function fetchFriends() {
         friendsLoading.value = true;
         const res = await fetchFriendsFromService();
         const raw = res?.data;
-        const friendsList: FriendResponse[] = Array.isArray(raw?.friends)
-            ? raw.friends
-            : [];
+        const friendsList: FriendResponse[] = Array.isArray(raw?.friends) ? raw.friends : [];
+
         friends.value = friendsList.map((friend) => ({
             id: friend.id,
             username: friend.username,
@@ -384,6 +376,7 @@ async function fetchChatDetails() {
 
         if (data) {
             const updatedRole = data.currentUserRole || data.memberRole;
+
             emit('chat-updated', {
                 members: data.members || [],
                 currentUserRole: updatedRole,
@@ -409,12 +402,11 @@ async function fetchPinnedMessagesList() {
         const { mapMessageFromBackend } = useMessageHelpers();
         const res = await fetchPinnedMessages(chat.value.id);
         const raw = res?.data;
-        const pinnedItems: any[] = Array.isArray(raw?.pinnedMessages)
-            ? raw.pinnedMessages
-            : [];
+        const pinnedItems: any[] = Array.isArray(raw?.pinnedMessages) ? raw.pinnedMessages : [];
 
         const mappedMessages = pinnedItems.map((pinnedItem) => {
             const message = mapMessageFromBackend(pinnedItem.message);
+
             return {
                 ...message,
                 isPinned: true,
@@ -431,6 +423,7 @@ async function fetchPinnedMessagesList() {
                     : undefined,
             };
         });
+
         chatStore.setPinnedMessages(chat.value.id, mappedMessages);
     } catch (err: any) {
         console.error('Error fetching pinned messages:', err);
@@ -447,22 +440,26 @@ onMounted(() => {
 
 function handleMessageSearchClick(messageId: string | number) {
     if (!chat.value) return;
+
     emit('close');
     nextTick(() => {
         const event = new CustomEvent('scroll-to-message', {
             detail: { messageId },
         });
+
         window.dispatchEvent(event);
     });
 }
 
 function handleLoadMoreSearchResults() {
     if (!chat.value) return;
+
     messageSearchComposable.loadMoreResults(chat.value.id);
 }
 
 onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside);
+
     if (searchDebounceTimer) {
         clearTimeout(searchDebounceTimer);
     }
@@ -472,16 +469,9 @@ onUnmounted(() => {
 <template>
     <template v-if="chat && isOpen">
         <Teleport to="body">
-            <div
-                class="fixed inset-0 z-50 bg-black/50 xl:hidden"
-                @click.self="handleToggleState"
-            >
-                <div
-                    class="flex h-full flex-col bg-white shadow-xl dark:bg-gray-800"
-                >
-                    <div
-                        class="bg-gray flex flex-1 flex-col overflow-hidden dark:bg-gray-900"
-                    >
+            <div class="fixed inset-0 z-50 bg-black/50 xl:hidden" @click.self="handleToggleState">
+                <div class="flex h-full flex-col bg-white shadow-xl dark:bg-gray-800">
+                    <div class="bg-gray flex flex-1 flex-col overflow-hidden dark:bg-gray-900">
                         <ChatActionsHeader
                             :is-group-chat="isGroupChat"
                             :is-owner="isOwner"
@@ -495,32 +485,21 @@ onUnmounted(() => {
                                 <UserInfoSection :user="chat.otherUser" />
                             </template>
 
-                            <div
-                                class="border-gray-200 px-4 py-3 dark:border-gray-700"
-                            >
-                                <div
-                                    class="mb-2 flex items-center justify-between"
-                                >
+                            <div class="border-gray-200 px-4 py-3 dark:border-gray-700">
+                                <div class="mb-2 flex items-center justify-between">
                                     <h3
                                         class="text-sm font-semibold text-gray-900 dark:text-gray-100"
                                     >
                                         Message search
                                     </h3>
                                     <button
-                                        v-if="
-                                            messageSearchComposable.searchQuery
-                                                .value
-                                        "
+                                        v-if="messageSearchComposable.searchQuery.value"
                                         type="button"
                                         tabindex="0"
                                         aria-label="Clear search"
                                         class="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-500"
-                                        @click="
-                                            messageSearchComposable.clearSearch()
-                                        "
-                                        @keydown.enter="
-                                            messageSearchComposable.clearSearch()
-                                        "
+                                        @click="messageSearchComposable.clearSearch()"
+                                        @keydown.enter="messageSearchComposable.clearSearch()"
                                         @keydown.space.prevent="
                                             messageSearchComposable.clearSearch()
                                         "
@@ -528,44 +507,21 @@ onUnmounted(() => {
                                         Clear
                                     </button>
                                 </div>
-                                <label for="message-search" class="sr-only"
-                                    >Search messages</label
-                                >
+                                <label for="message-search" class="sr-only">Search messages</label>
                                 <input
                                     id="message-search"
-                                    v-model="
-                                        messageSearchComposable.searchQuery
-                                            .value
-                                    "
+                                    v-model="messageSearchComposable.searchQuery.value"
                                     type="text"
                                     placeholder="Search messages..."
                                     class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
                                 />
                                 <MessageSearchResults
-                                    v-if="
-                                        messageSearchComposable.searchQuery
-                                            .value
-                                    "
-                                    :messages="
-                                        messageSearchComposable.searchResults
-                                            .value
-                                    "
-                                    :is-loading="
-                                        messageSearchComposable.searchLoading
-                                            .value
-                                    "
-                                    :has-more="
-                                        messageSearchComposable.searchHasMore
-                                            .value
-                                    "
-                                    :total="
-                                        messageSearchComposable.searchTotal
-                                            .value
-                                    "
-                                    :query="
-                                        messageSearchComposable.searchQuery
-                                            .value
-                                    "
+                                    v-if="messageSearchComposable.searchQuery.value"
+                                    :messages="messageSearchComposable.searchResults.value"
+                                    :is-loading="messageSearchComposable.searchLoading.value"
+                                    :has-more="messageSearchComposable.searchHasMore.value"
+                                    :total="messageSearchComposable.searchTotal.value"
+                                    :query="messageSearchComposable.searchQuery.value"
                                     @message-click="handleMessageSearchClick"
                                     @load-more="handleLoadMoreSearchResults"
                                 />
@@ -619,9 +575,7 @@ onUnmounted(() => {
         <aside
             class="hidden h-full max-w-[400px] flex-col border-l bg-white dark:border-gray-700 dark:bg-gray-800 md:min-w-96 xl:flex"
         >
-            <div
-                class="bg-gray flex min-h-0 flex-1 flex-col overflow-hidden dark:bg-gray-900"
-            >
+            <div class="bg-gray flex min-h-0 flex-1 flex-col overflow-hidden dark:bg-gray-900">
                 <ChatActionsHeader
                     :is-group-chat="isGroupChat"
                     :is-owner="isOwner"
@@ -639,9 +593,7 @@ onUnmounted(() => {
                         class="border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-900"
                     >
                         <div class="mb-2 flex items-center justify-between">
-                            <h3
-                                class="text-sm font-semibold text-gray-900 dark:text-gray-100"
-                            >
+                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
                                 Message search
                             </h3>
                             <button
@@ -651,19 +603,13 @@ onUnmounted(() => {
                                 aria-label="Clear search"
                                 class="text-xs text-blue-600 hover:text-blue-700"
                                 @click="messageSearchComposable.clearSearch()"
-                                @keydown.enter="
-                                    messageSearchComposable.clearSearch()
-                                "
-                                @keydown.space.prevent="
-                                    messageSearchComposable.clearSearch()
-                                "
+                                @keydown.enter="messageSearchComposable.clearSearch()"
+                                @keydown.space.prevent="messageSearchComposable.clearSearch()"
                             >
                                 Clear
                             </button>
                         </div>
-                        <label for="message-search-desktop" class="sr-only"
-                            >Search messages</label
-                        >
+                        <label for="message-search-desktop" class="sr-only">Search messages</label>
                         <input
                             id="message-search-desktop"
                             v-model="messageSearchComposable.searchQuery.value"
@@ -673,15 +619,9 @@ onUnmounted(() => {
                         />
                         <MessageSearchResults
                             v-if="messageSearchComposable.searchQuery.value"
-                            :messages="
-                                messageSearchComposable.searchResults.value
-                            "
-                            :is-loading="
-                                messageSearchComposable.searchLoading.value
-                            "
-                            :has-more="
-                                messageSearchComposable.searchHasMore.value
-                            "
+                            :messages="messageSearchComposable.searchResults.value"
+                            :is-loading="messageSearchComposable.searchLoading.value"
+                            :has-more="messageSearchComposable.searchHasMore.value"
                             :total="messageSearchComposable.searchTotal.value"
                             @message-click="handleMessageSearchClick"
                             @load-more="handleLoadMoreSearchResults"

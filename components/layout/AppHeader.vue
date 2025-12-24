@@ -4,11 +4,13 @@ const { isDark, toggleTheme } = useTheme();
 
 const userInitials = computed(() => {
     if (!user.value?.username) return '?';
+
     const names = user.value.username.split(' ');
 
     if (names.length >= 2) {
         const first = names[0]?.charAt(0) || '';
         const second = names[1]?.charAt(0) || '';
+
         return (first + second).toUpperCase();
     }
 
@@ -23,6 +25,7 @@ function handleToggleDropdown() {
 
 function handleLogout() {
     const { logout } = useAuth();
+
     logout();
     showDropdown.value = false;
 
@@ -36,6 +39,7 @@ function handleToggleTheme() {
 
 function handleClickOutside(event: MouseEvent) {
     const target = event.target as HTMLElement;
+
     if (!target.closest('.profile-dropdown')) {
         showDropdown.value = false;
     }
@@ -70,9 +74,7 @@ onUnmounted(() => {
                 >
                     {{ userInitials }}
                 </div>
-                <span
-                    class="hidden text-sm font-medium text-gray-900 dark:text-gray-100 md:inline"
-                >
+                <span class="hidden text-sm font-medium text-gray-900 dark:text-gray-100 md:inline">
                     {{ user?.username }}
                 </span>
                 <svg
@@ -105,12 +107,7 @@ onUnmounted(() => {
                     @keydown.space.prevent="handleToggleTheme"
                 >
                     <span>{{ isDark ? 'Tryb jasny' : 'Tryb ciemny' }}</span>
-                    <svg
-                        class="size-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
+                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                             v-if="isDark"
                             stroke-linecap="round"

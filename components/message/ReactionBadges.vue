@@ -15,7 +15,7 @@ interface Emits {
     (e: 'reaction-click', emoji: string, event: Event): void;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 const emit = defineEmits<Emits>();
 
 function handleReactionBadgeClick(emoji: string, event: Event) {

@@ -29,16 +29,13 @@ const filteredChats = computed(() => {
 
     if (query.length === 0) {
         return props.chats.filter(
-            (chat) =>
-                !props.currentChatId ||
-                !compareIds(chat.id, props.currentChatId),
+            (chat) => !props.currentChatId || !compareIds(chat.id, props.currentChatId),
         );
     }
 
     return props.chats.filter(
         (chat) =>
-            (!props.currentChatId ||
-                !compareIds(chat.id, props.currentChatId)) &&
+            (!props.currentChatId || !compareIds(chat.id, props.currentChatId)) &&
             chat.name.toLowerCase().includes(query),
     );
 });
@@ -131,16 +128,9 @@ onMounted(() => {
                 </div>
 
                 <div class="mb-4 flex-1 overflow-y-auto">
-                    <div
-                        v-if="filteredChats.length === 0"
-                        class="p-8 text-center"
-                    >
+                    <div v-if="filteredChats.length === 0" class="p-8 text-center">
                         <p class="text-sm text-gray-500 dark:text-gray-400">
-                            {{
-                                searchQuery
-                                    ? 'No chats found'
-                                    : 'No available chats'
-                            }}
+                            {{ searchQuery ? 'No chats found' : 'No available chats' }}
                         </p>
                     </div>
                     <ul
@@ -161,11 +151,7 @@ onMounted(() => {
                                 class="w-full text-left"
                                 :aria-label="`Forward to: ${chat.name}`"
                                 @click="handleSelectChat(chat.id)"
-                                @keydown="
-                                    (e) =>
-                                        e.key === 'Enter' &&
-                                        handleSelectChat(chat.id)
-                                "
+                                @keydown="(e) => e.key === 'Enter' && handleSelectChat(chat.id)"
                             >
                                 <ChatItem
                                     :chat="chat"

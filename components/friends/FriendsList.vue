@@ -50,7 +50,9 @@ function formatLastSeen(lastSeen?: string): string {
     const diffMins = Math.floor(diffMs / 60000);
 
     if (diffMins < 1) return 'Now';
+
     if (diffMins < 60) return `${diffMins} min ago`;
+
     if (diffMins < 1440) return `${Math.floor(diffMins / 60)} hrs ago`;
 
     return date.toLocaleDateString('en-US', {
@@ -65,9 +67,7 @@ function formatLastSeen(lastSeen?: string): string {
         class="max-h-[calc(100vh-150px)] flex-1 overflow-y-auto rounded-b-[1.125rem] bg-white dark:bg-gray-900"
     >
         <div v-if="friendsList.length === 0" class="p-8 text-center">
-            <p class="text-sm text-gray-500 dark:text-gray-400">
-                You don't have any friends yet
-            </p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">You don't have any friends yet</p>
             <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">
                 Add friends to start chatting
             </p>
@@ -107,22 +107,14 @@ function formatLastSeen(lastSeen?: string): string {
                                 class="ml-2 rounded p-1 text-gray-400 transition-colors hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400"
                                 tabindex="0"
                                 aria-label="Remove friend"
-                                @click.stop="
-                                    handleRemoveFriend(friend.id, $event)
-                                "
-                                @keydown.enter.stop="
-                                    handleRemoveFriend(friend.id, $event)
-                                "
-                                @keydown.space.stop="
-                                    handleRemoveFriend(friend.id, $event)
-                                "
+                                @click.stop="handleRemoveFriend(friend.id, $event)"
+                                @keydown.enter.stop="handleRemoveFriend(friend.id, $event)"
+                                @keydown.space.stop="handleRemoveFriend(friend.id, $event)"
                             >
                                 <Icon name="remove" class="size-5" />
                             </button>
                         </div>
-                        <p
-                            class="truncate text-xs text-gray-500 dark:text-gray-400"
-                        >
+                        <p class="truncate text-xs text-gray-500 dark:text-gray-400">
                             {{
                                 friend.isOnline
                                     ? 'Online'

@@ -36,12 +36,8 @@ function handleKeyDown(event: KeyboardEvent) {
 </script>
 
 <template>
-    <div
-        class="border-b border-t border-gray-200 p-4 dark:border-gray-700 dark:bg-gray-900"
-    >
-        <h3 class="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
-            Add user
-        </h3>
+    <div class="border-b border-t border-gray-200 p-4 dark:border-gray-700 dark:bg-gray-900">
+        <h3 class="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Add user</h3>
         <div class="space-y-2">
             <label for="add-user-input" class="sr-only">Username</label>
             <input
@@ -49,7 +45,7 @@ function handleKeyDown(event: KeyboardEvent) {
                 v-model="addUserUsername"
                 type="text"
                 placeholder="Enter username"
-                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                class="w-full rounded-full border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
                 @keydown="handleKeyDown"
             />
             <button
@@ -66,9 +62,7 @@ function handleKeyDown(event: KeyboardEvent) {
         </div>
 
         <div v-if="props.availableFriends.length > 0" class="mt-4">
-            <p class="mb-2 text-xs text-gray-600 dark:text-gray-400">
-                Available friends:
-            </p>
+            <p class="mb-2 text-xs text-gray-600 dark:text-gray-400">Available friends:</p>
             <div class="max-h-32 space-y-1 overflow-y-auto">
                 <button
                     v-for="friend in props.availableFriends"
@@ -87,7 +81,7 @@ function handleKeyDown(event: KeyboardEvent) {
                         v-if="friend.isOnline"
                         class="size-2 rounded-full bg-green-500"
                         aria-label="Online"
-                    ></span>
+                    />
                 </button>
             </div>
         </div>

@@ -27,22 +27,16 @@
                         </div>
 
                         <div class="mb-2">
-                            <h1 class="mb-2 text-3xl font-bold text-gray-900">
-                                Jan Kowalski
-                            </h1>
+                            <h1 class="mb-2 text-3xl font-bold text-gray-900">Jan Kowalski</h1>
                             <span
                                 class="inline-flex items-center rounded-full border border-green-200 bg-green-100 px-4 py-2 text-sm font-medium text-green-800"
                             >
-                                <span
-                                    class="mr-2 inline-block size-2 rounded-full bg-green-500"
-                                />
+                                <span class="mr-2 inline-block size-2 rounded-full bg-green-500" />
                                 Online
                             </span>
                         </div>
 
-                        <p class="mt-4 text-lg text-gray-600">
-                            jan.kowalski@example.com
-                        </p>
+                        <p class="mt-4 text-lg text-gray-600">jan.kowalski@example.com</p>
 
                         <NuxtLink
                             to="/dashboard"
@@ -54,75 +48,51 @@
                 </div>
 
                 <div class="rounded-lg bg-white p-6 shadow-lg">
-                    <h2 class="mb-4 text-xl font-bold text-gray-900">
-                        Profile Details
-                    </h2>
+                    <h2 class="mb-4 text-xl font-bold text-gray-900">Profile Details</h2>
                     <div class="space-y-4">
                         <div
                             class="flex items-center justify-between border-b border-gray-200 py-3"
                         >
-                            <span class="font-medium text-gray-600"
-                                >User ID</span
-                            >
-                            <span class="font-mono text-sm text-gray-900"
-                                >123456</span
-                            >
+                            <span class="font-medium text-gray-600">User ID</span>
+                            <span class="font-mono text-sm text-gray-900">123456</span>
                         </div>
 
                         <div
                             class="flex items-center justify-between border-b border-gray-200 py-3"
                         >
                             <span class="font-medium text-gray-600">Email</span>
-                            <span class="text-gray-900"
-                                >jan.kowalski@example.com</span
-                            >
+                            <span class="text-gray-900">jan.kowalski@example.com</span>
                         </div>
 
                         <div
                             class="flex items-center justify-between border-b border-gray-200 py-3"
                         >
-                            <span class="font-medium text-gray-600"
-                                >Username</span
-                            >
+                            <span class="font-medium text-gray-600">Username</span>
                             <span class="text-gray-900">Jan Kowalski</span>
                         </div>
 
                         <div
                             class="flex items-center justify-between border-b border-gray-200 py-3"
                         >
-                            <span class="font-medium text-gray-600"
-                                >Status</span
-                            >
-                            <span class="font-medium text-green-600"
-                                >Online</span
-                            >
+                            <span class="font-medium text-gray-600">Status</span>
+                            <span class="font-medium text-green-600">Online</span>
                         </div>
 
                         <div
                             class="flex items-center justify-between border-b border-gray-200 py-3"
                         >
-                            <span class="font-medium text-gray-600"
-                                >Created Date</span
-                            >
-                            <span class="text-gray-900"
-                                >January 1, 2024, 10:00</span
-                            >
+                            <span class="font-medium text-gray-600">Created Date</span>
+                            <span class="text-gray-900">January 1, 2024, 10:00</span>
                         </div>
 
                         <div class="flex items-center justify-between py-3">
-                            <span class="font-medium text-gray-600"
-                                >Last Activity</span
-                            >
-                            <span class="text-gray-900"
-                                >January 5, 2024, 15:30</span
-                            >
+                            <span class="font-medium text-gray-600">Last Activity</span>
+                            <span class="text-gray-900">January 5, 2024, 15:30</span>
                         </div>
                     </div>
                 </div>
 
-                <div
-                    class="rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 p-6 shadow-lg"
-                >
+                <div class="rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 p-6 shadow-lg">
                     <div class="flex items-start gap-4">
                         <div class="flex-shrink-0">
                             <svg
@@ -138,12 +108,10 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="mb-1 font-bold text-gray-900">
-                                Activity Information
-                            </h3>
+                            <h3 class="mb-1 font-bold text-gray-900">Activity Information</h3>
                             <p class="text-gray-700">
-                                User Jan Kowalski is currently online. Last
-                                activity: January 5, 2024, 15:30.
+                                User Jan Kowalski is currently online. Last activity: January 5,
+                                2024, 15:30.
                             </p>
                         </div>
                     </div>

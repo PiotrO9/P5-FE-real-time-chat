@@ -15,22 +15,19 @@ async function handleSubmit(event: Event) {
     event.preventDefault();
     localError.value = null;
 
-    if (
-        !email.value ||
-        !username.value ||
-        !password.value ||
-        !confirmPassword.value
-    ) {
+    if (!email.value || !username.value || !password.value || !confirmPassword.value) {
         return;
     }
 
     if (password.value !== confirmPassword.value) {
         localError.value = 'Passwords do not match';
+
         return;
     }
 
     if (password.value.length < 6) {
         localError.value = 'Password must be at least 6 characters';
+
         return;
     }
 
@@ -50,14 +47,10 @@ async function handleSubmit(event: Event) {
         <div class="w-full max-w-md">
             <div class="rounded-lg bg-white p-8 shadow-lg dark:bg-gray-800">
                 <div class="mb-8 text-center">
-                    <h1
-                        class="mb-2 text-3xl font-bold text-gray-900 dark:text-gray-100"
-                    >
+                    <h1 class="mb-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
                         Register
                     </h1>
-                    <p class="text-gray-600 dark:text-gray-400">
-                        Create a new account
-                    </p>
+                    <p class="text-gray-600 dark:text-gray-400">Create a new account</p>
                 </div>
 
                 <form class="space-y-6" @submit="handleSubmit">

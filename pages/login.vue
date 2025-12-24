@@ -28,14 +28,10 @@ async function handleSubmit(event: Event) {
         <div class="w-full max-w-md">
             <div class="rounded-lg bg-white p-8 shadow-lg dark:bg-gray-800">
                 <div class="mb-8 text-center">
-                    <h1
-                        class="mb-2 text-3xl font-bold text-gray-900 dark:text-gray-100"
-                    >
+                    <h1 class="mb-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
                         {{ title }}
                     </h1>
-                    <p class="text-gray-600 dark:text-gray-400">
-                        Welcome back!
-                    </p>
+                    <p class="text-gray-600 dark:text-gray-400">Welcome back!</p>
                 </div>
 
                 <form class="space-y-6" @submit="handleSubmit">

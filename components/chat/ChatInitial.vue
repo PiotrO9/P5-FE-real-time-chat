@@ -9,10 +9,7 @@ const props = defineProps<Props>();
 
 type AvatarColor = 'green' | 'purple' | 'teal' | 'blue' | 'pink' | 'orange';
 
-function getAvatarColor(
-    chatId?: string | number,
-    initial?: string,
-): AvatarColor {
+function getAvatarColor(chatId?: string | number, initial?: string): AvatarColor {
     if (!chatId && !initial) return 'blue';
 
     const hash = chatId
@@ -21,20 +18,12 @@ function getAvatarColor(
               .reduce((acc, char) => acc + char.charCodeAt(0), 0)
         : initial?.charCodeAt(0) || 0;
 
-    const colors: AvatarColor[] = [
-        'green',
-        'purple',
-        'teal',
-        'blue',
-        'pink',
-        'orange',
-    ];
+    const colors: AvatarColor[] = ['green', 'purple', 'teal', 'blue', 'pink', 'orange'];
+
     return colors[hash % colors.length] as AvatarColor;
 }
 
-const avatarColor = computed(() =>
-    getAvatarColor(props.chatId, props.chatInitial),
-);
+const avatarColor = computed(() => getAvatarColor(props.chatId, props.chatInitial));
 
 const avatarClasses = computed(() => {
     const colorMap: Record<AvatarColor, string> = {
@@ -47,6 +36,7 @@ const avatarClasses = computed(() => {
     };
 
     const color: AvatarColor = avatarColor.value || 'blue';
+
     return `size-10 ${colorMap[color]} flex items-center justify-center font-bold rounded-full`;
 });
 </script>
@@ -60,6 +50,6 @@ const avatarClasses = computed(() => {
             v-if="isOnline"
             class="absolute bottom-0 right-0 z-10 size-3.5 rounded-full border-2 border-white bg-green-500 dark:border-gray-900"
             aria-label="Online"
-        ></div>
+        />
     </div>
 </template>

@@ -11,9 +11,7 @@ const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
 const isLoadingMore = computed(() => props.isLoading);
-const buttonText = computed(() =>
-    isLoadingMore.value ? 'Loading...' : 'Load older',
-);
+const buttonText = computed(() => (isLoadingMore.value ? 'Loading...' : 'Load older'));
 const ariaLabel = computed(() =>
     isLoadingMore.value ? 'Loading older messages' : 'Load older messages',
 );
@@ -24,6 +22,7 @@ function handleClick() {
 
 function handleKeyDown(event: KeyboardEvent) {
     if (event.key !== 'Enter' && event.key !== ' ') return;
+
     event.preventDefault();
     emit('load-more');
 }

@@ -14,9 +14,11 @@ const errorTitle = computed(() => {
     if (props.error.statusCode === 404) {
         return 'Page Not Found';
     }
+
     if (props.error.statusCode === 500) {
         return 'Server Error';
     }
+
     return 'An Error Occurred';
 });
 
@@ -24,9 +26,11 @@ const errorDescription = computed(() => {
     if (props.error.statusCode === 404) {
         return 'Sorry, but the page you are looking for does not exist or has been moved.';
     }
+
     if (props.error.statusCode === 500) {
         return 'An unexpected server error occurred. Our team has been notified and is working on resolving the issue.';
     }
+
     return props.error.message || 'An unexpected error occurred.';
 });
 
@@ -51,9 +55,7 @@ function handleKeyDown(event: KeyboardEvent, action: () => void) {
 </script>
 
 <template>
-    <div
-        class="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12"
-    >
+    <div class="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12">
         <div class="w-full max-w-lg text-center">
             <div class="rounded-lg bg-white p-8 shadow-lg md:p-12">
                 <div class="mb-8">
@@ -66,11 +68,7 @@ function handleKeyDown(event: KeyboardEvent, action: () => void) {
                         "
                     >
                         <Icon
-                            :name="
-                                error.statusCode === 404
-                                    ? 'status-info'
-                                    : 'status-error'
-                            "
+                            :name="error.statusCode === 404 ? 'status-info' : 'status-error'"
                             class="size-12"
                             aria-hidden="true"
                         />
@@ -78,11 +76,7 @@ function handleKeyDown(event: KeyboardEvent, action: () => void) {
 
                     <h1
                         class="mb-4 text-6xl font-bold"
-                        :class="
-                            error.statusCode === 404
-                                ? 'text-blue-600'
-                                : 'text-red-600'
-                        "
+                        :class="error.statusCode === 404 ? 'text-blue-600' : 'text-red-600'"
                     >
                         {{ error.statusCode }}
                     </h1>
@@ -132,8 +126,7 @@ function handleKeyDown(event: KeyboardEvent, action: () => void) {
                                 (e) => {
                                     if (e.key === 'Enter' || e.key === ' ') {
                                         e.preventDefault();
-                                        const target =
-                                            e.currentTarget as HTMLElement;
+                                        const target = e.currentTarget as HTMLElement;
                                         if (target?.parentElement) {
                                             const details =
                                                 target.parentElement as HTMLDetailsElement;

@@ -26,17 +26,14 @@ interface Emits {
     (e: 'reply', message: Chat['messages'][0]): void;
     (e: 'scroll-to-message', messageId: string | number): void;
     (e: 'mark-latest-as-read'): void;
-    (
-        e: 'forward-message',
-        targetChatId: string,
-        messageId: string | number,
-    ): void;
+    (e: 'forward-message', targetChatId: string, messageId: string | number): void;
 }
 
-const chatStore = useChatStore();
-
 const props = defineProps<Props>();
+
 const emit = defineEmits<Emits>();
+
+const chatStore = useChatStore();
 
 const messagesContainerRef = ref<HTMLDivElement | null>(null);
 const highlightedMessageId = ref<string | number | null>(null);
@@ -44,27 +41,25 @@ const highlightedMessageId = ref<string | number | null>(null);
 const selectedChat = computed(() => props.selectedChat);
 const canLoadMore = computed(() => props.canLoadMore ?? false);
 const isLoadingMore = computed(() => props.isLoadingMore ?? false);
-const hasMessages = computed(
-    () => (selectedChat.value?.messages.length ?? 0) > 0,
-);
+const hasMessages = computed(() => (selectedChat.value?.messages.length ?? 0) > 0);
 const messages = computed(() => selectedChat.value?.messages ?? []);
 
 const pinnedMessages = computed(() => {
     if (!selectedChat.value) return [];
+
     return chatStore.getPinnedMessages(selectedChat.value.id);
 });
 
 const lastPinnedMessage = computed(() => {
     if (pinnedMessages.value.length === 0) return null;
+
     const sorted = [...pinnedMessages.value].sort((a, b) => {
-        const dateA = a.pinnedAt
-            ? new Date(a.pinnedAt).getTime()
-            : new Date(a.createdAt).getTime();
-        const dateB = b.pinnedAt
-            ? new Date(b.pinnedAt).getTime()
-            : new Date(b.createdAt).getTime();
+        const dateA = a.pinnedAt ? new Date(a.pinnedAt).getTime() : new Date(a.createdAt).getTime();
+        const dateB = b.pinnedAt ? new Date(b.pinnedAt).getTime() : new Date(b.createdAt).getTime();
+
         return dateB - dateA;
     });
+
     return sorted[0];
 });
 const typingUsersRef = computed(() => props.typingUsers ?? []);
@@ -80,7 +75,9 @@ watch(
 
 function scrollToBottom() {
     const el = messagesContainerRef.value;
+
     if (!el) return;
+
     el.scrollTop = el.scrollHeight;
 }
 
@@ -125,6 +122,7 @@ async function handleScrollToMessage(messageId: string | number) {
     const messageElement = messagesContainerRef.value?.querySelector(
         `[data-message-id="${messageId}"]`,
     );
+
     if (messageElement) {
         messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
         highlightedMessageId.value = messageId;
@@ -136,10 +134,7 @@ async function handleScrollToMessage(messageId: string | number) {
     }
 }
 
-function handleForwardMessage(
-    targetChatId: string,
-    messageId: string | number,
-) {
+function handleForwardMessage(targetChatId: string, messageId: string | number) {
     emit('forward-message', targetChatId, messageId);
 }
 
@@ -153,6 +148,7 @@ function handleBack() {
 
 function handleScroll() {
     const el = messagesContainerRef.value;
+
     if (!el) return;
 
     const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 100;
@@ -164,6 +160,7 @@ function handleScroll() {
 
 onMounted(() => {
     const el = messagesContainerRef.value;
+
     if (el) {
         el.addEventListener('scroll', handleScroll);
     }
@@ -171,6 +168,7 @@ onMounted(() => {
 
 onUnmounted(() => {
     const el = messagesContainerRef.value;
+
     if (el) {
         el.removeEventListener('scroll', handleScroll);
     }
@@ -181,11 +179,7 @@ defineExpose({ scrollToBottom, handleScrollToMessage });
 
 <template>
     <section v-if="selectedChat" class="flex h-full min-h-0 flex-1 flex-col">
-        <ChatHeader
-            :selected-chat
-            @toggle-actions="handleToggleActions"
-            @back="handleBack"
-        />
+        <ChatHeader :selected-chat @toggle-actions="handleToggleActions" @back="handleBack" />
 
         <PinnedMessagePreview
             v-if="lastPinnedMessage"

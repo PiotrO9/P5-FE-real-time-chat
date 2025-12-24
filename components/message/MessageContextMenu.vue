@@ -7,22 +7,16 @@ interface Props {
 }
 
 interface Emits {
-    (e: 'delete'): void;
-    (e: 'pin'): void;
-    (e: 'forward'): void;
-    (e: 'mouseenter'): void;
-    (e: 'mouseleave'): void;
+    (e: 'delete' | 'pin' | 'forward' | 'mouseenter' | 'mouseleave'): void;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 const emit = defineEmits<Emits>();
 
-function handleKeyDown(
-    event: KeyboardEvent,
-    action: 'delete' | 'pin' | 'forward',
-) {
+function handleKeyDown(event: KeyboardEvent, action: 'delete' | 'pin' | 'forward') {
     if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
+
         if (action === 'delete') {
             emit('delete');
         } else if (action === 'pin') {

@@ -18,6 +18,7 @@ const { formatMessageTime, truncateMessage } = useMessageHelpers();
 
 function handleClick() {
     if (!hasMessage.value) return;
+
     emit('click');
 }
 
@@ -40,24 +41,18 @@ function handleKeyDown(event: KeyboardEvent) {
         @keydown="handleKeyDown"
     >
         <div class="flex items-center gap-3">
-            <Icon name="pin" class="size-5 flex-shrink-0" />
+            <Icon name="pin" class="size-5 flex-shrink-0" style="color: rgb(239 68 68)" />
             <div class="min-w-0 flex-1">
                 <div class="mb-1 flex items-center gap-2">
-                    <p
-                        class="text-xs font-semibold text-yellow-900 dark:text-yellow-200"
-                    >
+                    <p class="text-xs font-semibold text-yellow-900 dark:text-yellow-200">
                         {{ message?.senderUsername }}
                     </p>
-                    <span class="text-xs text-yellow-700 dark:text-yellow-300"
-                        >•</span
-                    >
+                    <span class="text-xs text-yellow-700 dark:text-yellow-300">•</span>
                     <p class="text-xs text-yellow-700 dark:text-yellow-300">
                         {{ formatMessageTime(message?.createdAt || '') }}
                     </p>
                 </div>
-                <p
-                    class="line-clamp-2 text-sm text-yellow-900 dark:text-yellow-100"
-                >
+                <p class="line-clamp-2 text-sm text-yellow-900 dark:text-yellow-100">
                     {{ truncateMessage(message?.content || '') }}
                 </p>
             </div>

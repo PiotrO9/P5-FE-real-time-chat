@@ -21,10 +21,7 @@ function handleToggleState() {
         @click="handleToggleState"
     >
         <div class="flex items-center gap-1">
-            <Icon
-                name="context-menu-dots"
-                class="text-gray-600 dark:text-gray-300"
-            />
+            <Icon name="context-menu-dots" class="text-gray-600 dark:text-gray-300" />
         </div>
     </div>
 </template>

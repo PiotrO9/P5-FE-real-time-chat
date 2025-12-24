@@ -16,19 +16,17 @@ const { typingText } = defineProps<Props>();
                     <span
                         class="typing-dot h-1.5 w-1.5 rounded-full bg-gray-500"
                         style="animation-delay: 0ms"
-                    ></span>
+                    />
                     <span
                         class="typing-dot h-1.5 w-1.5 rounded-full bg-gray-500"
                         style="animation-delay: 150ms"
-                    ></span>
+                    />
                     <span
                         class="typing-dot h-1.5 w-1.5 rounded-full bg-gray-500"
                         style="animation-delay: 300ms"
-                    ></span>
+                    />
                 </div>
-                <span class="text-sm font-medium text-gray-600">{{
-                    typingText
-                }}</span>
+                <span class="text-sm font-medium text-gray-600">{{ typingText }}</span>
             </div>
         </div>
     </div>

@@ -17,18 +17,21 @@ interface Props {
 }
 
 interface Emits {
-    (e: 'emoji-click'): void;
-    (e: 'reply-click'): void;
-    (e: 'context-menu-toggle'): void;
+    (
+        e:
+            | 'reply-click'
+            | 'context-menu-toggle'
+            | 'mouseenter'
+            | 'mouseleave'
+            | 'delete'
+            | 'pin'
+            | 'forward'
+            | 'context-menu-mouseenter'
+            | 'context-menu-mouseleave'
+            | 'emoji-click',
+    ): void;
     (e: 'reaction-click', emoji: string): void;
     (e: 'tooltip-show-change', show: boolean): void;
-    (e: 'mouseenter'): void;
-    (e: 'mouseleave'): void;
-    (e: 'delete'): void;
-    (e: 'pin'): void;
-    (e: 'forward'): void;
-    (e: 'context-menu-mouseenter'): void;
-    (e: 'context-menu-mouseleave'): void;
 }
 
 const props = defineProps<Props>();
@@ -66,11 +69,7 @@ defineExpose({
         @mouseenter="emit('mouseenter')"
         @mouseleave="emit('mouseleave')"
     >
-        <div
-            ref="emojiTooltipContainerRef"
-            class="relative"
-            @mouseenter="emit('mouseenter')"
-        >
+        <div ref="emojiTooltipContainerRef" class="relative" @mouseenter="emit('mouseenter')">
             <button
                 type="button"
                 tabindex="0"
@@ -78,17 +77,9 @@ defineExpose({
                 :disabled="props.isDeleted"
                 class="flex size-8 items-center justify-center rounded-full border border-gray-300 bg-white shadow-sm transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:disabled:hover:bg-gray-800"
                 @click.stop="handleEmojiButtonClick"
-                @keydown="
-                    (e) =>
-                        e.key === 'Enter' &&
-                        !props.isDeleted &&
-                        handleEmojiButtonClick()
-                "
+                @keydown="(e) => e.key === 'Enter' && !props.isDeleted && handleEmojiButtonClick()"
             >
-                <Icon
-                    name="smile"
-                    class="size-4 text-gray-600 dark:text-gray-300"
-                />
+                <Icon name="smile" class="size-4 text-gray-600 dark:text-gray-300" />
             </button>
             <EmojiTooltip
                 ref="emojiTooltipRef"
@@ -111,15 +102,10 @@ defineExpose({
             @click.stop="!props.isDeleted && emit('reply-click')"
             @keydown="
                 (e) =>
-                    !props.isDeleted &&
-                    (e.key === 'Enter' || e.key === ' ') &&
-                    emit('reply-click')
+                    !props.isDeleted && (e.key === 'Enter' || e.key === ' ') && emit('reply-click')
             "
         >
-            <Icon
-                name="reply"
-                class="size-4 text-gray-600 dark:text-gray-300"
-            />
+            <Icon name="reply" class="size-4 text-gray-600 dark:text-gray-300" />
         </button>
         <div class="relative">
             <button
@@ -136,10 +122,7 @@ defineExpose({
                         emit('context-menu-toggle')
                 "
             >
-                <Icon
-                    name="context-menu-dots"
-                    class="size-4 text-gray-600 dark:text-gray-300"
-                />
+                <Icon name="context-menu-dots" class="size-4 text-gray-600 dark:text-gray-300" />
             </button>
             <MessageContextMenu
                 v-if="showContextMenu"

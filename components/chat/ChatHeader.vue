@@ -10,10 +10,11 @@ interface Emits {
     (e: 'toggle-actions' | 'back'): void;
 }
 
-const chatStore = useChatStore();
-
 const { selectedChat } = defineProps<Props>();
+
 const emit = defineEmits<Emits>();
+
+const chatStore = useChatStore();
 
 const isGroup = computed(() => selectedChat?.isGroup);
 const chatInitial = computed(() => {
@@ -23,6 +24,7 @@ const chatInitial = computed(() => {
 });
 const displayName = computed(() => {
     if (!selectedChat) return 'Chat';
+
     return selectedChat.isGroup
         ? selectedChat.name
         : selectedChat.otherUser?.username || selectedChat.name || 'Chat';
@@ -37,9 +39,10 @@ function formatLastSeen(lastSeen?: string): string {
     const diffMins = Math.floor(diffMs / 60000);
 
     if (diffMins < 1) return 'Now';
+
     if (diffMins < 60) return `Last seen ${diffMins} min ago`;
-    if (diffMins < 1440)
-        return `Last seen ${Math.floor(diffMins / 60)} hrs ago`;
+
+    if (diffMins < 1440) return `Last seen ${Math.floor(diffMins / 60)} hrs ago`;
 
     return `Last seen ${date.toLocaleDateString('en-US', {
         day: 'numeric',
@@ -49,21 +52,25 @@ function formatLastSeen(lastSeen?: string): string {
 
 const lastSeenText = computed(() => {
     if (isGroup.value) return null;
+
     if (selectedChat?.otherUser?.isOnline) return 'Active now';
+
     if (!selectedChat?.otherUser?.lastSeen) return null;
+
     return formatLastSeen(selectedChat.otherUser.lastSeen);
 });
 
 function handleToggleActions() {
     if (!selectedChat) return;
 
-    const isCurrentlyOpen =
-        chatStore.currentChatDetails?.id === selectedChat.id;
+    const isCurrentlyOpen = chatStore.currentChatDetails?.id === selectedChat.id;
+
     if (isCurrentlyOpen) {
         chatStore.closeChatDetails();
     } else {
         chatStore.openChatDetails(selectedChat);
     }
+
     emit('toggle-actions');
 }
 
@@ -92,10 +99,7 @@ function handleBackKeyDown(event: KeyboardEvent) {
                 @click="handleBack"
                 @keydown="handleBackKeyDown"
             >
-                <Icon
-                    name="arrow-left"
-                    class="size-5 text-gray-600 dark:text-gray-400"
-                />
+                <Icon name="arrow-left" class="size-5 text-gray-600 dark:text-gray-400" />
             </button>
             <ChatInitial :chat-initial :chat-id="selectedChat?.id" />
             <div class="flex min-w-0 flex-col">
@@ -104,10 +108,7 @@ function handleBackKeyDown(event: KeyboardEvent) {
                 >
                     {{ displayName }}
                 </h2>
-                <p
-                    v-if="lastSeenText"
-                    class="text-xs text-gray-500 dark:text-gray-400"
-                >
+                <p v-if="lastSeenText" class="text-xs text-gray-500 dark:text-gray-400">
                     {{ lastSeenText }}
                 </p>
             </div>

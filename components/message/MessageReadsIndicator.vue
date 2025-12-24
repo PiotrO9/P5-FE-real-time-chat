@@ -30,8 +30,7 @@ function formatReadDateTime(readAt: string): string {
     const now = new Date();
     const isToday = date.toDateString() === now.toDateString();
     const isYesterday =
-        date.toDateString() ===
-        new Date(now.getTime() - 24 * 60 * 60 * 1000).toDateString();
+        date.toDateString() === new Date(now.getTime() - 24 * 60 * 60 * 1000).toDateString();
 
     if (isToday) {
         return `today at ${formatMessageTime(readAt)}`;
@@ -90,6 +89,7 @@ function handleMoreMouseLeave() {
 const tooltipContent = computed(() => {
     if (hoveredRead.value) {
         const dateTime = formatReadDateTime(hoveredRead.value.readAt);
+
         return {
             username: hoveredRead.value.username,
             dateTime,
@@ -99,6 +99,7 @@ const tooltipContent = computed(() => {
 
     if (hiddenReadsCount.value > 0) {
         const hiddenReads = props.reads.slice(props.maxVisible);
+
         return {
             reads: hiddenReads.map((read) => ({
                 username: read.username,
@@ -156,15 +157,10 @@ const hasReads = computed(() => props.reads.length > 0);
                     <div class="font-semibold">
                         {{ tooltipContent.username }}
                     </div>
-                    <div class="text-[11px] text-gray-300">
-                        Read {{ tooltipContent.dateTime }}
-                    </div>
+                    <div class="text-[11px] text-gray-300">Read {{ tooltipContent.dateTime }}</div>
                 </div>
 
-                <div
-                    v-else-if="tooltipContent.reads"
-                    class="flex flex-col gap-2"
-                >
+                <div v-else-if="tooltipContent.reads" class="flex flex-col gap-2">
                     <div class="mb-1 font-semibold">
                         Read by {{ tooltipContent.reads.length }} more
                     </div>
@@ -186,7 +182,7 @@ const hasReads = computed(() => props.reads.length > 0);
 
                 <div
                     class="absolute right-4 top-full -mt-1 size-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"
-                ></div>
+                />
             </div>
         </Transition>
     </div>

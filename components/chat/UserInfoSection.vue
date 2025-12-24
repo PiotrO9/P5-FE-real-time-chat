@@ -48,23 +48,17 @@ const isOnline = computed(() => {
                         v-if="isOnline"
                         class="absolute bottom-0 right-0 size-4 rounded-full border-2 border-white bg-green-500"
                         aria-label="Online"
-                    ></div>
+                    />
                 </div>
 
                 <div class="flex w-full flex-col items-center gap-2">
-                    <h3
-                        class="text-lg font-semibold text-gray-900 dark:text-gray-100"
-                    >
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
                         {{ userData.username }}
                     </h3>
-                    <p
-                        class="text-center text-sm text-gray-500 dark:text-gray-400"
-                    >
+                    <p class="text-center text-sm text-gray-500 dark:text-gray-400">
                         Head Of Design at Logoipsum
                     </p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                        Bangladesh
-                    </p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Bangladesh</p>
                 </div>
             </div>
         </div>

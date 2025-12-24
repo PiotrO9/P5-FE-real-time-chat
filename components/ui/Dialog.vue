@@ -9,8 +9,7 @@ interface Props {
 
 interface Emits {
     (e: 'update:open', value: boolean): void;
-    (e: 'confirm'): void;
-    (e: 'cancel'): void;
+    (e: 'confirm' | 'cancel'): void;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -85,12 +84,8 @@ onMounted(() => {
             v-show="open"
             ref="dialogRef"
             class="dialog-content w-full max-w-md rounded-xl border-0 bg-white p-0 shadow-2xl backdrop:bg-black backdrop:bg-opacity-50 backdrop:backdrop-blur-sm dark:bg-gray-800"
-            :aria-labelledby="
-                hasHeaderSlot || title ? 'dialog-title' : undefined
-            "
-            :aria-describedby="
-                hasDefaultSlot || message ? 'dialog-message' : undefined
-            "
+            :aria-labelledby="hasHeaderSlot || title ? 'dialog-title' : undefined"
+            :aria-describedby="hasDefaultSlot || message ? 'dialog-message' : undefined"
             @keydown="handleKeyDown"
             @click="handleBackdropClick"
         >

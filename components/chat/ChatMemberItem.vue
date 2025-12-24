@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import type { ChatMember, Role } from '~/types/ChatsApi';
-import {
-    getRoleLabel,
-    getRoleColor,
-    getAvailableRoles,
-} from '~/utils/roleHelpers';
+import { getRoleLabel, getRoleColor, getAvailableRoles } from '~/utils/roleHelpers';
 import { compareIds } from '~/utils/idHelpers';
 import ChatInitial from './ChatInitial.vue';
+
+const props = withDefaults(defineProps<Props>(), {
+    openRoleMenuId: null,
+    isUpdatingRole: null,
+    isRemovingUser: null,
+});
+
+const emit = defineEmits<Emits>();
 
 function getRoleColorDark(role: Role): string {
     switch (role) {
@@ -36,26 +40,15 @@ interface Emits {
     (e: 'remove-user', userId: string): void;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-    openRoleMenuId: null,
-    isUpdatingRole: null,
-    isRemovingUser: null,
-});
-
-const emit = defineEmits<Emits>();
-
-const isMenuOpen = computed(
-    () => props.openRoleMenuId === String(props.member.id),
-);
-const isCurrentUser = computed(() =>
-    compareIds(props.member.id, props.currentUserId),
-);
+const isMenuOpen = computed(() => props.openRoleMenuId === String(props.member.id));
+const isCurrentUser = computed(() => compareIds(props.member.id, props.currentUserId));
 
 function handleToggleRoleMenu(event?: Event) {
     if (event) {
         event.stopPropagation();
         event.preventDefault();
     }
+
     emit('toggle-role-menu', String(props.member.id), event);
 }
 
@@ -73,14 +66,10 @@ function handleRemoveUser() {
         class="flex items-center justify-between rounded-lg p-2 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
     >
         <div class="flex min-w-0 flex-1 items-center gap-2">
-            <ChatInitial
-                :chat-initial="member.username.charAt(0).toUpperCase()"
-            />
+            <ChatInitial :chat-initial="member.username.charAt(0).toUpperCase()" />
 
             <div class="min-w-0 flex-1">
-                <p
-                    class="truncate text-sm font-medium text-gray-900 dark:text-gray-100"
-                >
+                <p class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
                     {{ member.username }}
                 </p>
                 <div class="mt-0.5 flex items-center gap-2">
@@ -127,8 +116,7 @@ function handleRemoveUser() {
                                 tabindex="0"
                                 :aria-label="`Set role to ${getRoleLabel(role)}`"
                                 :disabled="
-                                    isUpdatingRole === String(member.id) ||
-                                    member.role === role
+                                    isUpdatingRole === String(member.id) || member.role === role
                                 "
                                 :class="[
                                     'w-full px-3 py-2 text-left text-sm transition-colors',
@@ -160,7 +148,7 @@ function handleRemoveUser() {
                         v-if="member.isOnline"
                         class="h-1.5 w-1.5 rounded-full bg-green-500"
                         aria-label="Online"
-                    ></span>
+                    />
                 </div>
             </div>
         </div>

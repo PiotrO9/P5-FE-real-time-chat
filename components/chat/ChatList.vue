@@ -36,9 +36,7 @@ function getTypingUsers(chatId: string): string[] {
     <div class="max-h-full flex-1 overflow-y-auto bg-white dark:bg-gray-900">
         <div v-if="chatsList.length === 0">
             <div class="p-8 text-center">
-                <p class="text-sm text-gray-500 dark:text-gray-400">
-                    You don't have any chats yet
-                </p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">You don't have any chats yet</p>
             </div>
         </div>
         <ul

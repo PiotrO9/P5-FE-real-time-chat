@@ -24,6 +24,7 @@ const processedSvg = computed(() => {
     if (!svg.includes('currentColor') && svg.includes('stroke=')) {
         svg = svg.replace(/stroke="[^"]*"/g, 'stroke="currentColor"');
     }
+
     if (!svg.includes('currentColor') && svg.includes('fill=')) {
         svg = svg.replace(/fill="[^"]*"/g, 'fill="currentColor"');
     }
@@ -46,10 +47,7 @@ const iconStyle = computed(() => {
         color: 'var(--icon-color)',
     };
 
-    if (
-        !props.class ||
-        (!props.class.includes('w-') && !props.class.includes('h-'))
-    ) {
+    if (!props.class || (!props.class.includes('w-') && !props.class.includes('h-'))) {
         style.width = 'var(--icon-size)';
         style.height = 'var(--icon-size)';
     }
@@ -78,8 +76,10 @@ watch(
 
 async function loadIcon(iconName: string) {
     isLoading.value = true;
+
     try {
         const iconModule = await import(`@/assets/icons/${iconName}.svg?raw`);
+
         svgContent.value = iconModule.default;
     } catch (error) {
         console.warn(`Icon "${iconName}" not found:`, error);
