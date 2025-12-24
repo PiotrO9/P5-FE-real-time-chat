@@ -138,11 +138,11 @@ function handleBack() {
 	emit('back')
 }
 
-	function handleScroll() {
-		const el = messagesContainerRef.value
-		if (!el) return
+function handleScroll() {
+	const el = messagesContainerRef.value
+	if (!el) return
 
-		const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 100
+	const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 100
 
 	if (isNearBottom) {
 		emit('mark-latest-as-read')

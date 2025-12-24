@@ -47,7 +47,9 @@ function formatLastSeen(lastSeen?: string): string {
 }
 
 const lastSeenText = computed(() => {
-	if (isGroup.value || !selectedChat?.otherUser?.lastSeen) return null
+	if (isGroup.value) return null
+	if (selectedChat?.otherUser?.isOnline) return 'Active now'
+	if (!selectedChat?.otherUser?.lastSeen) return null
 	return formatLastSeen(selectedChat.otherUser.lastSeen)
 })
 
@@ -90,7 +92,7 @@ function handleBackKeyDown(event: KeyboardEvent) {
 			>
 				<Icon name="arrow-left" class="size-5 text-gray-600 dark:text-gray-400" />
 			</button>
-			<ChatInitial :chat-initial />
+			<ChatInitial :chat-initial :chat-id="selectedChat?.id" />
 			<div class="flex flex-col min-w-0">
 				<h2
 					class="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100 truncate min-w-0"
@@ -102,12 +104,14 @@ function handleBackKeyDown(event: KeyboardEvent) {
 				</p>
 			</div>
 		</div>
-		<ActionsMenu
-			v-if="selectedChat"
-			class="flex-shrink-0"
-			@click="handleToggleActions"
-			@keydown.enter="handleToggleActions"
-			@keydown.space.prevent="handleToggleActions"
-		/>
+		<div class="flex items-center gap-2 flex-shrink-0">
+			<ActionsMenu
+				v-if="selectedChat"
+				class="flex-shrink-0"
+				@click="handleToggleActions"
+				@keydown.enter="handleToggleActions"
+				@keydown.space.prevent="handleToggleActions"
+			/>
+		</div>
 	</div>
 </template>

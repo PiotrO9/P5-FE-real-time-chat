@@ -110,9 +110,10 @@ export function useSocketHandlers(
 			if (!chat.isGroup && chat.otherUser && compareIds(chat.otherUser.id, userId)) {
 				chat.otherUser.isOnline = data.isOnline
 				if (data.lastSeen) {
-					chat.otherUser.lastSeen = data.lastSeen instanceof Date 
-						? data.lastSeen.toISOString() 
-						: String(data.lastSeen)
+					chat.otherUser.lastSeen =
+						data.lastSeen instanceof Date
+							? data.lastSeen.toISOString()
+							: String(data.lastSeen)
 				}
 				chat.hasOnlineMembers = data.isOnline
 			}
@@ -122,9 +123,10 @@ export function useSocketHandlers(
 				if (member) {
 					member.isOnline = data.isOnline
 					if (data.lastSeen) {
-						member.lastSeen = data.lastSeen instanceof Date 
-							? data.lastSeen.toISOString() 
-							: String(data.lastSeen)
+						member.lastSeen =
+							data.lastSeen instanceof Date
+								? data.lastSeen.toISOString()
+								: String(data.lastSeen)
 					}
 					chat.hasOnlineMembers = chat.members.some((m) => m.isOnline === true)
 				}

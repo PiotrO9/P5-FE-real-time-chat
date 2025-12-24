@@ -101,7 +101,7 @@ watch(
 				:aria-label="'Message'"
 				:tabindex="0"
 				:rows="1"
-				:placeholder="hasReplyTo ? 'Write a reply...' : 'Type a message'"
+				:placeholder="hasReplyTo ? 'Write a reply...' : 'Type your message...'"
 				:value="props.modelValue"
 				class="flex-1 min-w-0 text-sm resize-none border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 				@input="handleInput"
@@ -109,7 +109,7 @@ watch(
 			></textarea>
 			<button
 				type="submit"
-				class="flex-shrink-0 size-10 rounded-lg flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+				class="flex-shrink-0 size-10 rounded-lg flex items-center justify-center bg-purple-600 hover:bg-purple-700 text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-1"
 				aria-label="Send message"
 			>
 				<svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

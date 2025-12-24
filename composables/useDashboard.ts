@@ -298,8 +298,7 @@ export function useDashboard() {
 		try {
 			await messagesComposable.forwardMessage(targetChatId, messageId)
 			nextTick(() => handleScrollToBottom())
-		} catch (error) {
-		}
+		} catch (error) {}
 	}
 
 	function handleOpenPinnedMessages() {

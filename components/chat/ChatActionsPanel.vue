@@ -476,9 +476,7 @@ onUnmounted(() => {
 										Clear
 									</button>
 								</div>
-								<label for="message-search" class="sr-only"
-									>Search messages</label
-								>
+								<label for="message-search" class="sr-only">Search messages</label>
 								<input
 									id="message-search"
 									v-model="messageSearchComposable.searchQuery.value"
@@ -580,9 +578,7 @@ onUnmounted(() => {
 								Clear
 							</button>
 						</div>
-						<label for="message-search-desktop" class="sr-only"
-							>Search messages</label
-						>
+						<label for="message-search-desktop" class="sr-only">Search messages</label>
 						<input
 							id="message-search-desktop"
 							v-model="messageSearchComposable.searchQuery.value"

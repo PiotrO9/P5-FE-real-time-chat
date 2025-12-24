@@ -58,11 +58,7 @@ function getIconClasses(type: string) {
 						v-if="toast.type === 'success'"
 						name="status-success"
 						class="size-5"
-					/><Icon
-						v-else-if="toast.type === 'error'"
-						name="status-error"
-						class="size-5"
-					/>
+					/><Icon v-else-if="toast.type === 'error'" name="status-error" class="size-5" />
 					<Icon
 						v-else-if="toast.type === 'warning'"
 						name="status-warning"

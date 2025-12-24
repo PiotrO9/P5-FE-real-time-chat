@@ -22,11 +22,15 @@ async function handleSubmit(event: Event) {
 </script>
 
 <template>
-	<div class="min-h-screen flex items-center justify-center px-4 py-12 bg-gray-50 dark:bg-gray-900">
+	<div
+		class="min-h-screen flex items-center justify-center px-4 py-12 bg-gray-50 dark:bg-gray-900"
+	>
 		<div class="max-w-md w-full">
 			<div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
 				<div class="text-center mb-8">
-					<h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">{{ title }}</h1>
+					<h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+						{{ title }}
+					</h1>
 					<p class="text-gray-600 dark:text-gray-400">Welcome back!</p>
 				</div>
 
@@ -39,7 +43,10 @@ async function handleSubmit(event: Event) {
 					</div>
 
 					<div>
-						<label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+						<label
+							for="email"
+							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+						>
 							Email
 						</label>
 						<input
@@ -54,7 +61,10 @@ async function handleSubmit(event: Event) {
 					</div>
 
 					<div>
-						<label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+						<label
+							for="password"
+							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+						>
 							Password
 						</label>
 						<input
