@@ -120,7 +120,7 @@ const hasReads = computed(() => props.reads.length > 0);
         <div
             v-for="(read, index) in visibleReads"
             :key="read.userId"
-            class="flex size-4 cursor-help items-center justify-center rounded-full border border-white bg-blue-500 text-[8px] font-medium text-white transition-transform hover:scale-110 dark:border-gray-800"
+            class="flex size-4 cursor-help items-center justify-center rounded-full border border-white bg-primary-500 text-[8px] font-medium text-white transition-transform hover:scale-110 dark:border-gray-800"
             :class="index > 0 ? '-ml-1' : ''"
             :aria-label="`Read by ${read.username} ${formatReadDateTime(read.readAt)}`"
             @mouseenter="handleReadMouseEnter(read)"

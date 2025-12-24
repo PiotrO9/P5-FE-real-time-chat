@@ -149,8 +149,8 @@ const ariaLabel = computed(() => {
                     :class="[
                         'rounded-lg px-3 py-1 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
                         isOwnMessage
-                            ? 'bg-blue-600 text-white hover:bg-blue-700 focus-visible:ring-blue-500'
-                            : 'bg-blue-600 text-white hover:bg-blue-700 focus-visible:ring-blue-500',
+                            ? 'bg-primary-600 text-white hover:bg-primary-700 focus-visible:ring-primary-500'
+                            : 'bg-primary-600 text-white hover:bg-primary-700 focus-visible:ring-primary-500',
                     ]"
                     @mousedown.prevent
                     @click.stop="emit('save-edit')"

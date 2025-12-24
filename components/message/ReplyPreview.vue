@@ -48,7 +48,7 @@ const replyText = computed(() => {
         type="button"
         tabindex="0"
         aria-label="Go to original message"
-        class="flex cursor-pointer flex-col gap-0.5 rounded-lg bg-gray-300 p-2 text-gray-500 transition-colors hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 dark:bg-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+        class="flex cursor-pointer flex-col gap-0.5 rounded-lg bg-gray-300 p-2 text-gray-500 transition-colors hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1 dark:bg-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
         :class="isOwnMessage ? 'items-end' : 'items-start'"
         @click="handleClick"
         @keydown="handleKeyDown"

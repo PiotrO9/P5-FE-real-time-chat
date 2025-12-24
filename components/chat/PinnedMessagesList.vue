@@ -69,10 +69,7 @@ function handlePinnedMessageClick(messageId: string | number) {
                             </span>
                         </div>
                     </div>
-                    <Icon
-                        name="pin"
-                        class="size-4 flex-shrink-0 text-gray-500 dark:text-gray-400"
-                    />
+                    <Icon name="pin" class="size-4 flex-shrink-0" style="color: #ef4444" />
                 </div>
             </button>
         </div>

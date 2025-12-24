@@ -9,7 +9,7 @@
                     </div>
                     <NuxtLink
                         to="/dashboard"
-                        class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
+                        class="rounded-lg bg-primary-600 px-4 py-2 font-medium text-white transition-colors hover:bg-primary-700"
                     >
                         Back to Dashboard
                     </NuxtLink>
@@ -21,7 +21,7 @@
                     <div class="flex flex-wrap items-center justify-between gap-4">
                         <div class="flex items-center gap-4">
                             <div
-                                class="flex size-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-lg font-bold text-white"
+                                class="flex size-12 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-purple-600 text-lg font-bold text-white"
                             >
                                 JD
                             </div>
@@ -57,7 +57,7 @@
                     <div class="flex flex-wrap items-center justify-between gap-4">
                         <div class="flex items-center gap-4">
                             <div
-                                class="flex size-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-lg font-bold text-white"
+                                class="flex size-12 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-purple-600 text-lg font-bold text-white"
                             >
                                 AN
                             </div>

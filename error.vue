@@ -63,7 +63,7 @@ function handleKeyDown(event: KeyboardEvent, action: () => void) {
                         class="mx-auto mb-6 flex size-24 items-center justify-center rounded-full"
                         :class="
                             error.statusCode === 404
-                                ? 'bg-blue-100 text-blue-600'
+                                ? 'bg-primary-100 text-primary-600'
                                 : 'bg-red-100 text-red-600'
                         "
                     >
@@ -76,7 +76,7 @@ function handleKeyDown(event: KeyboardEvent, action: () => void) {
 
                     <h1
                         class="mb-4 text-6xl font-bold"
-                        :class="error.statusCode === 404 ? 'text-blue-600' : 'text-red-600'"
+                        :class="error.statusCode === 404 ? 'text-primary-600' : 'text-red-600'"
                     >
                         {{ error.statusCode }}
                     </h1>
@@ -106,7 +106,7 @@ function handleKeyDown(event: KeyboardEvent, action: () => void) {
                         type="button"
                         tabindex="0"
                         aria-label="Go to home page"
-                        class="rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                        class="rounded-lg bg-primary-600 px-6 py-3 font-medium text-white transition-colors hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
                         @click="handleGoHome"
                         @keydown="(e) => handleKeyDown(e, handleGoHome)"
                     >

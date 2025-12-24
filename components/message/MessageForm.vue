@@ -75,7 +75,7 @@ watch(
                     <span class="text-xs font-medium text-gray-700 dark:text-gray-300"
                         >Reply to:</span
                     >
-                    <span class="text-xs font-semibold text-blue-600 dark:text-blue-400">
+                    <span class="text-xs font-semibold text-primary-600 dark:text-primary-400">
                         {{ replyTo.senderUsername }}
                     </span>
                 </div>
@@ -87,7 +87,7 @@ watch(
                 type="button"
                 tabindex="0"
                 aria-label="Cancel reply"
-                class="flex size-6 flex-shrink-0 items-center justify-center rounded-full transition-colors hover:bg-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 dark:hover:bg-gray-700"
+                class="flex size-6 flex-shrink-0 items-center justify-center rounded-full transition-colors hover:bg-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1 dark:hover:bg-gray-700"
                 @click="handleCancelReply"
                 @keydown="(e) => (e.key === 'Enter' || e.key === ' ') && handleCancelReply()"
             >

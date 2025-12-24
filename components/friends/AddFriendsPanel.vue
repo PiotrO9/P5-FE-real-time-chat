@@ -53,7 +53,7 @@ function handleKeyDown(event: KeyboardEvent) {
                 />
                 <button
                     type="button"
-                    class="flex-shrink-0 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700 md:px-4"
+                    class="flex-shrink-0 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-primary-600 dark:hover:bg-primary-700 md:px-4"
                     tabindex="0"
                     aria-label="Send invitation"
                     :disabled="!username.trim() || isSubmitting"
@@ -70,13 +70,13 @@ function handleKeyDown(event: KeyboardEvent) {
 
         <div class="flex-1 overflow-y-auto px-4 py-4">
             <div
-                class="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20"
+                class="rounded-lg border border-primary-200 bg-primary-50 p-4 dark:border-primary-800 dark:bg-primary-900/20"
             >
-                <h4 class="mb-2 text-sm font-semibold text-blue-900 dark:text-blue-300">
+                <h4 class="mb-2 text-sm font-semibold text-primary-900 dark:text-primary-300">
                     How it works?
                 </h4>
                 <ul
-                    class="list-inside list-disc space-y-1 text-xs text-blue-800 dark:text-blue-300"
+                    class="list-inside list-disc space-y-1 text-xs text-primary-800 dark:text-primary-300"
                 >
                     <li>Enter the username of the person you want to add</li>
                     <li>A friend invitation will be sent</li>

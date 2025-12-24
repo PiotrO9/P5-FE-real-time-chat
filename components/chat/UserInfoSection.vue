@@ -40,7 +40,7 @@ const isOnline = computed(() => {
             <div class="flex flex-col items-center gap-4">
                 <div class="relative flex-shrink-0">
                     <div
-                        class="flex size-20 items-center justify-center rounded-full bg-blue-100 text-2xl font-semibold text-blue-600"
+                        class="flex size-20 items-center justify-center rounded-full bg-primary-100 text-2xl font-semibold text-primary-600"
                     >
                         {{ getInitials(userData.username) }}
                     </div>

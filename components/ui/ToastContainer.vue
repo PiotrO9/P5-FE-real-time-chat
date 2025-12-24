@@ -25,7 +25,7 @@ function getToastClasses(type: string) {
             return `${baseClasses} bg-yellow-50 border-yellow-500 text-yellow-900`;
         case 'info':
         default:
-            return `${baseClasses} bg-blue-50 border-blue-500 text-blue-900`;
+            return `${baseClasses} bg-primary-50 border-primary-500 text-primary-900`;
     }
 }
 
@@ -39,7 +39,7 @@ function getIconClasses(type: string) {
             return 'text-yellow-500';
         case 'info':
         default:
-            return 'text-blue-500';
+            return 'text-primary-500';
     }
 }
 </script>

@@ -45,7 +45,7 @@ function handleKeyDown(event: KeyboardEvent) {
                 v-model="addUserUsername"
                 type="text"
                 placeholder="Enter username"
-                class="w-full rounded-full border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                class="w-full rounded-full border text-sm border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-500"
                 @keydown="handleKeyDown"
             />
             <button
@@ -53,7 +53,7 @@ function handleKeyDown(event: KeyboardEvent) {
                 tabindex="0"
                 aria-label="Add user"
                 :disabled="props.isAddingUser || !addUserUsername.trim()"
-                class="w-full rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700"
+                class="w-full rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-primary-600 dark:hover:bg-primary-700"
                 @click="handleAddUser"
                 @keydown.enter="handleAddUser"
             >

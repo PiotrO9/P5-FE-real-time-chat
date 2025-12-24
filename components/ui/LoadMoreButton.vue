@@ -32,7 +32,7 @@ function handleKeyDown(event: KeyboardEvent) {
     <div class="flex justify-center">
         <button
             type="button"
-            class="text-sm text-blue-600 underline hover:text-blue-700 disabled:opacity-50"
+            class="text-sm text-primary-600 underline hover:text-primary-700 disabled:opacity-50"
             :aria-label="ariaLabel"
             :tabindex="0"
             :disabled="isLoadingMore"

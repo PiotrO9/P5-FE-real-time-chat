@@ -140,7 +140,7 @@ defineExpose({
                     type="button"
                     tabindex="0"
                     :aria-label="`Add reaction ${emoji}`"
-                    class="flex size-8 items-center justify-center rounded-full text-lg transition-transform hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:hover:bg-gray-700"
+                    class="flex size-8 items-center justify-center rounded-full text-lg transition-transform hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:hover:bg-gray-700"
                     :class="{
                         'bg-blue-50 dark:bg-blue-900': hasUserReaction(emoji),
                         'hover:scale-110': true,

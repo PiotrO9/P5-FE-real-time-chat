@@ -17,7 +17,7 @@ function getRoleColorDark(role: Role): string {
         case 'OWNER':
             return 'dark:bg-purple-900/50 dark:text-purple-200 dark:border-purple-600';
         case 'MODERATOR':
-            return 'dark:bg-blue-900/50 dark:text-blue-200 dark:border-blue-600';
+            return 'dark:bg-primary-900/50 dark:text-primary-200 dark:border-primary-600';
         case 'MEMBER':
             return 'dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600';
         default:

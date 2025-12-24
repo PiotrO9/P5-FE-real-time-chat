@@ -99,26 +99,26 @@ function handleKeyDown(event: KeyboardEvent) {
                         </p>
                         <div
                             v-if="hasUnread"
-                            class="size-2 flex-shrink-0 rounded-full bg-blue-500"
+                            class="size-2 flex-shrink-0 rounded-full bg-primary-500"
                             aria-label="Unread messages"
                         />
                     </div>
                 </div>
                 <div
                     v-if="hasTypingUsers"
-                    class="flex min-w-0 items-center gap-1.5 truncate text-sm italic text-blue-600"
+                    class="flex min-w-0 items-center gap-1.5 truncate text-sm italic text-primary-600"
                 >
                     <div class="flex flex-shrink-0 items-center gap-0.5">
                         <span
-                            class="typing-dot h-1.5 w-1.5 rounded-full bg-blue-600"
+                            class="typing-dot h-1.5 w-1.5 rounded-full bg-primary-600"
                             style="animation-delay: 0ms"
                         />
                         <span
-                            class="typing-dot h-1.5 w-1.5 rounded-full bg-blue-600"
+                            class="typing-dot h-1.5 w-1.5 rounded-full bg-primary-600"
                             style="animation-delay: 150ms"
                         />
                         <span
-                            class="typing-dot h-1.5 w-1.5 rounded-full bg-blue-600"
+                            class="typing-dot h-1.5 w-1.5 rounded-full bg-primary-600"
                             style="animation-delay: 300ms"
                         />
                     </div>

@@ -497,7 +497,7 @@ onUnmounted(() => {
                                         type="button"
                                         tabindex="0"
                                         aria-label="Clear search"
-                                        class="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-500"
+                                        class="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-500"
                                         @click="messageSearchComposable.clearSearch()"
                                         @keydown.enter="messageSearchComposable.clearSearch()"
                                         @keydown.space.prevent="
@@ -513,7 +513,7 @@ onUnmounted(() => {
                                     v-model="messageSearchComposable.searchQuery.value"
                                     type="text"
                                     placeholder="Search messages..."
-                                    class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                                    class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
                                 />
                                 <MessageSearchResults
                                     v-if="messageSearchComposable.searchQuery.value"
@@ -601,7 +601,7 @@ onUnmounted(() => {
                                 type="button"
                                 tabindex="0"
                                 aria-label="Clear search"
-                                class="text-xs text-blue-600 hover:text-blue-700"
+                                class="text-xs text-primary-600 hover:text-primary-700"
                                 @click="messageSearchComposable.clearSearch()"
                                 @keydown.enter="messageSearchComposable.clearSearch()"
                                 @keydown.space.prevent="messageSearchComposable.clearSearch()"
@@ -615,7 +615,7 @@ onUnmounted(() => {
                             v-model="messageSearchComposable.searchQuery.value"
                             type="text"
                             placeholder="Search messages..."
-                            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                            class="w-full rounded-full border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
                         />
                         <MessageSearchResults
                             v-if="messageSearchComposable.searchQuery.value"

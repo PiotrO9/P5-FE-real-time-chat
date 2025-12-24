@@ -44,9 +44,9 @@ function handleReactionBadgeKeyDown(event: KeyboardEvent, emoji: string) {
             type="button"
             tabindex="0"
             :aria-label="`${getReactionCount(emoji)} reactions ${emoji}, click to ${hasUserReaction(emoji) ? 'remove' : 'add'} reaction`"
-            class="flex items-center gap-1 rounded-full border border-gray-300 bg-gray-100 px-2 py-0.5 text-xs transition-colors hover:bg-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700"
+            class="flex items-center gap-1 rounded-full border border-gray-300 bg-gray-100 px-2 py-0.5 text-xs transition-colors hover:bg-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700"
             :class="{
-                'border-blue-300 bg-blue-100 dark:border-blue-600 dark:bg-blue-900':
+                'border-primary-300 bg-primary-100 dark:border-primary-600 dark:bg-primary-900':
                     hasUserReaction(emoji),
             }"
             @click="handleReactionBadgeClick(emoji, $event)"

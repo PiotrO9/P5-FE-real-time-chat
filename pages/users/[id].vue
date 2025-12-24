@@ -4,7 +4,7 @@
             <div class="mb-6">
                 <NuxtLink
                     to="/users"
-                    class="mb-4 flex items-center gap-2 font-medium text-blue-600 hover:text-blue-700"
+                    class="mb-4 flex items-center gap-2 font-medium text-primary-600 hover:text-primary-700"
                 >
                     <svg class="size-5" fill="currentColor" viewBox="0 0 20 20">
                         <path
@@ -21,7 +21,7 @@
                 <div class="rounded-lg bg-white p-8 shadow-lg">
                     <div class="flex flex-col items-center text-center">
                         <div
-                            class="mb-4 flex size-24 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-3xl font-bold text-white"
+                            class="mb-4 flex size-24 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-purple-600 text-3xl font-bold text-white"
                         >
                             JK
                         </div>
@@ -40,7 +40,7 @@
 
                         <NuxtLink
                             to="/dashboard"
-                            class="mt-6 rounded-lg bg-blue-600 px-6 py-2 font-medium text-white transition-colors hover:bg-blue-700"
+                            class="mt-6 rounded-lg bg-primary-600 px-6 py-2 font-medium text-white transition-colors hover:bg-primary-700"
                         >
                             Edit Profile
                         </NuxtLink>
@@ -96,7 +96,7 @@
                     <div class="flex items-start gap-4">
                         <div class="flex-shrink-0">
                             <svg
-                                class="size-8 text-blue-600"
+                                class="size-8 text-primary-600"
                                 fill="currentColor"
                                 viewBox="0 0 20 20"
                             >

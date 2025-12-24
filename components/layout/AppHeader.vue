@@ -70,7 +70,7 @@ onUnmounted(() => {
                 @keydown.space.prevent="handleToggleDropdown"
             >
                 <div
-                    class="flex size-8 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-600"
+                    class="flex size-8 items-center justify-center rounded-full bg-primary-100 text-sm font-semibold text-primary-600"
                 >
                     {{ userInitials }}
                 </div>

@@ -75,7 +75,7 @@ defineExpose({
                 tabindex="0"
                 aria-label="Add reaction"
                 :disabled="props.isDeleted"
-                class="flex size-8 items-center justify-center rounded-full border border-gray-300 bg-white shadow-sm transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:disabled:hover:bg-gray-800"
+                class="flex size-8 items-center justify-center rounded-full border border-gray-300 bg-white shadow-sm transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:disabled:hover:bg-gray-800"
                 @click.stop="handleEmojiButtonClick"
                 @keydown="(e) => e.key === 'Enter' && !props.isDeleted && handleEmojiButtonClick()"
             >
@@ -98,7 +98,7 @@ defineExpose({
             tabindex="0"
             aria-label="Reply to message"
             :disabled="props.isDeleted"
-            class="flex size-8 items-center justify-center rounded-full border border-gray-300 bg-white shadow-sm transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:disabled:hover:bg-gray-800"
+            class="flex size-8 items-center justify-center rounded-full border border-gray-300 bg-white shadow-sm transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:disabled:hover:bg-gray-800"
             @click.stop="!props.isDeleted && emit('reply-click')"
             @keydown="
                 (e) =>
@@ -113,7 +113,7 @@ defineExpose({
                 tabindex="0"
                 aria-label="Context menu"
                 :disabled="props.isDeleted"
-                class="flex size-8 items-center justify-center rounded-full border border-gray-300 bg-white shadow-sm transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:disabled:hover:bg-gray-800"
+                class="flex size-8 items-center justify-center rounded-full border border-gray-300 bg-white shadow-sm transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:disabled:hover:bg-gray-800"
                 @click.stop="!props.isDeleted && emit('context-menu-toggle')"
                 @keydown="
                     (e) =>

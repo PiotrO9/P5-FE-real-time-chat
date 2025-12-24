@@ -18,7 +18,7 @@ export function getRoleColor(role: Role): string {
         case 'OWNER':
             return 'bg-purple-100 text-purple-700 border-purple-300';
         case 'MODERATOR':
-            return 'bg-blue-100 text-blue-700 border-blue-300';
+            return 'bg-primary-100 text-primary-700 border-primary-300';
         case 'MEMBER':
             return 'bg-gray-100 text-gray-700 border-gray-300';
         default:
