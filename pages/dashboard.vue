@@ -2,6 +2,7 @@
 import ChatList from '~/components/chat/ChatList.vue';
 import ChatPanel from '~/components/chat/ChatPanel.vue';
 import ChatActionsPanel from '~/components/chat/ChatActionsPanel.vue';
+import CreateGroupChatDialog from '~/components/chat/CreateGroupChatDialog.vue';
 import MessageForm from '~/components/message/MessageForm.vue';
 import FriendsList from '~/components/friends/FriendsList.vue';
 import AddFriendsPanel from '~/components/friends/AddFriendsPanel.vue';
@@ -52,6 +53,32 @@ onUnmounted(() => {
                                     >
                                         Messages
                                     </h1>
+                                    <button
+                                        type="button"
+                                        tabindex="0"
+                                        aria-label="Create group"
+                                        class="flex size-8 items-center justify-center rounded-full bg-primary-500 text-white transition-colors hover:bg-primary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:bg-primary-600 dark:hover:bg-primary-700"
+                                        @click="dashboard.handleOpenCreateGroupDialog"
+                                        @keydown="
+                                            (e) =>
+                                                (e.key === 'Enter' || e.key === ' ') &&
+                                                dashboard.handleOpenCreateGroupDialog()
+                                        "
+                                    >
+                                        <svg
+                                            class="size-5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M12 4v16m8-8H4"
+                                            />
+                                        </svg>
+                                    </button>
                                 </div>
                                 <div class="relative">
                                     <label for="chat-search" class="sr-only">Search</label>
@@ -266,6 +293,16 @@ onUnmounted(() => {
                     :current-user-id="dashboard.currentUserId.value"
                     @chat-updated="dashboard.handleChatUpdated"
                     @close="dashboard.isActionsPanelOpen.value = false"
+                />
+
+                <CreateGroupChatDialog
+                    v-model:open="dashboard.isCreateGroupDialogOpen.value"
+                    :friends="dashboard.friendsComposable.friends.value"
+                    :is-creating="dashboard.isCreatingGroup.value"
+                    @create="dashboard.handleCreateGroupChat"
+                    @update:open="
+                        (val) => (dashboard.isCreateGroupDialogOpen.value = val)
+                    "
                 />
             </div>
         </div>

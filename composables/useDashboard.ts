@@ -2,7 +2,7 @@ import type { Message } from '~/types/Chat';
 import { toNumber } from '~/utils/typeHelpers';
 import { compareIds, findById } from '~/utils/idHelpers';
 import { pinnedMessagesService } from '~/services/pinnedMessagesService';
-import { markMessageAsRead } from '~/services/chatService';
+import { markMessageAsRead, createChat } from '~/services/chatService';
 
 export function useDashboard() {
     const { user } = useAuth();
@@ -12,10 +12,13 @@ export function useDashboard() {
 
     const currentUserId = computed(() => {
         const userId = user.value?.id;
+
         if (!userId) return 0;
+
         if (typeof userId === 'string' && isNaN(Number(userId))) {
             return userId;
         }
+
         return toNumber(userId);
     });
 
@@ -43,6 +46,8 @@ export function useDashboard() {
     const chatPanelRef = ref<any>(null);
     const isActionsPanelOpen = ref(false);
     const replyToMessage = ref<Message | null>(null);
+    const isCreateGroupDialogOpen = ref(false);
+    const isCreatingGroup = ref(false);
 
     const searchQuery = computed({
         get: () => chatsComposable.searchQuery.value,
@@ -53,6 +58,7 @@ export function useDashboard() {
 
     const currentTypingUsers = computed(() => {
         if (!chatsComposable.selectedChatId.value) return [];
+
         return typingUsersComposable.getTypingUsers(
             chatsComposable.selectedChatId.value,
         );
@@ -66,9 +72,11 @@ export function useDashboard() {
 
     const pendingInvitesTotal = computed(() => {
         const total = invitesComposable.invites.value.totalPending;
+
         if (!total) {
             return 0;
         }
+
         return total;
     });
 
@@ -88,7 +96,7 @@ export function useDashboard() {
             viewModeComposable.viewMode.value,
             viewModeComposable.friendsSubView.value,
         ],
-        ([viewMode, friendsSubView]) => {
+        ([viewMode]) => {
             if (viewMode === 'friends') {
                 friendsComposable.fetchFriends();
                 invitesComposable.fetchInvites();
@@ -124,6 +132,7 @@ export function useDashboard() {
         subView?: 'list' | 'add' | 'invites',
     ) {
         viewModeComposable.setViewMode(mode, subView);
+
         if (mode === 'friends') {
             friendsComposable.fetchFriends();
             invitesComposable.fetchInvites();
@@ -138,8 +147,9 @@ export function useDashboard() {
         }
     }
 
-    function handleStartChat(friendId: string | number) {
+    async function handleStartChat(friendId: string | number) {
         const friend = friendsComposable.findFriendById(friendId);
+
         if (!friend) return;
 
         viewModeComposable.setViewMode('chats');
@@ -150,14 +160,79 @@ export function useDashboard() {
 
         if (existingChat) {
             handleSelectChat(existingChat.id);
+
             return;
         }
 
-        toastError('Chat not found with this friend');
+        try {
+            const response = await createChat({
+                participantId: String(friend.id),
+            });
+
+            if (response?.data) {
+                await chatsComposable.fetchChats();
+                handleSelectChat(response.data.id);
+            }
+        } catch (err: any) {
+            const errorMessage =
+                err?.response?._data?.message ||
+                err?.response?._data?.error ||
+                err?.message ||
+                'Failed to create chat';
+
+            toastError(errorMessage);
+        }
+    }
+
+    async function handleCreateGroupChat(data: {
+        name: string;
+        participantIds: string[];
+    }) {
+        const { name, participantIds } = data;
+
+        if (!name || !name.trim() || participantIds.length < 2) {
+            toastError('Group name and at least 2 friends are required');
+
+            return;
+        }
+
+        try {
+            isCreatingGroup.value = true;
+            const response = await createChat({
+                name: name.trim(),
+                participantIds,
+            });
+
+            if (response?.data) {
+                await chatsComposable.fetchChats();
+                isCreateGroupDialogOpen.value = false;
+                handleSelectChat(response.data.id);
+            }
+        } catch (err: any) {
+            const errorMessage =
+                err?.response?._data?.message ||
+                err?.response?._data?.error ||
+                err?.message ||
+                'Failed to create group';
+
+            toastError(errorMessage);
+        } finally {
+            isCreatingGroup.value = false;
+        }
+    }
+
+    async function handleOpenCreateGroupDialog() {
+        await friendsComposable.fetchFriends();
+        isCreateGroupDialogOpen.value = true;
+    }
+
+    function handleCloseCreateGroupDialog() {
+        isCreateGroupDialogOpen.value = false;
     }
 
     async function handleSelectChat(chatId: string) {
         if (chatsComposable.selectedChatId.value === chatId) return;
+
         chatsComposable.selectChat(chatId);
         messagesComposable.fetchMessages(chatId, false);
         await pinnedMessagesService.fetchPinnedMessagesForChat(chatId);
@@ -175,16 +250,20 @@ export function useDashboard() {
         currentUserRole?: any;
     }) {
         const chat = chatsComposable.selectedChat.value;
+
         if (!chat) return;
 
         chat.members = data.members;
+
         if (data.currentUserRole) {
             chat.currentUserRole = data.currentUserRole;
         }
 
         const storeChat = chatStore.currentChatDetails;
+
         if (storeChat && compareIds(storeChat.id, chat.id)) {
             storeChat.members = data.members;
+
             if (data.currentUserRole) {
                 storeChat.currentUserRole = data.currentUserRole;
             }
@@ -193,9 +272,13 @@ export function useDashboard() {
 
     function handleLoadMore() {
         const chatId = chatsComposable.selectedChatId.value;
+
         if (chatId === null) return;
+
         const state = messagesComposable.getChatState(chatId);
+
         if (!state.hasMore) return;
+
         messagesComposable.fetchMessages(chatId, true);
     }
 
@@ -238,6 +321,7 @@ export function useDashboard() {
         typingUsersComposable.handleMessageSent(chat.id, emit);
 
         const replyToId = replyToMessage.value?.id;
+
         await messagesComposable.sendMessage(chat.id, text, replyToId);
         replyToMessage.value = null;
         nextTick(() => handleScrollToBottom());
@@ -245,6 +329,7 @@ export function useDashboard() {
 
     async function handleMarkLatestMessageAsRead() {
         const chat = chatsComposable.selectedChat.value;
+
         if (!chat || !chat.messages || chat.messages.length === 0) return;
 
         const nonSystemMessages = chat.messages.filter(
@@ -255,6 +340,7 @@ export function useDashboard() {
         if (nonSystemMessages.length === 0) return;
 
         const latestMessage = nonSystemMessages[nonSystemMessages.length - 1];
+
         if (!latestMessage) return;
 
         const hasRead = messageReadsComposable.hasUserReadMessage(
@@ -273,6 +359,7 @@ export function useDashboard() {
 
     async function handleDeleteMessage(messageId: string | number) {
         const chat = chatsComposable.selectedChat.value;
+
         if (!chat) return;
 
         await messagesComposable.deleteMessage(chat.id, messageId);
@@ -297,6 +384,7 @@ export function useDashboard() {
     function handleScrollToMessage(messageId: string | number) {
         nextTick(() => {
             const chatPanel = chatPanelRef.value;
+
             if (chatPanel && chatPanel.handleScrollToMessage) {
                 chatPanel.handleScrollToMessage(messageId);
             }
@@ -305,9 +393,11 @@ export function useDashboard() {
 
     function handlePinUpdated(messageId: string | number, isPinned: boolean) {
         const chat = chatsComposable.selectedChat.value;
+
         if (!chat) return;
 
         const message = findById(chat.messages, messageId);
+
         if (message) {
             message.isPinned = isPinned;
         }
@@ -320,19 +410,25 @@ export function useDashboard() {
         try {
             await messagesComposable.forwardMessage(targetChatId, messageId);
             nextTick(() => handleScrollToBottom());
-        } catch (error) {}
+        } catch {
+            // Ignore errors when forwarding messages
+        }
     }
 
     function handleOpenPinnedMessages() {
         const chat = chatsComposable.selectedChat.value;
+
         if (!chat) return;
+
         chatStore.openChatDetails(chat);
         isActionsPanelOpen.value = true;
     }
 
     function handleTypingInput() {
         const chatId = chatsComposable.selectedChatId.value;
+
         if (!chatId) return;
+
         typingUsersComposable.handleTypingInput(chatId, emit);
     }
 
@@ -398,6 +494,8 @@ export function useDashboard() {
         chatPanelRef,
         isActionsPanelOpen,
         replyToMessage,
+        isCreateGroupDialogOpen,
+        isCreatingGroup,
         handleViewModeChange,
         handleFriendsSubViewChange,
         handleStartChat,
@@ -421,6 +519,9 @@ export function useDashboard() {
         handleMarkLatestMessageAsRead,
         handleForwardMessage,
         handleBackToChats,
+        handleCreateGroupChat,
+        handleOpenCreateGroupDialog,
+        handleCloseCreateGroupDialog,
         initialize,
         cleanup,
     };

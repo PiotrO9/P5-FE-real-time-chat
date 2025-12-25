@@ -60,3 +60,16 @@ export interface ChatsResponse {
     chats: ChatListItem[];
     total: number;
 }
+
+export interface CreateDirectChatRequest {
+    participantId: UUID;
+}
+
+export interface CreateGroupChatRequest {
+    name: string;
+    participantIds: UUID[];
+}
+
+export type CreateChatRequest = CreateDirectChatRequest | CreateGroupChatRequest;
+
+export type ChatResponse = DirectChatItem | GroupChatItem;

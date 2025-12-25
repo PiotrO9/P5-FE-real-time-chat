@@ -1,9 +1,17 @@
-import type { ChatsResponse } from '~/types/ChatsApi';
+import type {
+    ChatsResponse,
+    CreateChatRequest,
+    ChatResponse,
+} from '~/types/ChatsApi';
 import type { Message } from '~/types/Chat';
 import type { MessagesResponse } from '~/types/MessagesApi';
 
 export async function fetchChats() {
     return await useApi<ApiResponse<ChatsResponse>>('GET', '/api/chats');
+}
+
+export async function createChat(request: CreateChatRequest) {
+    return await useApi<ApiResponse<ChatResponse>>('POST', '/api/chats', request);
 }
 
 export async function fetchChatDetails(chatId: string | string) {

@@ -1,3 +1,17 @@
 export function getErrorMessage(err: any, defaultMessage: string): string {
-    return err?.response?._data?.message || err?.message || defaultMessage;
+    const responseData = err?.response?._data;
+    
+    if (responseData?.message) {
+        return responseData.message;
+    }
+    
+    if (responseData?.error) {
+        return responseData.error;
+    }
+    
+    if (err?.message) {
+        return err.message;
+    }
+    
+    return defaultMessage;
 }
