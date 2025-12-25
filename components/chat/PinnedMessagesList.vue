@@ -85,6 +85,7 @@ function handlePinnedMessageClick(messageId: string | number) {
                     </div>
                     <Pin
                         class="size-4 flex-shrink-0"
+                        fill="#ef4444"
                         style="color: #ef4444"
                     />
                 </div>

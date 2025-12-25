@@ -102,8 +102,9 @@ const ariaLabel = computed(() => {
     >
         <Pin
             v-if="isPinned && !isDeleting && !isDeleted"
-            class="absolute -right-1 -top-1 size-3 rotate-[45deg]"
-            style="color: rgb(239 68 68)"
+            class="absolute -right-1 -top-1 size-4 rotate-[45deg]"
+            fill="#ef4444"
+            style="color: #ef4444"
             aria-label="Pinned message"
         />
         <p v-if="isDeleting" class="whitespace-pre-wrap break-words italic">

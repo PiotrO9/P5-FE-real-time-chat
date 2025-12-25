@@ -44,7 +44,8 @@ function handleKeyDown(event: KeyboardEvent) {
         <div class="flex items-center gap-3">
             <Pin
                 class="size-5 flex-shrink-0"
-                style="color: rgb(239 68 68)"
+                fill="#ef4444"
+                style="color: #ef4444"
             />
             <div class="min-w-0 flex-1">
                 <div class="mb-1 flex items-center gap-2">
