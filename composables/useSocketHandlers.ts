@@ -38,6 +38,7 @@ export function useSocketHandlers(
 
         if (!chat) {
             chatsComposable.fetchChats();
+
             return;
         }
 
@@ -68,6 +69,7 @@ export function useSocketHandlers(
 
     function handleMessageDeleted(data: { chatId: string; messageId: string }) {
         const chatId = String(data.chatId);
+
         messages.removeMessage(chatId, data.messageId);
     }
 
@@ -78,6 +80,7 @@ export function useSocketHandlers(
     }) {
         const chatId = String(data.chatId);
         const userId = toNumber(data.reaction.userId);
+
         reactions.addReactionToMessage(
             chatId,
             data.messageId,
@@ -94,6 +97,7 @@ export function useSocketHandlers(
     }) {
         const chatId = String(data.chatId);
         const userId = toNumber(data.reaction.userId);
+
         reactions.removeReactionFromMessage(
             chatId,
             data.messageId,
@@ -111,10 +115,12 @@ export function useSocketHandlers(
                 'WebSocket: Chat not found for message:updated',
                 chatId,
             );
+
             return;
         }
 
         const mappedMessage = mapMessageFromBackend(data.message);
+
         messages.updateMessage(chatId, mappedMessage);
     }
 
@@ -124,6 +130,7 @@ export function useSocketHandlers(
         lastSeen?: Date;
     }) {
         const userId = toNumber(data.userId);
+
         friendsComposable.updateFriendStatus(
             userId,
             data.isOnline,
@@ -137,12 +144,14 @@ export function useSocketHandlers(
                 compareIds(chat.otherUser.id, userId)
             ) {
                 chat.otherUser.isOnline = data.isOnline;
+
                 if (data.lastSeen) {
                     chat.otherUser.lastSeen =
                         data.lastSeen instanceof Date
                             ? data.lastSeen.toISOString()
                             : String(data.lastSeen);
                 }
+
                 chat.hasOnlineMembers = data.isOnline;
             }
 
@@ -150,14 +159,17 @@ export function useSocketHandlers(
                 const member = chat.members.find((m) =>
                     compareIds(m.id, userId),
                 );
+
                 if (member) {
                     member.isOnline = data.isOnline;
+
                     if (data.lastSeen) {
                         member.lastSeen =
                             data.lastSeen instanceof Date
                                 ? data.lastSeen.toISOString()
                                 : String(data.lastSeen);
                     }
+
                     chat.hasOnlineMembers = chat.members.some(
                         (m) => m.isOnline === true,
                     );
@@ -176,6 +188,7 @@ export function useSocketHandlers(
     }) {
         const chatId = String(data.chatId);
         const chat = chatsComposable.findChatById(chatId);
+
         if (!chat) return;
 
         if (data.updates.name) {
@@ -186,6 +199,7 @@ export function useSocketHandlers(
             chatId,
             updates: data.updates,
         });
+
         chat.messages.push(systemMessage);
 
         if (selectedChatId.value && compareIds(selectedChatId.value, chat.id)) {
@@ -196,6 +210,7 @@ export function useSocketHandlers(
     function handleMemberAdded(data: { chatId: string; member: any }) {
         const chatId = String(data.chatId);
         const chat = chatsComposable.findChatById(chatId);
+
         if (!chat) return;
 
         const memberId = toNumber(data.member.userId || data.member.id);
@@ -209,6 +224,7 @@ export function useSocketHandlers(
             username,
             chatId,
         });
+
         chat.messages.push(systemMessage);
 
         if (selectedChatId.value && compareIds(selectedChatId.value, chat.id)) {
@@ -219,15 +235,18 @@ export function useSocketHandlers(
     function handleMemberRemoved(data: { chatId: string; userId: string }) {
         const chatId = String(data.chatId);
         const chat = chatsComposable.findChatById(chatId);
+
         if (!chat) return;
 
         const userId = toNumber(data.userId);
 
         let username = 'Unknown user';
+
         if (chat.otherUser && compareIds(chat.otherUser.id, userId)) {
             username = chat.otherUser.username;
         } else {
             const friend = friendsComposable.findFriendById(userId);
+
             if (friend) {
                 username = friend.username;
             }
@@ -238,6 +257,7 @@ export function useSocketHandlers(
             username,
             chatId,
         });
+
         chat.messages.push(systemMessage);
 
         if (selectedChatId.value && compareIds(selectedChatId.value, chat.id)) {
@@ -254,6 +274,7 @@ export function useSocketHandlers(
 
         const chatId = String(data.chatId);
         const chat = chatsComposable.findChatById(chatId);
+
         if (!chat) return;
 
         const pinnedMessageData = data.pinnedMessage;
@@ -270,6 +291,7 @@ export function useSocketHandlers(
             const message = chat.messages[messageIndex];
 
             let pinnedAtValue: string | undefined = undefined;
+
             if (pinnedMessageData?.pinnedAt) {
                 if (typeof pinnedMessageData.pinnedAt === 'string') {
                     pinnedAtValue = pinnedMessageData.pinnedAt;
@@ -301,6 +323,7 @@ export function useSocketHandlers(
             messages.updateMessage(chatId, updatedMessage);
 
             const chatStore = useChatStore();
+
             chatStore.addPinnedMessage(chatId, updatedMessage);
         }
     }
@@ -311,6 +334,7 @@ export function useSocketHandlers(
     }) {
         const chatId = String(data.chatId);
         const chat = chatsComposable.findChatById(chatId);
+
         if (!chat) return;
 
         const messageIndex = findIndexById(chat.messages, data.messageId);
@@ -323,10 +347,12 @@ export function useSocketHandlers(
                 pinnedBy: undefined,
                 pinnedAt: undefined,
             } as Message;
+
             messages.updateMessage(chatId, updatedMessage);
         }
 
         const chatStore = useChatStore();
+
         chatStore.removePinnedMessage(chatId, data.messageId);
     }
 
@@ -349,16 +375,19 @@ export function useSocketHandlers(
         });
 
         const chat = chatsComposable.findChatById(chatId);
+
         if (!chat) return;
 
         const currentMessageIndex = findIndexById(
             chat.messages,
             data.messageId,
         );
+
         if (currentMessageIndex === -1) return;
 
         for (let i = 0; i < currentMessageIndex; i++) {
             const message = chat.messages[i];
+
             if (message && message.reads) {
                 messageReads.removeReadFromMessage(
                     chatId,
@@ -372,6 +401,7 @@ export function useSocketHandlers(
     function handleFriendInviteReceived(data: FriendInviteReceivedEvent) {
         invitesComposable.addReceivedInvite(data.invite);
         const senderName = data.invite.sender.username;
+
         toastSuccess(`You received an invitation from ${senderName}`);
     }
 
@@ -391,19 +421,19 @@ export function useSocketHandlers(
         )
             ? data.friendship.addressee.username
             : data.friendship.requester.username;
+
         toastSuccess(`${friendName} accepted the invitation`);
     }
 
     function handleFriendInviteRejected(data: FriendInviteRejectedEvent) {
         invitesComposable.updateInviteStatus(data.invite);
         const receiverName = data.invite.receiver.username;
+
         toastSuccess(`${receiverName} rejected the invitation`);
     }
 
     function handleFriendRemoved(data: FriendRemovedEvent) {
         friendsComposable.removeFriendFromList(data.friendId);
-        const friendName = data.friend.username;
-        toastSuccess(`${friendName} has been removed from friends list`);
     }
 
     function setupListeners() {
