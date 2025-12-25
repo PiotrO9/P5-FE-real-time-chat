@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Message } from '~/types/Chat';
-import Icon from '~/components/ui/Icon.vue';
+import { Pin } from 'lucide-vue-next';
 
 interface Props {
     message: Message;
@@ -98,10 +98,9 @@ const ariaLabel = computed(() => {
         ]"
         :aria-label="ariaLabel"
     >
-        <Icon
+        <Pin
             v-if="isPinned && !isDeleting && !isDeleted"
-            name="pin"
-            class="absolute -right-1 -top-1 size-3 rotate-[20deg]"
+            class="absolute -right-1 -top-1 size-3 rotate-[45deg]"
             style="color: rgb(239 68 68)"
             aria-label="Pinned message"
         />

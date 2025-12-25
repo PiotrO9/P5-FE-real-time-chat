@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Message } from '~/types/Chat';
+import { Pin } from 'lucide-vue-next';
 
 interface Props {
     pinnedMessages: Message[];
@@ -82,8 +83,7 @@ function handlePinnedMessageClick(messageId: string | number) {
                             </span>
                         </div>
                     </div>
-                    <Icon
-                        name="pin"
+                    <Pin
                         class="size-4 flex-shrink-0"
                         style="color: #ef4444"
                     />

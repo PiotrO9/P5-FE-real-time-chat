@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Friend } from '~/types/Chat';
 import ChatInitial from '../chat/ChatInitial.vue';
+import { X } from 'lucide-vue-next';
 
 interface Props {
     friends: Friend[];
@@ -111,7 +112,7 @@ function formatLastSeen(lastSeen?: string): string {
                                 @keydown.enter.stop="handleRemoveFriend(friend.id, $event)"
                                 @keydown.space.stop="handleRemoveFriend(friend.id, $event)"
                             >
-                                <Icon name="remove" class="size-5" />
+                                <X class="size-5" />
                             </button>
                         </div>
                         <p class="truncate text-xs text-gray-500 dark:text-gray-400">

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { CheckCircle, AlertCircle, AlertTriangle, Info, X } from 'lucide-vue-next';
+
 const { toasts, removeToast } = useToast();
 
 function handleRemoveToast(id: string) {
@@ -54,17 +56,19 @@ function getIconClasses(type: string) {
                 role="alert"
             >
                 <div :class="getIconClasses(toast.type)" class="mt-0.5 flex-shrink-0">
-                    <Icon
+                    <CheckCircle
                         v-if="toast.type === 'success'"
-                        name="status-success"
-                        class="size-5"
-                    /><Icon v-else-if="toast.type === 'error'" name="status-error" class="size-5" />
-                    <Icon
-                        v-else-if="toast.type === 'warning'"
-                        name="status-warning"
                         class="size-5"
                     />
-                    <Icon v-else name="status-info" class="size-5" />
+                    <AlertCircle
+                        v-else-if="toast.type === 'error'"
+                        class="size-5"
+                    />
+                    <AlertTriangle
+                        v-else-if="toast.type === 'warning'"
+                        class="size-5"
+                    />
+                    <Info v-else class="size-5" />
                 </div>
 
                 <p class="flex-1 text-sm font-medium">{{ toast.message }}</p>
@@ -77,7 +81,7 @@ function getIconClasses(type: string) {
                     @click="handleRemoveToast(toast.id)"
                     @keydown="handleKeyDown($event, toast.id)"
                 >
-                    <Icon class="size-4" name="remove" />
+                    <X class="size-4" />
                 </button>
             </div>
         </TransitionGroup>

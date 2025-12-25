@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { MoreVertical } from 'lucide-vue-next';
+
 interface Props {
     classes?: string;
 }
@@ -22,10 +24,7 @@ function handleToggleState() {
         @click="handleToggleState"
     >
         <div class="flex items-center gap-1">
-            <Icon
-                name="context-menu-dots"
-                class="text-gray-600 dark:text-gray-300"
-            />
+            <MoreVertical class="text-gray-600 dark:text-gray-300" />
         </div>
     </div>
 </template>

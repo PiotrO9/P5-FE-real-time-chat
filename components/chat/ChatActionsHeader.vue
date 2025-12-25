@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { X } from 'lucide-vue-next';
+
 interface Emits {
     (e: 'close'): void;
 }
@@ -33,8 +35,7 @@ function handleKeyDown(event: KeyboardEvent) {
                 @click="handleToggleState"
                 @keydown="handleKeyDown"
             >
-                <Icon
-                    name="remove"
+                <X
                     class="size-4 text-gray-600 dark:text-gray-300"
                 />
             </button>

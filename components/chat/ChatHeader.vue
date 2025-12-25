@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Chat } from '~/types/Chat';
 import ChatInitial from './ChatInitial.vue';
+import { ArrowLeft } from 'lucide-vue-next';
 
 interface Props {
     selectedChat: Chat | null;
@@ -101,8 +102,7 @@ function handleBackKeyDown(event: KeyboardEvent) {
                 @click="handleBack"
                 @keydown="handleBackKeyDown"
             >
-                <Icon
-                    name="arrow-left"
+                <ArrowLeft
                     class="size-5 text-gray-600 dark:text-gray-400"
                 />
             </button>

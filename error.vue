@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Info, AlertCircle } from 'lucide-vue-next';
+
 interface ErrorProps {
     error: {
         statusCode: number;
@@ -67,8 +69,13 @@ function handleKeyDown(event: KeyboardEvent, action: () => void) {
                                 : 'bg-red-100 text-red-600'
                         "
                     >
-                        <Icon
-                            :name="error.statusCode === 404 ? 'status-info' : 'status-error'"
+                        <Info
+                            v-if="error.statusCode === 404"
+                            class="size-12"
+                            aria-hidden="true"
+                        />
+                        <AlertCircle
+                            v-else
                             class="size-12"
                             aria-hidden="true"
                         />

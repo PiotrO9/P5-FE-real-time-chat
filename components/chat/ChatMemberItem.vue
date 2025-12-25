@@ -7,6 +7,7 @@ import {
 } from '~/utils/roleHelpers';
 import { compareIds } from '~/utils/idHelpers';
 import ChatInitial from './ChatInitial.vue';
+import { Trash2 } from 'lucide-vue-next';
 
 const props = withDefaults(defineProps<Props>(), {
     openRoleMenuId: null,
@@ -176,7 +177,7 @@ function handleRemoveUser() {
                 @click="handleRemoveUser"
                 @keydown.enter="handleRemoveUser"
             >
-                <Icon name="bin" class="size-4" />
+                <Trash2 class="size-4" />
             </button>
         </div>
     </div>

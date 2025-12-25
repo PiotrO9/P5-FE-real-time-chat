@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type EmojiTooltip from '../ui/EmojiTooltip.vue';
 import MessageContextMenu from './MessageContextMenu.vue';
+import { Smile, Reply, MoreVertical } from 'lucide-vue-next';
 
 interface Props {
     messageId: string | number;
@@ -93,8 +94,7 @@ defineExpose({
                         handleEmojiButtonClick()
                 "
             >
-                <Icon
-                    name="smile"
+                <Smile
                     class="size-4 text-gray-600 dark:text-gray-300"
                 />
             </button>
@@ -124,8 +124,7 @@ defineExpose({
                     emit('reply-click')
             "
         >
-            <Icon
-                name="reply"
+            <Reply
                 class="size-4 text-gray-600 dark:text-gray-300"
             />
         </button>
@@ -144,8 +143,7 @@ defineExpose({
                         emit('context-menu-toggle')
                 "
             >
-                <Icon
-                    name="context-menu-dots"
+                <MoreVertical
                     class="size-4 text-gray-600 dark:text-gray-300"
                 />
             </button>

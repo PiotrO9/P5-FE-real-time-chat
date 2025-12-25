@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Message } from '~/types/Chat';
+import { Pin } from 'lucide-vue-next';
 
 interface Props {
     message: Message | null;
@@ -41,8 +42,7 @@ function handleKeyDown(event: KeyboardEvent) {
         @keydown="handleKeyDown"
     >
         <div class="flex items-center gap-3">
-            <Icon
-                name="pin"
+            <Pin
                 class="size-5 flex-shrink-0"
                 style="color: rgb(239 68 68)"
             />
