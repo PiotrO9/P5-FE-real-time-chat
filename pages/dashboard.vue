@@ -292,6 +292,7 @@ onUnmounted(() => {
                     :chat="dashboard.currentChat.value"
                     :current-user-id="dashboard.currentUserId.value"
                     @chat-updated="dashboard.handleChatUpdated"
+                    @chat-left="dashboard.handleChatLeft"
                     @close="dashboard.isActionsPanelOpen.value = false"
                 />
 

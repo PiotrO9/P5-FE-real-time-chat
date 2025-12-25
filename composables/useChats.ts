@@ -92,6 +92,16 @@ export function useChats() {
         }
     }
 
+    function removeChat(chatId: string) {
+        const index = chats.value.findIndex((chat) => compareIds(chat.id, chatId));
+        if (index !== -1) {
+            chats.value.splice(index, 1);
+        }
+        if (compareIds(selectedChatId.value, chatId)) {
+            selectedChatId.value = null;
+        }
+    }
+
     return {
         chats,
         chatsLoading,
@@ -105,5 +115,6 @@ export function useChats() {
         findChatById,
         updateChat,
         incrementUnreadCount,
+        removeChat,
     };
 }

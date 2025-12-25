@@ -194,3 +194,10 @@ export async function searchMessages(
         `/api/messages/${chatId}/search?${params.toString()}`,
     );
 }
+
+export async function leaveChat(chatId: number | string) {
+    return await useApi<ApiResponse<{ message: string }>>(
+        'POST',
+        `/api/chats/${chatId}/leave`,
+    );
+}

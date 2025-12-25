@@ -270,6 +270,12 @@ export function useDashboard() {
         }
     }
 
+    function handleChatLeft(chatId: string) {
+        chatStore.closeChatDetails();
+        chatsComposable.removeChat(chatId);
+        isActionsPanelOpen.value = false;
+    }
+
     function handleLoadMore() {
         const chatId = chatsComposable.selectedChatId.value;
 
@@ -501,6 +507,7 @@ export function useDashboard() {
         handleStartChat,
         handleSelectChat,
         handleChatUpdated,
+        handleChatLeft,
         handleLoadMore,
         handleScrollToBottom,
         handleAddFriend,

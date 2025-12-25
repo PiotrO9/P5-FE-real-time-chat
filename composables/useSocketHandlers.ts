@@ -239,6 +239,14 @@ export function useSocketHandlers(
         if (!chat) return;
 
         const userId = toNumber(data.userId);
+        const isCurrentUser = compareIds(userId, currentUserId.value);
+
+        if (isCurrentUser) {
+            const chatStore = useChatStore();
+            chatStore.closeChatDetails();
+            chatsComposable.removeChat(chatId);
+            return;
+        }
 
         let username = 'Unknown user';
 
@@ -249,6 +257,16 @@ export function useSocketHandlers(
 
             if (friend) {
                 username = friend.username;
+            }
+        }
+
+        if (chat.members) {
+            const memberIndex = chat.members.findIndex((member) =>
+                compareIds(member.id, userId),
+            );
+
+            if (memberIndex !== -1) {
+                chat.members.splice(memberIndex, 1);
             }
         }
 

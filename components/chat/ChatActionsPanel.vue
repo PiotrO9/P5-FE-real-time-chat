@@ -8,6 +8,7 @@ import {
     fetchChatDetails as fetchChatDetailsFromService,
     updateChatMemberRole,
     fetchPinnedMessages,
+    leaveChat,
 } from '~/services/chatService';
 import { fetchFriends as fetchFriendsFromService } from '~/services/friendsService';
 import { getRoleLabel } from '~/utils/roleHelpers';
@@ -25,8 +26,12 @@ interface Props {
 }
 
 interface Emits {
-    (e: 'chat-updated', data: { members: ChatMember[]; currentUserRole?: Role }): void;
+    (
+        e: 'chat-updated',
+        data: { members: ChatMember[]; currentUserRole?: Role },
+    ): void;
     (e: 'close'): void;
+    (e: 'chat-left', chatId: string): void;
 }
 
 const props = defineProps<Props>();
@@ -54,13 +59,17 @@ const selectedMemberName = ref<string>('');
 const pinnedMessagesLoading = ref(false);
 const messageSearchComposable = useMessageSearch();
 const showMessageSearch = ref(false);
+const isLeavingChat = ref(false);
+const showLeaveChatDialog = ref(false);
 let searchDebounceTimer: NodeJS.Timeout | null = null;
 
 const chat = computed(() => props.chat);
 const currentUserId = computed(() => props.currentUserId);
 const isGroupChat = computed(() => chat.value?.isGroup ?? false);
 const currentUserRole = computed(
-    () => chat.value?.members?.find((user) => user.id == currentUserId.value)?.role ?? null,
+    () =>
+        chat.value?.members?.find((user) => user.id == currentUserId.value)
+            ?.role ?? null,
 );
 const isOwner = computed(() => {
     const role = currentUserRole.value;
@@ -84,7 +93,9 @@ const members = computed(() => {
 const availableFriends = computed(() => {
     const memberIds = members.value.map((member) => String(member.id));
 
-    return friends.value.filter((friend) => !memberIds.includes(String(friend.id)));
+    return friends.value.filter(
+        (friend) => !memberIds.includes(String(friend.id)),
+    );
 });
 const pinnedMessagesList = computed(() => {
     if (!chat.value) return [];
@@ -92,8 +103,12 @@ const pinnedMessagesList = computed(() => {
     const messages = chatStore.getPinnedMessages(chat.value.id);
 
     return [...messages].sort((a, b) => {
-        const dateA = a.pinnedAt ? new Date(a.pinnedAt).getTime() : new Date(a.createdAt).getTime();
-        const dateB = b.pinnedAt ? new Date(b.pinnedAt).getTime() : new Date(b.createdAt).getTime();
+        const dateA = a.pinnedAt
+            ? new Date(a.pinnedAt).getTime()
+            : new Date(a.createdAt).getTime();
+        const dateB = b.pinnedAt
+            ? new Date(b.pinnedAt).getTime()
+            : new Date(b.createdAt).getTime();
 
         return dateB - dateA;
     });
@@ -159,7 +174,9 @@ function handleAddUserFromSection(username: string) {
         return;
     }
 
-    const isAlreadyMember = members.value.some((member) => compareIds(member.id, friend.id));
+    const isAlreadyMember = members.value.some((member) =>
+        compareIds(member.id, friend.id),
+    );
 
     if (isAlreadyMember) {
         toastError('User is already in the chat');
@@ -228,6 +245,39 @@ function handleCancelRoleChange() {
     selectedMemberName.value = '';
 }
 
+async function handleLeaveChat() {
+    if (!chat.value) return;
+
+    const chatId = String(chat.value.id);
+
+    try {
+        isLeavingChat.value = true;
+        await leaveChat(chatId);
+        chatStore.closeChatDetails();
+        toastSuccess('You have left the chat');
+        emit('chat-left', chatId);
+        emit('close');
+    } catch (err: any) {
+        const errorMessage =
+            err?.response?._data?.message ||
+            err?.message ||
+            'Failed to leave chat';
+
+        toastError(errorMessage);
+    } finally {
+        isLeavingChat.value = false;
+        showLeaveChatDialog.value = false;
+    }
+}
+
+function handleOpenLeaveChatDialog() {
+    showLeaveChatDialog.value = true;
+}
+
+function handleCancelLeaveChat() {
+    showLeaveChatDialog.value = false;
+}
+
 function handleToggleState() {
     chatStore.closeChatDetails();
     isOpen.value = false;
@@ -269,7 +319,10 @@ async function handleAddUser(friend: Friend) {
         toastSuccess(`${friend.username} has been added to the chat`);
         await fetchChatDetails();
     } catch (err: any) {
-        const errorMessage = err?.response?._data?.message || err?.message || 'Failed to add user';
+        const errorMessage =
+            err?.response?._data?.message ||
+            err?.message ||
+            'Failed to add user';
 
         toastError(errorMessage);
     } finally {
@@ -297,7 +350,9 @@ async function handleRemoveUser(userId: string) {
         await fetchChatDetails();
     } catch (err: any) {
         const errorMessage =
-            err?.response?._data?.message || err?.message || 'Failed to remove user';
+            err?.response?._data?.message ||
+            err?.message ||
+            'Failed to remove user';
 
         toastError(errorMessage);
     } finally {
@@ -306,7 +361,8 @@ async function handleRemoveUser(userId: string) {
 }
 
 async function handleConfirmRoleChange() {
-    if (!chat.value || !selectedMemberId.value || !selectedNewRole.value) return;
+    if (!chat.value || !selectedMemberId.value || !selectedNewRole.value)
+        return;
 
     const memberId = selectedMemberId.value;
     const newRole = selectedNewRole.value;
@@ -318,11 +374,15 @@ async function handleConfirmRoleChange() {
             newRole === 'MEMBER' ? 'USER' : (newRole as 'MODERATOR' | 'OWNER');
 
         await updateChatMemberRole(chat.value.id, String(memberId), apiRole);
-        toastSuccess(`User ${memberName} role has been changed to ${getRoleLabel(newRole)}`);
+        toastSuccess(
+            `User ${memberName} role has been changed to ${getRoleLabel(newRole)}`,
+        );
         await fetchChatDetails();
     } catch (err: any) {
         const errorMessage =
-            err?.response?._data?.message || err?.message || 'Failed to change user role';
+            err?.response?._data?.message ||
+            err?.message ||
+            'Failed to change user role';
 
         toastError(errorMessage);
     } finally {
@@ -341,7 +401,9 @@ async function fetchFriends() {
         friendsLoading.value = true;
         const res = await fetchFriendsFromService();
         const raw = res?.data;
-        const friendsList: FriendResponse[] = Array.isArray(raw?.friends) ? raw.friends : [];
+        const friendsList: FriendResponse[] = Array.isArray(raw?.friends)
+            ? raw.friends
+            : [];
 
         friends.value = friendsList.map((friend) => ({
             id: friend.id,
@@ -393,7 +455,9 @@ async function fetchPinnedMessagesList() {
         const { mapMessageFromBackend } = useMessageHelpers();
         const res = await fetchPinnedMessages(chat.value.id);
         const raw = res?.data;
-        const pinnedItems: any[] = Array.isArray(raw?.pinnedMessages) ? raw.pinnedMessages : [];
+        const pinnedItems: any[] = Array.isArray(raw?.pinnedMessages)
+            ? raw.pinnedMessages
+            : [];
 
         const mappedMessages = pinnedItems.map((pinnedItem) => {
             const message = mapMessageFromBackend(pinnedItem.message);
@@ -460,9 +524,16 @@ onUnmounted(() => {
 <template>
     <template v-if="chat && isOpen">
         <Teleport to="body">
-            <div class="fixed inset-0 z-50 bg-black/50 xl:hidden" @click.self="handleToggleState">
-                <div class="flex h-full flex-col bg-white shadow-xl dark:bg-gray-800">
-                    <div class="bg-gray flex flex-1 flex-col overflow-hidden dark:bg-gray-900">
+            <div
+                class="fixed inset-0 z-50 bg-black/50 xl:hidden"
+                @click.self="handleToggleState"
+            >
+                <div
+                    class="flex h-full flex-col bg-white shadow-xl dark:bg-gray-800"
+                >
+                    <div
+                        class="bg-gray flex flex-1 flex-col overflow-hidden dark:bg-gray-900"
+                    >
                         <ChatActionsHeader
                             :is-group-chat="isGroupChat"
                             :is-owner="isOwner"
@@ -476,21 +547,32 @@ onUnmounted(() => {
                                 <UserInfoSection :user="chat.otherUser" />
                             </template>
 
-                            <div class="border-gray-200 px-4 py-3 dark:border-gray-700">
-                                <div class="mb-2 flex items-center justify-between">
+                            <div
+                                class="border-gray-200 px-4 py-3 dark:border-gray-700"
+                            >
+                                <div
+                                    class="mb-2 flex items-center justify-between"
+                                >
                                     <h3
                                         class="text-sm font-semibold text-gray-900 dark:text-gray-100"
                                     >
                                         Message search
                                     </h3>
                                     <button
-                                        v-if="messageSearchComposable.searchQuery.value"
+                                        v-if="
+                                            messageSearchComposable.searchQuery
+                                                .value
+                                        "
                                         type="button"
                                         tabindex="0"
                                         aria-label="Clear search"
                                         class="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-500"
-                                        @click="messageSearchComposable.clearSearch()"
-                                        @keydown.enter="messageSearchComposable.clearSearch()"
+                                        @click="
+                                            messageSearchComposable.clearSearch()
+                                        "
+                                        @keydown.enter="
+                                            messageSearchComposable.clearSearch()
+                                        "
                                         @keydown.space.prevent="
                                             messageSearchComposable.clearSearch()
                                         "
@@ -498,21 +580,44 @@ onUnmounted(() => {
                                         Clear
                                     </button>
                                 </div>
-                                <label for="message-search" class="sr-only">Search messages</label>
+                                <label for="message-search" class="sr-only"
+                                    >Search messages</label
+                                >
                                 <input
                                     id="message-search"
-                                    v-model="messageSearchComposable.searchQuery.value"
+                                    v-model="
+                                        messageSearchComposable.searchQuery
+                                            .value
+                                    "
                                     type="text"
                                     placeholder="Search messages..."
                                     class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
                                 />
                                 <MessageSearchResults
-                                    v-if="messageSearchComposable.searchQuery.value"
-                                    :messages="messageSearchComposable.searchResults.value"
-                                    :is-loading="messageSearchComposable.searchLoading.value"
-                                    :has-more="messageSearchComposable.searchHasMore.value"
-                                    :total="messageSearchComposable.searchTotal.value"
-                                    :query="messageSearchComposable.searchQuery.value"
+                                    v-if="
+                                        messageSearchComposable.searchQuery
+                                            .value
+                                    "
+                                    :messages="
+                                        messageSearchComposable.searchResults
+                                            .value
+                                    "
+                                    :is-loading="
+                                        messageSearchComposable.searchLoading
+                                            .value
+                                    "
+                                    :has-more="
+                                        messageSearchComposable.searchHasMore
+                                            .value
+                                    "
+                                    :total="
+                                        messageSearchComposable.searchTotal
+                                            .value
+                                    "
+                                    :query="
+                                        messageSearchComposable.searchQuery
+                                            .value
+                                    "
                                     @message-click="handleMessageSearchClick"
                                     @load-more="handleLoadMoreSearchResults"
                                 />
@@ -544,6 +649,27 @@ onUnmounted(() => {
                                     @change-role="handleChangeRole"
                                     @remove-user="handleRemoveUser"
                                 />
+
+                                <div
+                                    class="border-t border-gray-200 px-4 py-4 dark:border-gray-700"
+                                >
+                                    <button
+                                        type="button"
+                                        tabindex="0"
+                                        aria-label="Leave chat"
+                                        :disabled="isLeavingChat"
+                                        class="w-full rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-700 dark:bg-gray-800 dark:text-red-400 dark:hover:bg-red-900/30"
+                                        @click="handleOpenLeaveChatDialog"
+                                        @keydown.enter="
+                                            handleOpenLeaveChatDialog
+                                        "
+                                    >
+                                        <span v-if="!isLeavingChat"
+                                            >Leave chat</span
+                                        >
+                                        <span v-else>Leaving...</span>
+                                    </button>
+                                </div>
                             </template>
 
                             <template v-else-if="isGroupChat">
@@ -556,6 +682,27 @@ onUnmounted(() => {
                                     :is-updating-role="null"
                                     :is-removing-user="null"
                                 />
+
+                                <div
+                                    class="border-t border-gray-200 px-4 py-4 dark:border-gray-700"
+                                >
+                                    <button
+                                        type="button"
+                                        tabindex="0"
+                                        aria-label="Leave chat"
+                                        :disabled="isLeavingChat"
+                                        class="w-full rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-700 dark:bg-gray-800 dark:text-red-400 dark:hover:bg-red-900/30"
+                                        @click="handleOpenLeaveChatDialog"
+                                        @keydown.enter="
+                                            handleOpenLeaveChatDialog
+                                        "
+                                    >
+                                        <span v-if="!isLeavingChat"
+                                            >Leave chat</span
+                                        >
+                                        <span v-else>Leaving...</span>
+                                    </button>
+                                </div>
                             </template>
                         </div>
                     </div>
@@ -566,7 +713,9 @@ onUnmounted(() => {
         <aside
             class="hidden h-full max-w-[400px] flex-col border-l bg-white dark:border-gray-700 dark:bg-gray-800 md:min-w-96 xl:flex"
         >
-            <div class="bg-gray flex min-h-0 flex-1 flex-col overflow-hidden dark:bg-gray-900">
+            <div
+                class="bg-gray flex min-h-0 flex-1 flex-col overflow-hidden dark:bg-gray-900"
+            >
                 <ChatActionsHeader
                     :is-group-chat="isGroupChat"
                     :is-owner="isOwner"
@@ -584,7 +733,9 @@ onUnmounted(() => {
                         class="border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-900"
                     >
                         <div class="mb-2 flex items-center justify-between">
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                            <h3
+                                class="text-sm font-semibold text-gray-900 dark:text-gray-100"
+                            >
                                 Message search
                             </h3>
                             <button
@@ -594,13 +745,19 @@ onUnmounted(() => {
                                 aria-label="Clear search"
                                 class="text-xs text-primary-600 hover:text-primary-700"
                                 @click="messageSearchComposable.clearSearch()"
-                                @keydown.enter="messageSearchComposable.clearSearch()"
-                                @keydown.space.prevent="messageSearchComposable.clearSearch()"
+                                @keydown.enter="
+                                    messageSearchComposable.clearSearch()
+                                "
+                                @keydown.space.prevent="
+                                    messageSearchComposable.clearSearch()
+                                "
                             >
                                 Clear
                             </button>
                         </div>
-                        <label for="message-search-desktop" class="sr-only">Search messages</label>
+                        <label for="message-search-desktop" class="sr-only"
+                            >Search messages</label
+                        >
                         <input
                             id="message-search-desktop"
                             v-model="messageSearchComposable.searchQuery.value"
@@ -610,9 +767,15 @@ onUnmounted(() => {
                         />
                         <MessageSearchResults
                             v-if="messageSearchComposable.searchQuery.value"
-                            :messages="messageSearchComposable.searchResults.value"
-                            :is-loading="messageSearchComposable.searchLoading.value"
-                            :has-more="messageSearchComposable.searchHasMore.value"
+                            :messages="
+                                messageSearchComposable.searchResults.value
+                            "
+                            :is-loading="
+                                messageSearchComposable.searchLoading.value
+                            "
+                            :has-more="
+                                messageSearchComposable.searchHasMore.value
+                            "
                             :total="messageSearchComposable.searchTotal.value"
                             @message-click="handleMessageSearchClick"
                             @load-more="handleLoadMoreSearchResults"
@@ -645,6 +808,23 @@ onUnmounted(() => {
                             @change-role="handleChangeRole"
                             @remove-user="handleRemoveUser"
                         />
+
+                        <div
+                            class="border-t border-gray-200 px-4 py-4 dark:border-gray-700"
+                        >
+                            <button
+                                type="button"
+                                tabindex="0"
+                                aria-label="Leave chat"
+                                :disabled="isLeavingChat"
+                                class="w-full rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-700 dark:bg-gray-800 dark:text-red-400 dark:hover:bg-red-900/30"
+                                @click="handleOpenLeaveChatDialog"
+                                @keydown.enter="handleOpenLeaveChatDialog"
+                            >
+                                <span v-if="!isLeavingChat">Leave chat</span>
+                                <span v-else>Leaving...</span>
+                            </button>
+                        </div>
                     </template>
 
                     <template v-else-if="isGroupChat">
@@ -657,6 +837,23 @@ onUnmounted(() => {
                             :is-updating-role="null"
                             :is-removing-user="null"
                         />
+
+                        <div
+                            class="border-t border-gray-200 px-4 py-4 dark:border-gray-700"
+                        >
+                            <button
+                                type="button"
+                                tabindex="0"
+                                aria-label="Leave chat"
+                                :disabled="isLeavingChat"
+                                class="w-full rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-700 dark:bg-gray-800 dark:text-red-400 dark:hover:bg-red-900/30"
+                                @click="handleOpenLeaveChatDialog"
+                                @keydown.enter="handleOpenLeaveChatDialog"
+                            >
+                                <span v-if="!isLeavingChat">Leave chat</span>
+                                <span v-else>Leaving...</span>
+                            </button>
+                        </div>
                     </template>
                 </div>
             </div>
@@ -665,7 +862,7 @@ onUnmounted(() => {
 
     <Dialog
         :open="showConfirmDialog"
-        :title="`Change user role`"
+        title="Change user role"
         :message="
             selectedMemberName && selectedNewRole
                 ? `Are you sure you want to change user ${selectedMemberName}'s role to ${getRoleLabel(selectedNewRole)}?`
@@ -676,5 +873,16 @@ onUnmounted(() => {
         @update:open="showConfirmDialog = $event"
         @confirm="handleConfirmRoleChange"
         @cancel="handleCancelRoleChange"
+    />
+
+    <Dialog
+        :open="showLeaveChatDialog"
+        title="Leave chat"
+        message="Are you sure you want to leave this chat? You will no longer receive messages from this chat."
+        confirm-text="Leave"
+        cancel-text="Cancel"
+        @update:open="showLeaveChatDialog = $event"
+        @confirm="handleLeaveChat"
+        @cancel="handleCancelLeaveChat"
     />
 </template>
