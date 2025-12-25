@@ -54,25 +54,27 @@ const bubbleClasses = computed(() => {
 const isDeleted = computed(() => props.message.isDeleted === true);
 
 const borderRadiusClass = computed(() => {
+    const baseClass = 'rounded-lg';
+
     if (props.isEditing || props.isDeleting || isDeleted.value) {
-        return 'rounded-2xl';
+        return `${baseClass} md:rounded-2xl`;
     }
 
     const contentLength = props.message.content?.length || 0;
 
     if (contentLength <= 50) {
-        return 'rounded-full';
+        return `${baseClass} md:rounded-full`;
     }
 
     if (contentLength <= 150) {
-        return 'rounded-3xl';
+        return `${baseClass} md:rounded-3xl`;
     }
 
     if (contentLength <= 300) {
-        return 'rounded-2xl';
+        return `${baseClass} md:rounded-2xl`;
     }
 
-    return 'rounded-xl';
+    return `${baseClass} md:rounded-xl`;
 });
 
 const ariaLabel = computed(() => {

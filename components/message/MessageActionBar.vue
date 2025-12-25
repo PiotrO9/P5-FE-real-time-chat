@@ -64,7 +64,7 @@ defineExpose({
 <template>
     <div
         v-if="shouldRender !== false"
-        class="flex shrink-0 items-center gap-1 transition-opacity duration-200"
+        class="flex shrink-0 flex-wrap items-center gap-1 transition-opacity duration-200 md:flex-nowrap"
         :class="{
             'opacity-100': shouldShow,
             'opacity-0': !shouldShow,
@@ -94,9 +94,7 @@ defineExpose({
                         handleEmojiButtonClick()
                 "
             >
-                <Smile
-                    class="size-4 text-gray-600 dark:text-gray-300"
-                />
+                <Smile class="size-4 text-gray-600 dark:text-gray-300" />
             </button>
             <EmojiTooltip
                 ref="emojiTooltipRef"
@@ -124,9 +122,7 @@ defineExpose({
                     emit('reply-click')
             "
         >
-            <Reply
-                class="size-4 text-gray-600 dark:text-gray-300"
-            />
+            <Reply class="size-4 text-gray-600 dark:text-gray-300" />
         </button>
         <div class="relative">
             <button
@@ -143,9 +139,7 @@ defineExpose({
                         emit('context-menu-toggle')
                 "
             >
-                <MoreVertical
-                    class="size-4 text-gray-600 dark:text-gray-300"
-                />
+                <MoreVertical class="size-4 text-gray-600 dark:text-gray-300" />
             </button>
             <MessageContextMenu
                 v-if="showContextMenu"
