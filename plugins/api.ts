@@ -19,6 +19,17 @@ export default defineNuxtPlugin(() => {
     const api = $fetch.create({
         baseURL: useRuntimeConfig().public.apiBaseUrl,
         credentials: 'include',
+        async onResponseError({ response }) {
+            if (response.status === 401) {
+                const authStore = useAuthStore();
+
+                await authStore.logout();
+
+                if (import.meta.client) {
+                    navigateTo('/login');
+                }
+            }
+        },
     });
 
     return {

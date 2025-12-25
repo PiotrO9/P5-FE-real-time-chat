@@ -23,9 +23,9 @@ async function handleSubmit(event: Event) {
 
 <template>
     <div
-        class="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900"
+        class="flex min-h-screen items-center justify-center bg-gray-50 px-4 dark:bg-gray-900"
     >
-        <div class="w-full max-w-md">
+        <div class="mx-auto w-full max-w-md">
             <div class="rounded-lg bg-white p-8 shadow-lg dark:bg-gray-800">
                 <div class="mb-8 text-center">
                     <h1
