@@ -19,6 +19,8 @@ const emit = defineEmits<Emits>();
 
 const searchQuery = ref('');
 const dialogRef = ref<HTMLDialogElement | null>(null);
+const searchInputRef = ref<HTMLInputElement | null>(null);
+const cancelButtonRef = ref<HTMLButtonElement | null>(null);
 
 const filteredChats = computed(() => {
     if (!props.chats || props.chats.length === 0) {
@@ -29,13 +31,16 @@ const filteredChats = computed(() => {
 
     if (query.length === 0) {
         return props.chats.filter(
-            (chat) => !props.currentChatId || !compareIds(chat.id, props.currentChatId),
+            (chat) =>
+                !props.currentChatId ||
+                !compareIds(chat.id, props.currentChatId),
         );
     }
 
     return props.chats.filter(
         (chat) =>
-            (!props.currentChatId || !compareIds(chat.id, props.currentChatId)) &&
+            (!props.currentChatId ||
+                !compareIds(chat.id, props.currentChatId)) &&
             chat.name.toLowerCase().includes(query),
     );
 });
@@ -50,6 +55,11 @@ watch(
                 if (dialogRef.value) {
                     dialogRef.value.showModal();
                     searchQuery.value = '';
+
+                    // Ustaw focus na pole wyszukiwania
+                    if (searchInputRef.value) {
+                        searchInputRef.value.focus();
+                    }
                 }
             });
         } else {
@@ -68,10 +78,52 @@ function handleCancel() {
     emit('update:open', false);
 }
 
+function getFocusableElements(): HTMLElement[] {
+    if (!dialogRef.value) return [];
+
+    const selector =
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+    const elements = Array.from(
+        dialogRef.value.querySelectorAll<HTMLElement>(selector),
+    );
+
+    return elements.filter(
+        (el) => !el.hasAttribute('disabled') && !el.hasAttribute('aria-hidden'),
+    );
+}
+
 function handleKeyDown(event: KeyboardEvent) {
     if (event.key === 'Escape') {
         event.preventDefault();
         handleCancel();
+
+        return;
+    }
+
+    // Trap focus w modalu
+    if (event.key === 'Tab' && dialogRef.value) {
+        const focusableElements = getFocusableElements();
+
+        if (focusableElements.length === 0) return;
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (!firstElement || !lastElement) return;
+
+        if (event.shiftKey) {
+            // Shift + Tab
+            if (document.activeElement === firstElement) {
+                event.preventDefault();
+                lastElement.focus();
+            }
+        } else {
+            // Tab
+            if (document.activeElement === lastElement) {
+                event.preventDefault();
+                firstElement.focus();
+            }
+        }
     }
 }
 
@@ -119,18 +171,27 @@ onMounted(() => {
 
                 <div class="mb-4">
                     <input
+                        ref="searchInputRef"
                         v-model="searchQuery"
                         type="text"
                         placeholder="Search chat..."
-                        class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-500"
+                        class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500 focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-500"
                         aria-label="Search chat"
+                        tabindex="0"
                     />
                 </div>
 
                 <div class="mb-4 flex-1 overflow-y-auto">
-                    <div v-if="filteredChats.length === 0" class="p-8 text-center">
+                    <div
+                        v-if="filteredChats.length === 0"
+                        class="p-8 text-center"
+                    >
                         <p class="text-sm text-gray-500 dark:text-gray-400">
-                            {{ searchQuery ? 'No chats found' : 'No available chats' }}
+                            {{
+                                searchQuery
+                                    ? 'No chats found'
+                                    : 'No available chats'
+                            }}
                         </p>
                     </div>
                     <ul
@@ -148,10 +209,14 @@ onMounted(() => {
                             <button
                                 type="button"
                                 tabindex="0"
-                                class="w-full text-left"
+                                class="w-full rounded-lg text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
                                 :aria-label="`Forward to: ${chat.name}`"
                                 @click="handleSelectChat(chat.id)"
-                                @keydown="(e) => e.key === 'Enter' && handleSelectChat(chat.id)"
+                                @keydown="
+                                    (e) =>
+                                        e.key === 'Enter' &&
+                                        handleSelectChat(chat.id)
+                                "
                             >
                                 <ChatItem
                                     :chat="chat"
@@ -166,9 +231,10 @@ onMounted(() => {
 
                 <footer class="flex justify-end gap-3">
                     <button
+                        ref="cancelButtonRef"
                         type="button"
                         tabindex="0"
-                        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors duration-150 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors duration-150 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                         aria-label="Cancel"
                         @click="handleCancel"
                         @keydown="(e) => e.key === 'Enter' && handleCancel()"

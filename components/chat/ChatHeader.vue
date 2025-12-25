@@ -42,7 +42,8 @@ function formatLastSeen(lastSeen?: string): string {
 
     if (diffMins < 60) return `Last seen ${diffMins} min ago`;
 
-    if (diffMins < 1440) return `Last seen ${Math.floor(diffMins / 60)} hrs ago`;
+    if (diffMins < 1440)
+        return `Last seen ${Math.floor(diffMins / 60)} hrs ago`;
 
     return `Last seen ${date.toLocaleDateString('en-US', {
         day: 'numeric',
@@ -63,7 +64,8 @@ const lastSeenText = computed(() => {
 function handleToggleActions() {
     if (!selectedChat) return;
 
-    const isCurrentlyOpen = chatStore.currentChatDetails?.id === selectedChat.id;
+    const isCurrentlyOpen =
+        chatStore.currentChatDetails?.id === selectedChat.id;
 
     if (isCurrentlyOpen) {
         chatStore.closeChatDetails();
@@ -99,16 +101,22 @@ function handleBackKeyDown(event: KeyboardEvent) {
                 @click="handleBack"
                 @keydown="handleBackKeyDown"
             >
-                <Icon name="arrow-left" class="size-5 text-gray-600 dark:text-gray-400" />
+                <Icon
+                    name="arrow-left"
+                    class="size-5 text-gray-600 dark:text-gray-400"
+                />
             </button>
             <ChatInitial :chat-initial :chat-id="selectedChat?.id" />
             <div class="flex min-w-0 flex-col">
                 <h2
-                    class="min-w-0 truncate text-base font-semibold text-gray-900 dark:text-gray-100 md:text-lg"
+                    class="line-clamp-1 min-w-0 text-base font-semibold text-gray-900 dark:text-gray-100 md:text-lg"
                 >
                     {{ displayName }}
                 </h2>
-                <p v-if="lastSeenText" class="text-xs text-gray-500 dark:text-gray-400">
+                <p
+                    v-if="lastSeenText"
+                    class="text-xs text-gray-500 dark:text-gray-400"
+                >
                     {{ lastSeenText }}
                 </p>
             </div>

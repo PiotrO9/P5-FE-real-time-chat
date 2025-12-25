@@ -18,9 +18,13 @@ const emit = defineEmits<Emits>();
 
 const chatData = computed(() => props.chat);
 const selected = computed(() => props.isSelected);
-const chatInitial = computed(() => (chatData.value.name ?? '').charAt(0) || '?');
+const chatInitial = computed(
+    () => (chatData.value.name ?? '').charAt(0) || '?',
+);
 const chatName = computed(() =>
-    chatData.value.isGroup ? chatData.value.name : chatData.value.otherUser.username,
+    chatData.value.isGroup
+        ? chatData.value.name
+        : chatData.value.otherUser.username,
 );
 const lastMessage = computed(() => chatData.value.lastMessage);
 const lastMessageContent = computed(() => lastMessage.value?.content || '');
@@ -49,7 +53,11 @@ const isOnline = computed(() => {
         return chatData.value.hasOnlineMembers ?? false;
     }
 
-    return chatData.value.hasOnlineMembers ?? chatData.value.otherUser?.isOnline ?? false;
+    return (
+        chatData.value.hasOnlineMembers ??
+        chatData.value.otherUser?.isOnline ??
+        false
+    );
 });
 const itemClasses = computed(() => {
     const base =
@@ -82,7 +90,11 @@ function handleKeyDown(event: KeyboardEvent) {
             @click="handleClick"
             @keydown="handleKeyDown"
         >
-            <ChatInitial :chat-initial="chatInitial" :is-online="isOnline" :chat-id="chatData.id" />
+            <ChatInitial
+                :chat-initial="chatInitial"
+                :is-online="isOnline"
+                :chat-id="chatData.id"
+            />
             <div class="flex min-w-0 flex-1 flex-col gap-1">
                 <div class="flex min-w-0 items-center justify-between gap-2">
                     <p
@@ -124,7 +136,13 @@ function handleKeyDown(event: KeyboardEvent) {
                     </div>
                     <span class="truncate">{{ typingText }}</span>
                 </div>
-                <p v-else class="min-w-0 truncate text-sm text-gray-600 dark:text-gray-400">
+                <p
+                    v-else
+                    :class="[
+                        'min-w-0 truncate text-sm text-gray-600 dark:text-gray-400',
+                        hasUnread ? 'font-bold' : '',
+                    ]"
+                >
                     {{ displayMessage }}
                 </p>
             </div>

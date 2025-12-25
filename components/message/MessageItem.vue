@@ -25,7 +25,11 @@ interface Emits {
     ): void;
     (e: 'pin-updated', messageId: string | number, isPinned: boolean): void;
     (e: 'reply', message: Message): void;
-    (e: 'forward-message', targetChatId: string, messageId: string | number): void;
+    (
+        e: 'forward-message',
+        targetChatId: string,
+        messageId: string | number,
+    ): void;
 }
 
 const props = defineProps<Props>();
@@ -51,11 +55,18 @@ const actionBarRef = ref<InstanceType<typeof MessageActionBar> | null>(null);
 
 const currentUserId = computed(() => user.value?.id ?? 0);
 const messageRef = computed(() => props.message);
-const { isOwnMessage, senderDisplayName } = useMessageOwnership(messageRef, currentUserId);
+const { isOwnMessage, senderDisplayName } = useMessageOwnership(
+    messageRef,
+    currentUserId,
+);
 const { formatMessageTime } = useMessageHelpers();
-const formattedTime = computed(() => formatMessageTime(props.message.createdAt));
+const formattedTime = computed(() =>
+    formatMessageTime(props.message.createdAt),
+);
 const isDeleted = computed(() => props.message.isDeleted === true);
-const isEdited = computed(() => props.message.edited === true || !!props.message.editedAt);
+const isEdited = computed(
+    () => props.message.edited === true || !!props.message.editedAt,
+);
 const isPinned = computed(() => props.message.isPinned ?? false);
 const hasReplyTo = computed(() => !!props.message.replyTo);
 
@@ -107,6 +118,10 @@ const shouldShowActionBar = computed(
         (uiState.showActionBar || uiState.isFocused),
 );
 
+const shouldRenderActionBar = computed(
+    () => !isDeleted.value && !uiState.isDeleting && !isEditing.value,
+);
+
 const actionBarProps = computed(() => ({
     messageId: props.message.id,
     currentUserId: currentUserId.value,
@@ -118,6 +133,7 @@ const actionBarProps = computed(() => ({
     isOwnMessage: isOwnMessage.value,
     isPinned: isPinned.value,
     shouldShow: shouldShowActionBar.value,
+    shouldRender: shouldRenderActionBar.value,
     showContextMenu: uiState.showContextMenu,
 }));
 
@@ -134,16 +150,18 @@ function shouldHideActionBar(): boolean {
     );
 }
 
-function handleFocus() {
-    if (!isDeleted.value && !uiState.isDeleting) {
+function handleActionBarFocusIn() {
+    if (!isDeleted.value && !uiState.isDeleting && !isEditing.value) {
         uiState.isFocused = true;
         uiState.showActionBar = true;
     }
 }
 
-function handleBlur() {
-    uiState.isFocused = false;
-    uiState.showActionBar = false;
+function handleActionBarFocusOut() {
+    if (shouldHideActionBar()) {
+        uiState.isFocused = false;
+        uiState.showActionBar = false;
+    }
 }
 
 function handleMessageMouseEnter() {
@@ -230,7 +248,12 @@ function handleReplyToClick(event: Event) {
 }
 
 function handleDeleteClick() {
-    if (!isOwnMessage.value || isDeleted.value || uiState.isDeleting || uiState.justClosedDialog)
+    if (
+        !isOwnMessage.value ||
+        isDeleted.value ||
+        uiState.isDeleting ||
+        uiState.justClosedDialog
+    )
         return;
 
     uiState.isContextMenuActionExecuting = true;
@@ -348,12 +371,16 @@ function handleSelectChatForForward(chatId: string) {
             :class="isOwnMessage ? 'justify-end' : 'justify-start'"
         >
             <template v-if="!isOwnMessage">
-                <div class="relative flex max-w-[90%] items-start gap-2 md:max-w-[85%]">
+                <div
+                    class="relative flex max-w-[90%] items-start gap-2 md:max-w-[85%]"
+                >
                     <MessageAvatar :sender-name="senderDisplayName" />
 
                     <div class="flex min-w-0 flex-1 items-start gap-2">
                         <div class="flex-1">
-                            <p class="mb-1 text-xs font-medium text-gray-700 dark:text-gray-300">
+                            <p
+                                class="mb-1 text-xs font-medium text-gray-700 dark:text-gray-300"
+                            >
                                 {{ senderDisplayName }}
                             </p>
 
@@ -389,16 +416,26 @@ function handleSelectChatForForward(chatId: string) {
                                     v-bind="actionBarProps"
                                     @emoji-click="handleEmojiButtonClick"
                                     @reply-click="handleReplyClick"
-                                    @context-menu-toggle="handleToggleContextMenu"
+                                    @context-menu-toggle="
+                                        handleToggleContextMenu
+                                    "
                                     @reaction-click="handleReactionClick"
-                                    @tooltip-show-change="handleTooltipShowChange"
+                                    @tooltip-show-change="
+                                        handleTooltipShowChange
+                                    "
                                     @mouseenter="handleActionBarMouseEnter"
                                     @mouseleave="handleActionBarMouseLeave"
+                                    @focusin="handleActionBarFocusIn"
+                                    @focusout="handleActionBarFocusOut"
                                     @delete="handleDeleteClick"
                                     @pin="handlePinClick"
                                     @forward="handleForwardClick"
-                                    @context-menu-mouseenter="handleContextMenuMouseEnter"
-                                    @context-menu-mouseleave="handleContextMenuMouseLeave"
+                                    @context-menu-mouseenter="
+                                        handleContextMenuMouseEnter
+                                    "
+                                    @context-menu-mouseleave="
+                                        handleContextMenuMouseLeave
+                                    "
                                 />
                             </div>
 
@@ -415,7 +452,9 @@ function handleSelectChatForForward(chatId: string) {
                                 class="mt-1 flex items-center gap-1 text-[10px] text-gray-600 opacity-70 dark:text-gray-400 dark:opacity-80"
                             >
                                 {{ formattedTime }}
-                                <span v-if="isEdited" class="italic opacity-60 dark:opacity-70"
+                                <span
+                                    v-if="isEdited"
+                                    class="italic opacity-60 dark:opacity-70"
                                     >(edited)</span
                                 >
                             </p>
@@ -427,11 +466,9 @@ function handleSelectChatForForward(chatId: string) {
             <template v-else>
                 <div
                     class="z-1 relative flex max-w-[90%] flex-col items-end md:max-w-[85%]"
-                    tabindex="0"
+                    tabindex="-1"
                     @mouseenter="handleMessageMouseEnter"
                     @mouseleave="handleMessageMouseLeave"
-                    @focusin="handleFocus"
-                    @focusout="handleBlur"
                 >
                     <div class="relative flex flex-col">
                         <div class="flex items-center gap-2">
@@ -445,11 +482,17 @@ function handleSelectChatForForward(chatId: string) {
                                 @tooltip-show-change="handleTooltipShowChange"
                                 @mouseenter="handleActionBarMouseEnter"
                                 @mouseleave="handleActionBarMouseLeave"
+                                @focusin="handleActionBarFocusIn"
+                                @focusout="handleActionBarFocusOut"
                                 @delete="handleDeleteClick"
                                 @pin="handlePinClick"
                                 @forward="handleForwardClick"
-                                @context-menu-mouseenter="handleContextMenuMouseEnter"
-                                @context-menu-mouseleave="handleContextMenuMouseLeave"
+                                @context-menu-mouseenter="
+                                    handleContextMenuMouseEnter
+                                "
+                                @context-menu-mouseleave="
+                                    handleContextMenuMouseLeave
+                                "
                             />
                             <MessageBubble
                                 :message="message"
@@ -465,7 +508,9 @@ function handleSelectChatForForward(chatId: string) {
                                 @cancel-edit="editState.cancelEdit"
                                 @save-edit="editState.saveEdit"
                                 @keydown="editState.handleKeyDown"
-                                @update:edit-content="(value) => (editContent = value)"
+                                @update:edit-content="
+                                    (value) => (editContent = value)
+                                "
                             />
                         </div>
                         <ReactionBadges
@@ -478,7 +523,11 @@ function handleSelectChatForForward(chatId: string) {
                         />
                     </div>
                     <MessageReadsIndicator
-                        v-if="isOwnMessage && message.reads && message.reads.length > 0"
+                        v-if="
+                            isOwnMessage &&
+                            message.reads &&
+                            message.reads.length > 0
+                        "
                         :reads="message.reads"
                         :max-visible="3"
                     />
@@ -488,7 +537,9 @@ function handleSelectChatForForward(chatId: string) {
                         :class="isOwnMessage ? 'items-end' : 'items-start'"
                     >
                         {{ formattedTime }}
-                        <span v-if="isEdited" class="italic opacity-60 dark:opacity-70"
+                        <span
+                            v-if="isEdited"
+                            class="italic opacity-60 dark:opacity-70"
                             >(edited)</span
                         >
                     </p>

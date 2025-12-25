@@ -44,7 +44,8 @@ const bubbleClasses = computed(() => {
             !props.isPinned && !isDeleted,
         'bg-yellow-50 dark:bg-yellow-900/50 border-yellow-300 dark:border-yellow-500 text-gray-900 dark:text-white':
             props.isPinned && !isDeleted,
-        'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600': isDeleted,
+        'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600':
+            isDeleted,
         'ring-2 ring-gray-900 dark:ring-gray-100 ring-offset-2 dark:ring-offset-gray-900':
             props.highlighted,
     };
@@ -90,7 +91,11 @@ const ariaLabel = computed(() => {
 <template>
     <div
         class="relative w-fit px-3 py-2 text-xs shadow-sm transition-all duration-300 md:px-4 md:text-sm"
-        :class="[borderRadiusClass, isOwnMessage ? '' : 'max-w-full border', bubbleClasses]"
+        :class="[
+            borderRadiusClass,
+            isOwnMessage ? '' : 'max-w-full border',
+            bubbleClasses,
+        ]"
         :aria-label="ariaLabel"
     >
         <Icon
@@ -100,10 +105,12 @@ const ariaLabel = computed(() => {
             style="color: rgb(239 68 68)"
             aria-label="Pinned message"
         />
-        <p v-if="isDeleting" class="whitespace-pre-wrap break-words italic">Deleting...</p>
+        <p v-if="isDeleting" class="whitespace-pre-wrap break-words italic">
+            Deleting...
+        </p>
         <p
             v-else-if="isDeleted"
-            class="whitespace-pre-wrap break-words italic text-sm font-medium text-gray-700 dark:text-gray-300"
+            class="whitespace-pre-wrap break-words text-sm font-medium italic text-gray-700 dark:text-gray-300"
         >
             Message has been deleted
         </p>
@@ -122,7 +129,13 @@ const ariaLabel = computed(() => {
                 aria-label="Edit message"
                 @keydown="emit('keydown', $event)"
                 @blur="emit('cancel-edit')"
-                @input="(e) => $emit('update:editContent', (e.target as HTMLTextAreaElement).value)"
+                @input="
+                    (e) =>
+                        $emit(
+                            'update:editContent',
+                            (e.target as HTMLTextAreaElement).value,
+                        )
+                "
             />
             <div class="mt-2 flex items-center justify-end gap-2">
                 <button
@@ -145,7 +158,11 @@ const ariaLabel = computed(() => {
                     type="button"
                     tabindex="0"
                     aria-label="Save changes"
-                    :disabled="isUpdating || !editContent || editContent.trim() === message.content"
+                    :disabled="
+                        isUpdating ||
+                        !editContent ||
+                        editContent.trim() === message.content
+                    "
                     :class="[
                         'rounded-lg px-3 py-1 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
                         isOwnMessage
@@ -186,7 +203,9 @@ const ariaLabel = computed(() => {
                 >
                     {{ message.forwardedFrom.senderUsername }} •
                     {{
-                        new Date(message.forwardedFrom.originalCreatedAt).toLocaleString('en-US', {
+                        new Date(
+                            message.forwardedFrom.originalCreatedAt,
+                        ).toLocaleString('en-US', {
                             day: '2-digit',
                             month: '2-digit',
                             year: 'numeric',
@@ -204,7 +223,9 @@ const ariaLabel = computed(() => {
                         ? isPinned
                             ? 'text-gray-900 dark:text-yellow-50'
                             : 'text-white'
-                        : 'text-gray-600 dark:text-white'
+                        : isPinned
+                          ? 'text-gray-900 dark:text-white'
+                          : 'text-gray-900 dark:text-white'
                 "
             >
                 {{ message.content }}

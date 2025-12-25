@@ -28,10 +28,14 @@ async function handleSubmit(event: Event) {
         <div class="w-full max-w-md">
             <div class="rounded-lg bg-white p-8 shadow-lg dark:bg-gray-800">
                 <div class="mb-8 text-center">
-                    <h1 class="mb-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
+                    <h1
+                        class="mb-2 text-3xl font-bold text-gray-900 dark:text-gray-100"
+                    >
                         {{ title }}
                     </h1>
-                    <p class="text-gray-600 dark:text-gray-400">Welcome back!</p>
+                    <p class="text-gray-600 dark:text-gray-400">
+                        Welcome back!
+                    </p>
                 </div>
 
                 <form class="space-y-6" @submit="handleSubmit">
@@ -56,7 +60,7 @@ async function handleSubmit(event: Event) {
                             autocomplete="email"
                             required
                             placeholder="your@email.com"
-                            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-500"
+                            class="w-full rounded-full border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-500"
                         />
                     </div>
 
@@ -74,7 +78,7 @@ async function handleSubmit(event: Event) {
                             autocomplete="current-password"
                             required
                             placeholder="Enter your password"
-                            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-500"
+                            class="w-full rounded-full border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-500"
                         />
                     </div>
 
