@@ -250,23 +250,14 @@ function handleClickOutside(event: MouseEvent) {
 function handlePinnedMessageClick(messageId: string | number) {
     if (!chat.value) return;
 
-    const message = findById(chat.value.messages, messageId);
+    emit('close');
+    nextTick(() => {
+        const event = new CustomEvent('scroll-to-message', {
+            detail: { messageId },
+        });
 
-    if (message) {
-        const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
-
-        if (messageElement) {
-            messageElement.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center',
-            });
-            messageElement.classList.add('highlight-message');
-
-            setTimeout(() => {
-                messageElement.classList.remove('highlight-message');
-            }, 2000);
-        }
-    }
+        window.dispatchEvent(event);
+    });
 }
 
 async function handleAddUser(friend: Friend) {

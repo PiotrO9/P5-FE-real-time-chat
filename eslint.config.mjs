@@ -73,7 +73,12 @@ export default withNuxt(eslintConfigPrettier, {
         'vue/define-macros-order': [
             'error',
             {
-                order: ['defineOptions', 'defineProps', 'defineEmits', 'defineSlots'],
+                order: [
+                    'defineOptions',
+                    'defineProps',
+                    'defineEmits',
+                    'defineSlots',
+                ],
             },
         ],
         'vue/component-name-in-template-casing': [
@@ -93,6 +98,7 @@ export default withNuxt(eslintConfigPrettier, {
         'vue/v-bind-style': ['error', 'shorthand'],
         'vue/v-on-style': ['error', 'shorthand'],
         'vue/v-slot-style': ['error', 'shorthand'],
+        'vue/no-useless-v-bind': 'error',
 
         'vue/component-definition-name-casing': ['error', 'PascalCase'],
         'vue/prop-name-casing': ['error', 'camelCase'],
@@ -121,7 +127,10 @@ export default withNuxt(eslintConfigPrettier, {
         'vue/no-mutating-props': 'error',
 
         '@typescript-eslint/prefer-as-const': 'error',
-        '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
+        '@typescript-eslint/consistent-type-definitions': [
+            'error',
+            'interface',
+        ],
         '@typescript-eslint/no-explicit-any': 'warn',
 
         'prefer-const': 'error',

@@ -7,16 +7,4 @@
         @apply w-full rounded-lg border border-gray-300 px-4 py-2;
     }
 
-    .highlight-message {
-        animation: highlight 2s ease-in-out;
-    }
-
-    @keyframes highlight {
-        0% {
-            background-color: rgba(255, 255, 0, 0.3);
-        }
-        100% {
-            background-color: transparent;
-        }
-    }
 }

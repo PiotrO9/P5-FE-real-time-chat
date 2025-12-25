@@ -31,23 +31,23 @@ const bubbleClasses = computed(() => {
         return {
             'opacity-50': props.isDeleting || isDeleted,
             'bg-primary text-white': !props.isPinned && !isDeleted,
-            'bg-yellow-50 dark:bg-yellow-900/50 border-2 border-yellow-300 dark:border-yellow-500 text-gray-900 dark:text-yellow-50':
-                props.isPinned && !isDeleted,
+            'bg-indigo-50 dark:bg-indigo-900/30 border-2 border-indigo-300 dark:border-indigo-500 text-gray-900 dark:text-indigo-50':
+                props.isPinned && !isDeleted && !props.highlighted,
+            'bg-indigo-50 dark:bg-indigo-900/30 border-2 border-primary dark:border-primary text-gray-900 dark:text-indigo-50':
+                props.isPinned && !isDeleted && props.highlighted,
             'bg-gray-400 dark:bg-gray-600 text-white': isDeleted,
-            'ring-2 ring-gray-900 dark:ring-gray-100 ring-offset-2 dark:ring-offset-gray-900':
-                props.highlighted,
         };
     }
 
     return {
         'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100':
             !props.isPinned && !isDeleted,
-        'bg-yellow-50 dark:bg-yellow-900/50 border-yellow-300 dark:border-yellow-500 text-gray-900 dark:text-white':
-            props.isPinned && !isDeleted,
+        'bg-indigo-50 dark:bg-indigo-900/30 border-2 border-indigo-300 dark:border-indigo-500 text-gray-900 dark:text-white':
+            props.isPinned && !isDeleted && !props.highlighted,
+        'bg-indigo-50 dark:bg-indigo-900/30 border-2 border-primary dark:border-primary text-gray-900 dark:text-white':
+            props.isPinned && !isDeleted && props.highlighted,
         'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600':
             isDeleted,
-        'ring-2 ring-gray-900 dark:ring-gray-100 ring-offset-2 dark:ring-offset-gray-900':
-            props.highlighted,
     };
 });
 
@@ -92,7 +92,7 @@ const ariaLabel = computed(() => {
 
 <template>
     <div
-        class="relative w-fit px-3 py-2 text-xs shadow-sm transition-all duration-300 md:px-4 md:text-sm"
+        class="relative w-fit px-3 py-2 text-xs shadow-sm transition-all duration-300 ease-in-out md:px-4 md:text-sm"
         :class="[
             borderRadiusClass,
             isOwnMessage ? '' : 'max-w-full border',
@@ -222,7 +222,7 @@ const ariaLabel = computed(() => {
                 :class="
                     isOwnMessage
                         ? isPinned
-                            ? 'text-gray-900 dark:text-yellow-50'
+                            ? 'text-gray-900 dark:text-indigo-50'
                             : 'text-white'
                         : isPinned
                           ? 'text-gray-900 dark:text-white'

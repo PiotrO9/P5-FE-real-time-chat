@@ -37,7 +37,7 @@ function handleKeyDown(event: KeyboardEvent) {
         type="button"
         tabindex="0"
         aria-label="Open pinned messages"
-        class="w-full border-l-4 border-yellow-400 bg-yellow-50 px-4 py-3 text-left transition-colors hover:bg-yellow-100 focus-visible:outline-primary dark:border-yellow-500 dark:bg-yellow-900/40 dark:hover:bg-yellow-900/60"
+        class="w-full border-l-4 border-indigo-400 bg-indigo-50 px-4 py-3 text-left transition-colors hover:bg-indigo-100 focus-visible:outline-primary dark:border-indigo-500 dark:bg-indigo-900/40 dark:hover:bg-indigo-900/60"
         @click="handleClick"
         @keydown="handleKeyDown"
     >
@@ -49,19 +49,19 @@ function handleKeyDown(event: KeyboardEvent) {
             <div class="min-w-0 flex-1">
                 <div class="mb-1 flex items-center gap-2">
                     <p
-                        class="text-xs font-semibold text-yellow-900 dark:text-yellow-200"
+                        class="text-xs font-semibold text-indigo-900 dark:text-indigo-200"
                     >
                         {{ message?.senderUsername }}
                     </p>
-                    <span class="text-xs text-yellow-700 dark:text-yellow-300"
+                    <span class="text-xs text-indigo-700 dark:text-indigo-300"
                         >•</span
                     >
-                    <p class="text-xs text-yellow-700 dark:text-yellow-300">
+                    <p class="text-xs text-indigo-700 dark:text-indigo-300">
                         {{ formatMessageTime(message?.createdAt || '') }}
                     </p>
                 </div>
                 <p
-                    class="line-clamp-2 text-sm text-yellow-900 dark:text-yellow-100"
+                    class="line-clamp-2 text-sm text-indigo-900 dark:text-indigo-100"
                 >
                     {{ truncateMessage(message?.content || '') }}
                 </p>
