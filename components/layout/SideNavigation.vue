@@ -2,6 +2,12 @@
 const dashboard = useDashboard();
 const { isDark, toggleTheme } = useTheme();
 
+const isMounted = ref(false);
+
+onMounted(() => {
+    isMounted.value = true;
+});
+
 type NavView = 'chat' | 'friends' | 'invitations' | 'add';
 
 const navItems: Array<{
@@ -155,7 +161,7 @@ function handleLogoutKeyDown(event: KeyboardEvent) {
         >
             <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
-                    v-if="isDark"
+                    v-if="isMounted && isDark"
                     stroke-linecap="round"
                     stroke-linejoin="round"
                     stroke-width="2"

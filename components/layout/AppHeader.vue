@@ -2,6 +2,13 @@
 const { user } = useAuth();
 const { isDark, toggleTheme } = useTheme();
 
+const isMounted = ref(false);
+
+onMounted(() => {
+    isMounted.value = true;
+    document.addEventListener('click', handleClickOutside);
+});
+
 const userInitials = computed(() => {
     if (!user.value?.username) return '?';
 
@@ -45,10 +52,6 @@ function handleClickOutside(event: MouseEvent) {
     }
 }
 
-onMounted(() => {
-    document.addEventListener('click', handleClickOutside);
-});
-
 onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside);
 });
@@ -74,7 +77,9 @@ onUnmounted(() => {
                 >
                     {{ userInitials }}
                 </div>
-                <span class="hidden text-sm font-medium text-gray-900 dark:text-gray-100 md:inline">
+                <span
+                    class="hidden text-sm font-medium text-gray-900 dark:text-gray-100 md:inline"
+                >
                     {{ user?.username }}
                 </span>
                 <svg
@@ -106,10 +111,17 @@ onUnmounted(() => {
                     @keydown.enter="handleToggleTheme"
                     @keydown.space.prevent="handleToggleTheme"
                 >
-                    <span>{{ isDark ? 'Tryb jasny' : 'Tryb ciemny' }}</span>
-                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <span>
+                        {{ isMounted && isDark ? 'Tryb jasny' : 'Tryb ciemny' }}
+                    </span>
+                    <svg
+                        class="size-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
                         <path
-                            v-if="isDark"
+                            v-if="isMounted && isDark"
                             stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
