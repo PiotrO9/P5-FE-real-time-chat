@@ -23,9 +23,11 @@ export const useAuthStore = defineStore('auth', () => {
 
             user.value = response.data.user;
             isAuthenticated.value = true;
+
             return response;
         } catch (err: any) {
             const errorMessage = err?.response?._data?.message;
+
             error.value = errorMessage;
             isAuthenticated.value = false;
             throw err;
@@ -34,15 +36,17 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
-    async function register(email: string, password: string) {
+    async function register(email: string, username: string, password: string) {
         try {
             loading.value = true;
             error.value = null;
+
             return await useApi<ApiResponse<{ user: User }>>(
                 'POST',
                 '/api/auth/register',
                 {
                     email,
+                    username,
                     password,
                 },
             );
@@ -70,8 +74,10 @@ export const useAuthStore = defineStore('auth', () => {
                 'GET',
                 '/api/auth/me',
             );
+
             user.value = response.data.user;
             isAuthenticated.value = true;
+
             return response;
         } catch {
             isAuthenticated.value = false;
@@ -87,6 +93,7 @@ export const useAuthStore = defineStore('auth', () => {
                 'POST',
                 '/api/auth/refresh',
             );
+
             return response;
         } catch (err) {
             error.value = 'Failed to refresh token';

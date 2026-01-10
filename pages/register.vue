@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const { register, loading, error } = useAuth();
+const { success } = useToast();
 
 const email = ref('');
 const username = ref('');
@@ -37,7 +38,8 @@ async function handleSubmit(event: Event) {
     }
 
     try {
-        await register(email.value, password.value);
+        await register(email.value, username.value, password.value);
+        success('Rejestracja zakończona sukcesem! Witamy!');
         await navigateTo('/dashboard');
     } catch (err) {
         console.error('Registration failed:', err);
