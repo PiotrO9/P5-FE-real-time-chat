@@ -18,9 +18,11 @@ export function useDynamicTitle(sources: DynamicTitleSources) {
     function buildChatTitle(chat: Chat) {
         const unreadSuffix =
             chat.unreadCount > 0 ? ` (✉ ${chat.unreadCount})` : '';
+
         if (chat.isGroup) {
             return `Open group chat: ${chat.name}${unreadSuffix}`;
         }
+
         return `Open chat with ${chat.otherUser.username}${unreadSuffix}`;
     }
 
@@ -28,17 +30,21 @@ export function useDynamicTitle(sources: DynamicTitleSources) {
         if (sources.friendsSubView.value === 'invites') {
             return `Invitations (${sources.invitesTotal.value}) | ${baseTitle}`;
         }
+
         if (sources.friendsSubView.value === 'add') {
             return `Add friends | ${baseTitle}`;
         }
+
         if (sources.friendsSubView.value === 'list') {
             return `Friends list | ${baseTitle}`;
         }
+
         return baseTitle;
     }
 
     function buildTitle() {
         const chat = sources.selectedChat.value;
+
         if (chat) {
             return buildChatTitle(chat);
         }

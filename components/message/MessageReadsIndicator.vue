@@ -30,7 +30,8 @@ function formatReadDateTime(readAt: string): string {
     const now = new Date();
     const isToday = date.toDateString() === now.toDateString();
     const isYesterday =
-        date.toDateString() === new Date(now.getTime() - 24 * 60 * 60 * 1000).toDateString();
+        date.toDateString() ===
+        new Date(now.getTime() - 24 * 60 * 60 * 1000).toDateString();
 
     if (isToday) {
         return `today at ${formatMessageTime(readAt)}`;
@@ -120,7 +121,7 @@ const hasReads = computed(() => props.reads.length > 0);
         <div
             v-for="(read, index) in visibleReads"
             :key="read.userId"
-            class="flex size-4 cursor-help items-center justify-center rounded-full border border-white bg-primary-500 text-[8px] font-medium text-white transition-transform hover:scale-110 dark:border-gray-800"
+            class="flex size-4 cursor-help items-center justify-center rounded-full border border-white bg-primary-500 text-[8px] font-medium text-white transition-transform dark:border-gray-800"
             :class="index > 0 ? '-ml-1' : ''"
             :aria-label="`Read by ${read.username} ${formatReadDateTime(read.readAt)}`"
             @mouseenter="handleReadMouseEnter(read)"
@@ -130,7 +131,7 @@ const hasReads = computed(() => props.reads.length > 0);
         </div>
         <div
             v-if="hiddenReadsCount > 0"
-            class="-ml-1 flex size-4 cursor-help items-center justify-center rounded-full border border-white bg-gray-400 text-[8px] font-medium text-white transition-transform hover:scale-110 dark:border-gray-800 dark:bg-gray-600"
+            class="-ml-1 flex size-4 cursor-help items-center justify-center rounded-full border border-white bg-gray-400 text-[8px] font-medium text-white transition-transform dark:border-gray-800 dark:bg-gray-600"
             :aria-label="`And ${hiddenReadsCount} more`"
             @mouseenter="handleMoreMouseEnter"
             @mouseleave="handleMoreMouseLeave"
@@ -157,10 +158,15 @@ const hasReads = computed(() => props.reads.length > 0);
                     <div class="font-semibold">
                         {{ tooltipContent.username }}
                     </div>
-                    <div class="text-[11px] text-gray-300">Read {{ tooltipContent.dateTime }}</div>
+                    <div class="text-[11px] text-gray-300">
+                        Read {{ tooltipContent.dateTime }}
+                    </div>
                 </div>
 
-                <div v-else-if="tooltipContent.reads" class="flex flex-col gap-2">
+                <div
+                    v-else-if="tooltipContent.reads"
+                    class="flex flex-col gap-2"
+                >
                     <div class="mb-1 font-semibold">
                         Read by {{ tooltipContent.reads.length }} more
                     </div>

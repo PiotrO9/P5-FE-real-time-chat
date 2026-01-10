@@ -4,11 +4,7 @@ const { isDark, toggleTheme } = useTheme();
 
 const isMounted = ref(false);
 
-onMounted(() => {
-    isMounted.value = true;
-});
-
-type NavView = 'chat' | 'friends' | 'invitations' | 'add';
+type NavView = 'chat' | 'friends' | 'add';
 
 const navItems: Array<{
     name: NavView;
@@ -27,11 +23,13 @@ function isActive(item: NavView): boolean {
         case 'chat':
             return viewMode.value === 'chats';
         case 'friends':
-            return viewMode.value === 'friends' && friendsSubView.value === 'list';
-        case 'invitations':
-            return viewMode.value === 'friends' && friendsSubView.value === 'invites';
+            return (
+                viewMode.value === 'friends' && friendsSubView.value === 'list'
+            );
         case 'add':
-            return viewMode.value === 'friends' && friendsSubView.value === 'add';
+            return (
+                viewMode.value === 'friends' && friendsSubView.value === 'add'
+            );
         default:
             return false;
     }
@@ -44,9 +42,6 @@ function handleNavClick(item: NavView) {
             break;
         case 'friends':
             dashboard.handleViewModeChange('friends', 'list');
-            break;
-        case 'invitations':
-            dashboard.handleViewModeChange('friends', 'invites');
             break;
         case 'add':
             dashboard.handleViewModeChange('friends', 'add');
@@ -85,6 +80,10 @@ function handleLogoutKeyDown(event: KeyboardEvent) {
         handleLogout();
     }
 }
+
+onMounted(() => {
+    isMounted.value = true;
+});
 </script>
 
 <template>
@@ -159,7 +158,12 @@ function handleLogoutKeyDown(event: KeyboardEvent) {
             @click="handleToggleTheme"
             @keydown="handleThemeKeyDown"
         >
-            <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+                class="size-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+            >
                 <path
                     v-if="isMounted && isDark"
                     stroke-linecap="round"
@@ -185,7 +189,12 @@ function handleLogoutKeyDown(event: KeyboardEvent) {
             @click="handleLogout"
             @keydown="handleLogoutKeyDown"
         >
-            <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+                class="size-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+            >
                 <path
                     stroke-linecap="round"
                     stroke-linejoin="round"

@@ -6,7 +6,6 @@ import CreateGroupChatDialog from '~/components/chat/CreateGroupChatDialog.vue';
 import MessageForm from '~/components/message/MessageForm.vue';
 import FriendsList from '~/components/friends/FriendsList.vue';
 import AddFriendsPanel from '~/components/friends/AddFriendsPanel.vue';
-import InvitesPanel from '~/components/friends/InvitesPanel.vue';
 import SideNavigation from '~/components/layout/SideNavigation.vue';
 
 const dashboard = useDashboard();
@@ -39,15 +38,24 @@ onUnmounted(() => {
                 <aside
                     :class="[
                         'flex h-full w-full flex-col border-r border-gray-200 bg-white transition-transform duration-300 ease-in-out dark:border-gray-700 dark:bg-gray-900 md:max-w-96',
-                        dashboard.chatsComposable.selectedChat.value ? 'hidden md:flex' : 'flex',
+                        dashboard.chatsComposable.selectedChat.value
+                            ? 'hidden md:flex'
+                            : 'flex',
                     ]"
                 >
                     <div class="flex h-full flex-col">
-                        <template v-if="dashboard.viewModeComposable.viewMode.value === 'chats'">
+                        <template
+                            v-if="
+                                dashboard.viewModeComposable.viewMode.value ===
+                                'chats'
+                            "
+                        >
                             <div
                                 class="border-b border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900"
                             >
-                                <div class="mb-4 flex items-center justify-between">
+                                <div
+                                    class="mb-4 flex items-center justify-between"
+                                >
                                     <h1
                                         class="text-xl font-semibold text-gray-900 dark:text-gray-100"
                                     >
@@ -58,10 +66,13 @@ onUnmounted(() => {
                                         tabindex="0"
                                         aria-label="Create group"
                                         class="flex size-8 items-center justify-center rounded-full bg-primary-500 text-white transition-colors hover:bg-primary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:bg-primary-600 dark:hover:bg-primary-700"
-                                        @click="dashboard.handleOpenCreateGroupDialog"
+                                        @click="
+                                            dashboard.handleOpenCreateGroupDialog
+                                        "
                                         @keydown="
                                             (e) =>
-                                                (e.key === 'Enter' || e.key === ' ') &&
+                                                (e.key === 'Enter' ||
+                                                    e.key === ' ') &&
                                                 dashboard.handleOpenCreateGroupDialog()
                                         "
                                     >
@@ -81,7 +92,9 @@ onUnmounted(() => {
                                     </button>
                                 </div>
                                 <div class="relative">
-                                    <label for="chat-search" class="sr-only">Search</label>
+                                    <label for="chat-search" class="sr-only"
+                                        >Search</label
+                                    >
                                     <input
                                         id="chat-search"
                                         v-model="dashboard.searchQuery.value"
@@ -106,25 +119,34 @@ onUnmounted(() => {
                             </div>
 
                             <div
-                                v-if="dashboard.chatsComposable.chatsLoading.value"
+                                v-if="
+                                    dashboard.chatsComposable.chatsLoading.value
+                                "
                                 class="p-4 text-sm text-slate-600 dark:text-gray-400"
                             >
                                 Loading chats...
                             </div>
                             <div
-                                v-else-if="dashboard.chatsComposable.chatsError.value"
+                                v-else-if="
+                                    dashboard.chatsComposable.chatsError.value
+                                "
                                 class="p-4 text-sm text-red-600 dark:text-red-400"
                             >
                                 {{ dashboard.chatsComposable.chatsError.value }}
                             </div>
                             <ChatList
                                 v-else
-                                :chats="dashboard.chatsComposable.filteredChats.value"
+                                :chats="
+                                    dashboard.chatsComposable.filteredChats
+                                        .value
+                                "
                                 :selected-chat-id="
                                     dashboard.chatsComposable.selectedChatId.value?.toString() ??
                                     null
                                 "
-                                :typing-users-by-chat="dashboard.typingUsersByChat.value"
+                                :typing-users-by-chat="
+                                    dashboard.typingUsersByChat.value
+                                "
                                 @select-chat="dashboard.handleSelectChat"
                             />
                         </template>
@@ -142,11 +164,15 @@ onUnmounted(() => {
                             </div>
 
                             <template
-                                v-if="dashboard.viewModeComposable.viewMode.value === 'friends'"
+                                v-if="
+                                    dashboard.viewModeComposable.viewMode
+                                        .value === 'friends'
+                                "
                             >
                                 <template
                                     v-if="
-                                        dashboard.viewModeComposable.friendsSubView.value === 'list'
+                                        dashboard.viewModeComposable
+                                            .friendsSubView.value === 'list'
                                     "
                                 >
                                     <div class="px-4 py-3">
@@ -157,7 +183,10 @@ onUnmounted(() => {
                                         >
                                         <input
                                             id="friends-search"
-                                            v-model="dashboard.friendsComposable.searchQuery.value"
+                                            v-model="
+                                                dashboard.friendsComposable
+                                                    .searchQuery.value
+                                            "
                                             type="text"
                                             placeholder="Search friends..."
                                             class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs text-gray-900 placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500 md:text-sm"
@@ -166,63 +195,91 @@ onUnmounted(() => {
                                 </template>
                                 <div
                                     v-if="
-                                        dashboard.viewModeComposable.friendsSubView.value === 'list'
+                                        dashboard.viewModeComposable
+                                            .friendsSubView.value === 'list'
                                     "
                                     class="h-full"
                                 >
                                     <div
-                                        v-if="dashboard.friendsComposable.friendsLoading.value"
+                                        v-if="
+                                            dashboard.friendsComposable
+                                                .friendsLoading.value
+                                        "
                                         class="p-4 text-sm text-slate-600 dark:text-gray-400"
                                     >
                                         Loading friends...
                                     </div>
                                     <div
-                                        v-else-if="dashboard.friendsComposable.friendsError.value"
+                                        v-else-if="
+                                            dashboard.friendsComposable
+                                                .friendsError.value
+                                        "
                                         class="p-4 text-sm text-red-600 dark:text-red-400"
                                     >
-                                        {{ dashboard.friendsComposable.friendsError.value }}
+                                        {{
+                                            dashboard.friendsComposable
+                                                .friendsError.value
+                                        }}
                                     </div>
                                     <FriendsList
                                         v-else
                                         :friends="
-                                            dashboard.friendsComposable.displayedFriends.value
+                                            dashboard.friendsComposable
+                                                .displayedFriends.value
                                         "
-                                        @remove-friend="dashboard.handleRemoveFriend"
+                                        @remove-friend="
+                                            dashboard.handleRemoveFriend
+                                        "
                                         @start-chat="dashboard.handleStartChat"
                                     />
                                 </div>
                                 <div
                                     v-else-if="
-                                        dashboard.viewModeComposable.friendsSubView.value ===
-                                        'invites'
+                                        dashboard.viewModeComposable
+                                            .friendsSubView.value === 'add'
                                     "
+                                    class="h-full"
                                 >
                                     <div
-                                        v-if="dashboard.invitesComposable.invitesLoading.value"
+                                        v-if="
+                                            dashboard.invitesComposable
+                                                .invitesLoading.value
+                                        "
                                         class="p-4 text-sm text-slate-600 dark:text-gray-400"
                                     >
                                         Loading invitations...
                                     </div>
                                     <div
-                                        v-else-if="dashboard.invitesComposable.invitesError.value"
+                                        v-else-if="
+                                            dashboard.invitesComposable
+                                                .invitesError.value
+                                        "
                                         class="p-4 text-sm text-red-600 dark:text-red-400"
                                     >
-                                        {{ dashboard.invitesComposable.invitesError.value }}
+                                        {{
+                                            dashboard.invitesComposable
+                                                .invitesError.value
+                                        }}
                                     </div>
-                                    <InvitesPanel
+                                    <AddFriendsPanel
                                         v-else
                                         :sent-invites="
-                                            dashboard.invitesComposable.invites.value.sentInvites
+                                            dashboard.invitesComposable.invites
+                                                .value.sentInvites
                                         "
                                         :received-invites="
-                                            dashboard.invitesComposable.invites.value
-                                                .receivedInvites
+                                            dashboard.invitesComposable.invites
+                                                .value.receivedInvites
                                         "
-                                        @accept-invite="dashboard.handleAcceptInvite"
-                                        @reject-invite="dashboard.handleRejectInvite"
+                                        @add-friend="dashboard.handleAddFriend"
+                                        @accept-invite="
+                                            dashboard.handleAcceptInvite
+                                        "
+                                        @reject-invite="
+                                            dashboard.handleRejectInvite
+                                        "
                                     />
                                 </div>
-                                <AddFriendsPanel v-else @add-friend="dashboard.handleAddFriend" />
                             </template>
                         </template>
                     </div>
@@ -231,27 +288,37 @@ onUnmounted(() => {
                 <div
                     :class="[
                         'flex min-h-0 w-full flex-1 flex-col bg-white transition-transform duration-300 ease-in-out dark:bg-gray-900',
-                        dashboard.chatsComposable.selectedChat.value ? 'flex' : 'hidden md:flex',
+                        dashboard.chatsComposable.selectedChat.value
+                            ? 'flex'
+                            : 'hidden md:flex',
                     ]"
                 >
                     <div class="flex h-full min-h-0 w-full flex-1 flex-col">
                         <ChatPanel
                             :ref="(el) => (dashboard.chatPanelRef.value = el)"
-                            :selected-chat="dashboard.chatsComposable.selectedChat.value"
+                            :selected-chat="
+                                dashboard.chatsComposable.selectedChat.value
+                            "
                             :current-user-id="dashboard.currentUserId.value"
                             :typing-users="dashboard.currentTypingUsers.value"
-                            :available-chats="dashboard.chatsComposable.chats.value"
+                            :available-chats="
+                                dashboard.chatsComposable.chats.value
+                            "
                             :can-load-more="
                                 dashboard.chatsComposable.selectedChat.value
-                                    ? dashboard.messagesComposable.messagesState[
-                                          dashboard.chatsComposable.selectedChat.value.id
+                                    ? dashboard.messagesComposable
+                                          .messagesState[
+                                          dashboard.chatsComposable.selectedChat
+                                              .value.id
                                       ]?.hasMore
                                     : false
                             "
                             :is-loading-more="
                                 dashboard.chatsComposable.selectedChat.value
-                                    ? dashboard.messagesComposable.messagesState[
-                                          dashboard.chatsComposable.selectedChat.value.id
+                                    ? dashboard.messagesComposable
+                                          .messagesState[
+                                          dashboard.chatsComposable.selectedChat
+                                              .value.id
                                       ]?.loading
                                     : false
                             "
@@ -262,21 +329,31 @@ onUnmounted(() => {
                             @reply="dashboard.handleReply"
                             @scroll-to-message="dashboard.handleScrollToMessage"
                             @forward-message="dashboard.handleForwardMessage"
-                            @open-pinned-messages="dashboard.handleOpenPinnedMessages"
-                            @mark-latest-as-read="dashboard.handleMarkLatestMessageAsRead"
+                            @open-pinned-messages="
+                                dashboard.handleOpenPinnedMessages
+                            "
+                            @mark-latest-as-read="
+                                dashboard.handleMarkLatestMessageAsRead
+                            "
                             @toggle-actions="
                                 dashboard.isActionsPanelOpen.value =
                                     !dashboard.isActionsPanelOpen.value
                             "
                             @back="dashboard.handleBackToChats"
                         />
-                        <template v-if="dashboard.chatsComposable.selectedChat.value">
+                        <template
+                            v-if="dashboard.chatsComposable.selectedChat.value"
+                        >
                             <MessageForm
-                                :model-value="dashboard.messagesComposable.newMessageText.value"
+                                :model-value="
+                                    dashboard.messagesComposable.newMessageText
+                                        .value
+                                "
                                 :reply-to="dashboard.replyToMessage.value"
                                 @update:model-value="
                                     (val: string) =>
-                                        (dashboard.messagesComposable.newMessageText.value = val)
+                                        (dashboard.messagesComposable.newMessageText.value =
+                                            val)
                                 "
                                 @submit="dashboard.handleSendMessage"
                                 @typing="dashboard.handleTypingInput"
