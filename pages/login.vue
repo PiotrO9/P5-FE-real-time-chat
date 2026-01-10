@@ -16,7 +16,7 @@ async function handleSubmit(event: Event) {
         await login(email.value, password.value);
         await navigateTo('/dashboard');
     } catch (err: any) {
-        console.error('Login failed:', err);
+        // Error handled by useAuth composable
     }
 }
 </script>

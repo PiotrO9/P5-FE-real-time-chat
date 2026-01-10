@@ -29,11 +29,11 @@ export default defineNuxtPlugin(() => {
     });
 
     socket.on('connect', () => {
-        console.log('WebSocket connected:', socket.id);
+        // WebSocket connected
     });
 
     socket.on('disconnect', () => {
-        console.log('WebSocket disconnected');
+        // WebSocket disconnected
     });
 
     socket.on('connect_error', (error) => {

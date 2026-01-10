@@ -42,7 +42,7 @@ async function handleSubmit(event: Event) {
         success('Rejestracja zakończona sukcesem! Witamy!');
         await navigateTo('/dashboard');
     } catch (err) {
-        console.error('Registration failed:', err);
+        // Error handled by toast
     }
 }
 </script>

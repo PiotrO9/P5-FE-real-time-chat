@@ -164,13 +164,6 @@ export function useSocketHandlers(
 
                 chat.hasOnlineMembers = data.isOnline;
                 updatedChats++;
-
-                console.log('[Socket] Updated direct chat status:', {
-                    chatId: chat.id,
-                    otherUserId: chat.otherUser.id,
-                    isOnline: data.isOnline,
-                    hasOnlineMembers: chat.hasOnlineMembers,
-                });
             }
 
             // For group chats
@@ -212,12 +205,6 @@ export function useSocketHandlers(
                     isGroup: c.isGroup,
                     otherUserId: c.otherUser?.id,
                 })),
-            );
-        } else {
-            console.log(
-                '[Socket] Status update completed for',
-                updatedChats,
-                'chat(s)',
             );
         }
 
