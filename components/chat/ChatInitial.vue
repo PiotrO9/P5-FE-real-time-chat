@@ -9,7 +9,10 @@ const props = defineProps<Props>();
 
 type AvatarColor = 'green' | 'purple' | 'teal' | 'blue' | 'pink' | 'orange';
 
-function getAvatarColor(chatId?: string | number, initial?: string): AvatarColor {
+function getAvatarColor(
+    chatId?: string | number,
+    initial?: string,
+): AvatarColor {
     if (!chatId && !initial) return 'blue';
 
     const hash = chatId
@@ -18,12 +21,21 @@ function getAvatarColor(chatId?: string | number, initial?: string): AvatarColor
               .reduce((acc, char) => acc + char.charCodeAt(0), 0)
         : initial?.charCodeAt(0) || 0;
 
-    const colors: AvatarColor[] = ['green', 'purple', 'teal', 'blue', 'pink', 'orange'];
+    const colors: AvatarColor[] = [
+        'green',
+        'purple',
+        'teal',
+        'blue',
+        'pink',
+        'orange',
+    ];
 
     return colors[hash % colors.length] as AvatarColor;
 }
 
-const avatarColor = computed(() => getAvatarColor(props.chatId, props.chatInitial));
+const avatarColor = computed(() =>
+    getAvatarColor(props.chatId, props.chatInitial),
+);
 
 const avatarClasses = computed(() => {
     const colorMap: Record<AvatarColor, string> = {

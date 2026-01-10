@@ -9,13 +9,16 @@ export function useTypingUsers(currentUserId: Ref<number>) {
 
     const typingUsersByChat = computed(() => {
         const result: Record<string, string[]> = {};
+
         return result;
     });
 
     function getTypingUsers(chatId: string | null): string[] {
         if (!chatId) return [];
+
         const chatIdStr = String(chatId);
         const users = typingUsers[chatIdStr];
+
         return users ? Array.from(users.values()) : [];
     }
 
@@ -32,6 +35,7 @@ export function useTypingUsers(currentUserId: Ref<number>) {
         if (!typingUsers[chatId]) {
             typingUsers[chatId] = new Map();
         }
+
         typingUsers[chatId].set(userId, data.username);
     }
 
@@ -66,6 +70,7 @@ export function useTypingUsers(currentUserId: Ref<number>) {
                 emit('typing:stop', { chatId: chatIdStr });
                 isTyping = false;
             }
+
             typingTimeout = null;
         }, 3000);
     }
@@ -89,13 +94,16 @@ export function useTypingUsers(currentUserId: Ref<number>) {
 
     function updateTypingUsersByChat(chats: any[]) {
         const result: Record<string, string[]> = {};
+
         chats.forEach((chat) => {
             const chatId = String(chat.id);
             const users = typingUsers[chatId];
+
             if (users && users.size > 0) {
                 result[chatId] = Array.from(users.values());
             }
         });
+
         return result;
     }
 

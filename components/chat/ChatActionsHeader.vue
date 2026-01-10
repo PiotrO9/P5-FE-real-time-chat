@@ -35,9 +35,7 @@ function handleKeyDown(event: KeyboardEvent) {
                 @click="handleToggleState"
                 @keydown="handleKeyDown"
             >
-                <X
-                    class="size-4 text-gray-600 dark:text-gray-300"
-                />
+                <X class="size-4 text-gray-600 dark:text-gray-300" />
             </button>
         </div>
     </div>

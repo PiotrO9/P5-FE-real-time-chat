@@ -20,9 +20,11 @@ export const useChatStore = defineStore('chat', () => {
         if (!pinnedMessages.value[chatId]) {
             pinnedMessages.value[chatId] = [];
         }
+
         const exists = pinnedMessages.value[chatId].some(
             (m) => m.id === message.id,
         );
+
         if (!exists) {
             pinnedMessages.value[chatId].push(message);
         }
@@ -30,6 +32,7 @@ export const useChatStore = defineStore('chat', () => {
 
     function removePinnedMessage(chatId: string, messageId: string | number) {
         if (!pinnedMessages.value[chatId]) return;
+
         pinnedMessages.value[chatId] = pinnedMessages.value[chatId].filter(
             (m) => String(m.id) !== String(messageId),
         );

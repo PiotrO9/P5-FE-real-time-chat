@@ -35,9 +35,11 @@ export class PinnedMessagesService {
             });
 
             chatStore.setPinnedMessages(chatId, mappedMessages);
+
             return mappedMessages;
         } catch (err: any) {
             console.error('Error fetching pinned messages:', err);
+
             return [];
         }
     }

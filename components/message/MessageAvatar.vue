@@ -7,6 +7,7 @@ const props = defineProps<Props>();
 
 const avatarInitial = computed(() => {
     const name = props.senderName || '?';
+
     return name.charAt(0).toUpperCase();
 });
 </script>

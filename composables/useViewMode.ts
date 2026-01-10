@@ -7,6 +7,7 @@ export function useViewMode() {
 
     function setViewMode(mode: ViewMode, subView?: SubView) {
         viewMode.value = mode;
+
         if (mode === 'friends') {
             if (subView !== undefined) {
                 friendsSubView.value = subView;

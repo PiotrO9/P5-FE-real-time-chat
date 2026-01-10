@@ -23,6 +23,7 @@ export function useMessageReactions(
                 };
             } else {
                 const group = groups[reaction.emoji];
+
                 if (group) {
                     reaction.userIds.forEach((userId) => {
                         if (!group.userIds.includes(userId)) {
@@ -49,11 +50,13 @@ export function useMessageReactions(
 
     function hasUserReaction(emoji: string): boolean {
         const reactionGroup = groupedReactions.value[emoji];
+
         if (!reactionGroup) return false;
 
         const foundReaction = reactionGroup.reactions.find(
             (reaction) => reaction.emoji === emoji,
         );
+
         if (!foundReaction) return false;
 
         return foundReaction.userIds.some(
@@ -80,20 +83,19 @@ export function useMessageReactions(
 
             if (hasThisReaction || currentUserReaction) {
                 await removeReaction(message.value.id, emoji);
+
                 return { action: 'remove' as const, emoji };
-            } else {
-                const otherUserReaction = userReactions.value[0];
-
-                if (otherUserReaction) {
-                    await removeReaction(
-                        message.value.id,
-                        otherUserReaction.emoji,
-                    );
-                }
-
-                await addReaction(message.value.id, emoji);
-                return { action: 'add' as const, emoji };
             }
+
+            const otherUserReaction = userReactions.value[0];
+
+            if (otherUserReaction) {
+                await removeReaction(message.value.id, otherUserReaction.emoji);
+            }
+
+            await addReaction(message.value.id, emoji);
+
+            return { action: 'add' as const, emoji };
         } catch {
             return null;
         } finally {

@@ -52,13 +52,19 @@ const isOnline = computed(() => {
                 </div>
 
                 <div class="flex w-full flex-col items-center gap-2">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    <h3
+                        class="text-lg font-semibold text-gray-900 dark:text-gray-100"
+                    >
                         {{ userData.username }}
                     </h3>
-                    <p class="text-center text-sm text-gray-500 dark:text-gray-400">
+                    <p
+                        class="text-center text-sm text-gray-500 dark:text-gray-400"
+                    >
                         Head Of Design at Logoipsum
                     </p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Bangladesh</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        Bangladesh
+                    </p>
                 </div>
             </div>
         </div>

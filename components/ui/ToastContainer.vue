@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { CheckCircle, AlertCircle, AlertTriangle, Info, X } from 'lucide-vue-next';
+import {
+    CheckCircle,
+    AlertCircle,
+    AlertTriangle,
+    Info,
+    X,
+} from 'lucide-vue-next';
 
 const { toasts, removeToast } = useToast();
 
@@ -47,7 +53,11 @@ function getIconClasses(type: string) {
 </script>
 
 <template>
-    <div class="fixed right-4 top-4 z-50 flex flex-col gap-3" aria-live="polite" aria-atomic="true">
+    <div
+        class="fixed right-4 top-4 z-50 flex flex-col gap-3"
+        aria-live="polite"
+        aria-atomic="true"
+    >
         <TransitionGroup name="toast">
             <div
                 v-for="toast in toasts"
@@ -55,7 +65,10 @@ function getIconClasses(type: string) {
                 :class="getToastClasses(toast.type)"
                 role="alert"
             >
-                <div :class="getIconClasses(toast.type)" class="mt-0.5 flex-shrink-0">
+                <div
+                    :class="getIconClasses(toast.type)"
+                    class="mt-0.5 flex-shrink-0"
+                >
                     <CheckCircle
                         v-if="toast.type === 'success'"
                         class="size-5"

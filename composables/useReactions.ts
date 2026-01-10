@@ -13,10 +13,13 @@ export function useReactions(
         action: 'add' | 'remove',
     ) {
         if (!selectedChatId.value) return;
+
         const chat = findById(chats.value, selectedChatId.value);
+
         if (!chat) return;
 
         const message = findById(chat.messages, messageId);
+
         if (!message) return;
 
         if (!message.reactions) {
@@ -66,9 +69,11 @@ export function useReactions(
         username: string,
     ) {
         const chat = findById(chats.value, chatId);
+
         if (!chat) return;
 
         const message = findById(chat.messages, messageId);
+
         if (!message) return;
 
         if (!message.reactions) {
@@ -101,9 +106,11 @@ export function useReactions(
         userId: string | number,
     ) {
         const chat = findById(chats.value, chatId);
+
         if (!chat) return;
 
         const message = findById(chat.messages, messageId);
+
         if (!message || !message.reactions) return;
 
         const existingReaction = message.reactions.find(

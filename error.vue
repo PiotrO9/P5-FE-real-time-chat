@@ -57,7 +57,9 @@ function handleKeyDown(event: KeyboardEvent, action: () => void) {
 </script>
 
 <template>
-    <div class="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12">
+    <div
+        class="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12"
+    >
         <div class="w-full max-w-lg text-center">
             <div class="rounded-lg bg-white p-8 shadow-lg md:p-12">
                 <div class="mb-8">
@@ -83,7 +85,11 @@ function handleKeyDown(event: KeyboardEvent, action: () => void) {
 
                     <h1
                         class="mb-4 text-6xl font-bold"
-                        :class="error.statusCode === 404 ? 'text-primary-600' : 'text-red-600'"
+                        :class="
+                            error.statusCode === 404
+                                ? 'text-primary-600'
+                                : 'text-red-600'
+                        "
                     >
                         {{ error.statusCode }}
                     </h1>
@@ -133,7 +139,8 @@ function handleKeyDown(event: KeyboardEvent, action: () => void) {
                                 (e) => {
                                     if (e.key === 'Enter' || e.key === ' ') {
                                         e.preventDefault();
-                                        const target = e.currentTarget as HTMLElement;
+                                        const target =
+                                            e.currentTarget as HTMLElement;
                                         if (target?.parentElement) {
                                             const details =
                                                 target.parentElement as HTMLDetailsElement;

@@ -76,7 +76,9 @@ watch(
 
 function handleToggleFriend(friendId: string | number) {
     const id = String(friendId);
-    const index = selectedFriends.value.findIndex((id) => compareIds(id, friendId));
+    const index = selectedFriends.value.findIndex((id) =>
+        compareIds(id, friendId),
+    );
 
     if (index >= 0) {
         selectedFriends.value.splice(index, 1);
@@ -259,9 +261,11 @@ onMounted(() => {
                             v-for="friend in filteredFriends"
                             :key="friend.id"
                             role="option"
-                            :aria-selected="selectedFriends.some((id) =>
-                                compareIds(id, friend.id),
-                            )"
+                            :aria-selected="
+                                selectedFriends.some((id) =>
+                                    compareIds(id, friend.id),
+                                )
+                            "
                         >
                             <button
                                 type="button"
@@ -290,7 +294,9 @@ onMounted(() => {
                             >
                                 <div class="relative flex-shrink-0">
                                     <ChatInitial
-                                        :chat-initial="getInitials(friend.username)"
+                                        :chat-initial="
+                                            getInitials(friend.username)
+                                        "
                                         :is-online="friend.isOnline"
                                     />
                                 </div>
@@ -341,7 +347,11 @@ onMounted(() => {
                 >
                     <p class="text-sm text-gray-900 dark:text-gray-100">
                         <span class="font-medium">{{ selectedCount }}</span>
-                        {{ selectedCount === 1 ? 'friend selected' : 'friends selected' }}
+                        {{
+                            selectedCount === 1
+                                ? 'friend selected'
+                                : 'friends selected'
+                        }}
                     </p>
                 </div>
 
@@ -364,7 +374,10 @@ onMounted(() => {
                         aria-label="Create group"
                         :disabled="!canCreate || isCreating"
                         @click="handleCreate"
-                        @keydown="(e) => e.key === 'Enter' && canCreate && handleCreate()"
+                        @keydown="
+                            (e) =>
+                                e.key === 'Enter' && canCreate && handleCreate()
+                        "
                     >
                         {{ isCreating ? 'Creating...' : 'Create group' }}
                     </button>
@@ -390,4 +403,3 @@ onMounted(() => {
     }
 }
 </style>
-

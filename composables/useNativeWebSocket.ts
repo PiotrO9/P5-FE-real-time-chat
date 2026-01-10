@@ -20,6 +20,7 @@ export function useNativeWebSocket(url: string) {
     function sendMessage(message: any): void {
         const payload =
             typeof message === 'string' ? message : JSON.stringify(message);
+
         send(payload);
     }
 

@@ -10,5 +10,6 @@ export function ensureNumber(
     value: string | number | undefined | null,
 ): number {
     if (value === undefined || value === null) return 0;
+
     return toNumber(value);
 }

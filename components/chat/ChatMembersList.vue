@@ -39,7 +39,9 @@ function handleRemoveUser(userId: string) {
         <h3 class="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
             Members ({{ members.length }})
         </h3>
-        <div v-if="isLoading" class="text-sm text-gray-600 dark:text-gray-400">Loading...</div>
+        <div v-if="isLoading" class="text-sm text-gray-600 dark:text-gray-400">
+            Loading...
+        </div>
         <div v-else class="space-y-2">
             <ChatMemberItem
                 v-for="member in members"

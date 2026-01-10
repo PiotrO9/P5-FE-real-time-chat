@@ -10,6 +10,7 @@ export function useMessageOwnership(
 
     const senderDisplayName = computed(() => {
         if (isOwnMessage.value) return 'You';
+
         return message.value.senderUsername || 'Unknown';
     });
 

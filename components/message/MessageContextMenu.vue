@@ -13,7 +13,10 @@ interface Emits {
 defineProps<Props>();
 const emit = defineEmits<Emits>();
 
-function handleKeyDown(event: KeyboardEvent, action: 'delete' | 'pin' | 'forward') {
+function handleKeyDown(
+    event: KeyboardEvent,
+    action: 'delete' | 'pin' | 'forward',
+) {
     if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
 

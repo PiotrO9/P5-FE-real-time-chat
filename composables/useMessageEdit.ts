@@ -12,6 +12,7 @@ export function useMessageEdit(message: Ref<Message>, onSuccess?: () => void) {
 
     function startEdit() {
         if (isEditing.value || message.value.isDeleted) return;
+
         isEditing.value = true;
         editContent.value = message.value.content;
         nextTick(() => {
@@ -22,6 +23,7 @@ export function useMessageEdit(message: Ref<Message>, onSuccess?: () => void) {
 
     function cancelEdit() {
         if (isUpdating.value) return;
+
         isEditing.value = false;
         editContent.value = '';
     }
@@ -34,6 +36,7 @@ export function useMessageEdit(message: Ref<Message>, onSuccess?: () => void) {
             editContent.value.trim() === message.value.content
         ) {
             cancelEdit();
+
             return;
         }
 
@@ -47,6 +50,7 @@ export function useMessageEdit(message: Ref<Message>, onSuccess?: () => void) {
 
             if (res?.data) {
                 const updatedMessage = mapMessageFromBackend(res.data);
+
                 message.value.content = updatedMessage.content;
                 message.value.edited = updatedMessage.edited ?? true;
                 message.value.editedAt = updatedMessage.editedAt;
@@ -58,6 +62,7 @@ export function useMessageEdit(message: Ref<Message>, onSuccess?: () => void) {
         } catch (error: any) {
             const errorMessage =
                 error?.response?._data?.message || error?.message;
+
             toastError(errorMessage || 'Failed to update message');
         } finally {
             isUpdating.value = false;

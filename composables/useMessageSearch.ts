@@ -26,6 +26,7 @@ export function useMessageSearch() {
             searchResults.value = [];
             searchTotal.value = 0;
             searchHasMore.value = false;
+
             return;
         }
 
@@ -83,6 +84,7 @@ export function useMessageSearch() {
             !searchQuery.value.trim()
         )
             return;
+
         searchMessages(chatId, searchQuery.value, false);
     }
 

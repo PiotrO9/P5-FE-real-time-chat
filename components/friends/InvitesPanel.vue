@@ -25,7 +25,11 @@ function handleReject(inviteId: string) {
     emit('reject-invite', inviteId);
 }
 
-function handleKeyDown(event: KeyboardEvent, action: 'accept' | 'reject', inviteId: string) {
+function handleKeyDown(
+    event: KeyboardEvent,
+    action: 'accept' | 'reject',
+    inviteId: string,
+) {
     if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
 
@@ -91,7 +95,9 @@ function getStatusText(status: string): string {
                 v-if="receivedInvites.length === 0 && sentInvites.length === 0"
                 class="p-8 text-center"
             >
-                <p class="text-sm text-gray-500 dark:text-gray-400">No invitations</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    No invitations
+                </p>
             </div>
 
             <div v-else class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -113,10 +119,18 @@ function getStatusText(status: string): string {
                             role="option"
                             :aria-label="`Invitation from ${invite.sender?.username}`"
                         >
-                            <div class="flex items-center justify-between gap-3">
-                                <div class="flex min-w-0 flex-1 items-center gap-3">
+                            <div
+                                class="flex items-center justify-between gap-3"
+                            >
+                                <div
+                                    class="flex min-w-0 flex-1 items-center gap-3"
+                                >
                                     <ChatInitial
-                                        :chat-initial="getInitials(invite.sender?.username || '')"
+                                        :chat-initial="
+                                            getInitials(
+                                                invite.sender?.username || '',
+                                            )
+                                        "
                                     />
                                     <div class="min-w-0 flex-1">
                                         <p
@@ -129,12 +143,16 @@ function getStatusText(status: string): string {
                                         >
                                             {{ invite.sender?.email }}
                                         </p>
-                                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                                        <p
+                                            class="mt-1 text-xs text-gray-400 dark:text-gray-500"
+                                        >
                                             {{ formatDate(invite.createdAt) }}
                                         </p>
                                     </div>
                                 </div>
-                                <div class="flex flex-shrink-0 items-center gap-1 md:gap-2">
+                                <div
+                                    class="flex flex-shrink-0 items-center gap-1 md:gap-2"
+                                >
                                     <span
                                         :class="[
                                             'hidden rounded-full border px-2 py-1 text-xs font-medium sm:inline-block',
@@ -143,16 +161,26 @@ function getStatusText(status: string): string {
                                     >
                                         {{ getStatusText(invite.status) }}
                                     </span>
-                                    <template v-if="invite.status === 'PENDING'">
+                                    <template
+                                        v-if="invite.status === 'PENDING'"
+                                    >
                                         <button
                                             type="button"
                                             class="rounded-lg bg-green-500 px-2 py-1.5 text-xs font-medium text-white transition-colors hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 md:px-3"
                                             tabindex="0"
                                             aria-label="Accept invitation"
                                             @click="handleAccept(invite.id)"
-                                            @keydown="handleKeyDown($event, 'accept', invite.id)"
+                                            @keydown="
+                                                handleKeyDown(
+                                                    $event,
+                                                    'accept',
+                                                    invite.id,
+                                                )
+                                            "
                                         >
-                                            <span class="hidden sm:inline">Accept</span>
+                                            <span class="hidden sm:inline"
+                                                >Accept</span
+                                            >
                                             <span class="sm:hidden">✓</span>
                                         </button>
                                         <button
@@ -161,9 +189,17 @@ function getStatusText(status: string): string {
                                             tabindex="0"
                                             aria-label="Reject invitation"
                                             @click="handleReject(invite.id)"
-                                            @keydown="handleKeyDown($event, 'reject', invite.id)"
+                                            @keydown="
+                                                handleKeyDown(
+                                                    $event,
+                                                    'reject',
+                                                    invite.id,
+                                                )
+                                            "
                                         >
-                                            <span class="hidden sm:inline">Reject</span>
+                                            <span class="hidden sm:inline"
+                                                >Reject</span
+                                            >
                                             <span class="sm:hidden">×</span>
                                         </button>
                                     </template>
@@ -191,10 +227,18 @@ function getStatusText(status: string): string {
                             role="option"
                             :aria-label="`Invitation to ${invite.receiver?.username}`"
                         >
-                            <div class="flex items-center justify-between gap-3">
-                                <div class="flex min-w-0 flex-1 items-center gap-3">
+                            <div
+                                class="flex items-center justify-between gap-3"
+                            >
+                                <div
+                                    class="flex min-w-0 flex-1 items-center gap-3"
+                                >
                                     <ChatInitial
-                                        :chat-initial="getInitials(invite.receiver?.username || '')"
+                                        :chat-initial="
+                                            getInitials(
+                                                invite.receiver?.username || '',
+                                            )
+                                        "
                                     />
                                     <div class="min-w-0 flex-1">
                                         <p
@@ -207,7 +251,9 @@ function getStatusText(status: string): string {
                                         >
                                             {{ invite.receiver?.email }}
                                         </p>
-                                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                                        <p
+                                            class="mt-1 text-xs text-gray-400 dark:text-gray-500"
+                                        >
                                             {{ formatDate(invite.createdAt) }}
                                         </p>
                                     </div>

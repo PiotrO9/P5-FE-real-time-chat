@@ -13,7 +13,8 @@ export function useMessageHelpers() {
                 : toNumber(messageData.id);
         const chatId = String(messageData.chatId);
         const senderId =
-            typeof messageData.senderId === 'string' && isNaN(Number(messageData.senderId))
+            typeof messageData.senderId === 'string' &&
+            isNaN(Number(messageData.senderId))
                 ? messageData.senderId
                 : toNumber(messageData.senderId);
 
@@ -35,7 +36,9 @@ export function useMessageHelpers() {
             isPinned: messageData.isPinned ?? false,
             pinnedBy: messageData.pinnedBy
                 ? {
-                      id: messageData.pinnedBy.id || messageData.pinnedBy.userId,
+                      id:
+                          messageData.pinnedBy.id ||
+                          messageData.pinnedBy.userId,
                       username: messageData.pinnedBy.username || '',
                   }
                 : undefined,
@@ -63,20 +66,26 @@ export function useMessageHelpers() {
                 : undefined,
             reads: messageData.reads?.map((read: any) => ({
                 userId:
-                    typeof read.userId === 'string' && isNaN(Number(read.userId))
+                    typeof read.userId === 'string' &&
+                    isNaN(Number(read.userId))
                         ? read.userId
                         : toNumber(read.userId),
                 username: read.username || '',
-                readAt: typeof read.readAt === 'string' ? read.readAt : read.readAt.toISOString(),
+                readAt:
+                    typeof read.readAt === 'string'
+                        ? read.readAt
+                        : read.readAt.toISOString(),
             })),
             forwardedFrom: messageData.forwardedFrom
                 ? {
                       messageId: String(messageData.forwardedFrom.messageId),
                       chatId: String(messageData.forwardedFrom.chatId),
                       chatName: messageData.forwardedFrom.chatName ?? null,
-                      senderUsername: messageData.forwardedFrom.senderUsername || '',
+                      senderUsername:
+                          messageData.forwardedFrom.senderUsername || '',
                       originalCreatedAt:
-                          typeof messageData.forwardedFrom.originalCreatedAt === 'string'
+                          typeof messageData.forwardedFrom.originalCreatedAt ===
+                          'string'
                               ? messageData.forwardedFrom.originalCreatedAt
                               : messageData.forwardedFrom.originalCreatedAt.toISOString(),
                   }

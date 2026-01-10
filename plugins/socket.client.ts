@@ -13,6 +13,7 @@ export default defineNuxtPlugin(() => {
         const tokenCookie = cookies.find((row) =>
             row.startsWith('accessToken='),
         );
+
         return tokenCookie ? tokenCookie.split('=')[1] : null;
     }
 
@@ -22,6 +23,7 @@ export default defineNuxtPlugin(() => {
         withCredentials: true,
         auth: (cb) => {
             const token = getTokenFromCookies();
+
             cb({ token: token || undefined });
         },
     });

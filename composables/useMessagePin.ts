@@ -23,48 +23,52 @@ export function useMessagePin(message: Ref<Message>, chatStore: any) {
                 message.value.isPinned = false;
                 message.value.pinnedBy = undefined;
                 message.value.pinnedAt = undefined;
+
                 return false;
-            } else {
-                if (message.value.isPinned === true) {
-                    return true;
-                }
+            }
 
-                const res = await pinMessage(chatId, message.value.id);
-                const { mapMessageFromBackend } = useMessageHelpers();
+            if (message.value.isPinned === true) {
+                return true;
+            }
 
-                if (res?.data) {
-                    const pinnedData = res.data;
-                    if (pinnedData.message) {
-                        const mappedMessage = mapMessageFromBackend(
-                            pinnedData.message,
-                        );
-                        message.value.isPinned = mappedMessage.isPinned ?? true;
-                        message.value.pinnedBy = mappedMessage.pinnedBy;
-                        message.value.pinnedAt = mappedMessage.pinnedAt;
-                        const pinnedMessageForStore = {
-                            ...message.value,
-                            isPinned: mappedMessage.isPinned ?? true,
-                            pinnedBy: mappedMessage.pinnedBy,
-                            pinnedAt: mappedMessage.pinnedAt,
-                        };
-                        chatStore.addPinnedMessage(
-                            chatId,
-                            pinnedMessageForStore,
-                        );
-                    } else {
-                        message.value.isPinned = true;
-                        chatStore.addPinnedMessage(chatId, message.value);
-                    }
+            const res = await pinMessage(chatId, message.value.id);
+            const { mapMessageFromBackend } = useMessageHelpers();
+
+            if (res?.data) {
+                const pinnedData = res.data;
+
+                if (pinnedData.message) {
+                    const mappedMessage = mapMessageFromBackend(
+                        pinnedData.message,
+                    );
+
+                    message.value.isPinned = mappedMessage.isPinned ?? true;
+                    message.value.pinnedBy = mappedMessage.pinnedBy;
+                    message.value.pinnedAt = mappedMessage.pinnedAt;
+                    const pinnedMessageForStore = {
+                        ...message.value,
+                        isPinned: mappedMessage.isPinned ?? true,
+                        pinnedBy: mappedMessage.pinnedBy,
+                        pinnedAt: mappedMessage.pinnedAt,
+                    };
+
+                    chatStore.addPinnedMessage(chatId, pinnedMessageForStore);
                 } else {
                     message.value.isPinned = true;
                     chatStore.addPinnedMessage(chatId, message.value);
                 }
-                return true;
+            } else {
+                message.value.isPinned = true;
+                chatStore.addPinnedMessage(chatId, message.value);
             }
+
+            return true;
         } catch (error: any) {
             const errorMessage =
                 error?.response?._data?.message || error?.message;
+
             toastError(errorMessage || 'Failed to update pin status');
+
             return message.value.isPinned ?? false;
         } finally {
             isPinning.value = false;

@@ -74,6 +74,7 @@ export function useInvites() {
                 err,
                 'Failed to accept invitation',
             );
+
             toastError(errorMessage);
         }
     }
@@ -87,6 +88,7 @@ export function useInvites() {
                 err,
                 'Failed to reject invitation',
             );
+
             toastError(errorMessage);
         }
     }
@@ -120,6 +122,7 @@ export function useInvites() {
             invites.value.receivedInvites,
             invite.id,
         );
+
         if (existingIndex === -1) {
             invites.value.receivedInvites.push(invite);
             invites.value.totalReceived++;
@@ -129,13 +132,17 @@ export function useInvites() {
 
     function removeInvite(inviteId: string) {
         const sentIndex = findIndexById(invites.value.sentInvites, inviteId);
+
         if (sentIndex !== -1) {
             const invite = invites.value.sentInvites[sentIndex];
+
             if (invite.status === 'PENDING') {
                 invites.value.totalPending--;
             }
+
             invites.value.sentInvites.splice(sentIndex, 1);
             invites.value.totalSent--;
+
             return;
         }
 
@@ -143,11 +150,14 @@ export function useInvites() {
             invites.value.receivedInvites,
             inviteId,
         );
+
         if (receivedIndex !== -1) {
             const invite = invites.value.receivedInvites[receivedIndex];
+
             if (invite.status === 'PENDING') {
                 invites.value.totalPending--;
             }
+
             invites.value.receivedInvites.splice(receivedIndex, 1);
             invites.value.totalReceived--;
         }
@@ -161,9 +171,11 @@ export function useInvites() {
 
         if (sentIndex !== -1) {
             const invite = invites.value.sentInvites[sentIndex];
+
             if (invite.status === 'PENDING') {
                 invites.value.totalPending--;
             }
+
             invites.value.sentInvites[sentIndex] = {
                 ...invite,
                 status: inviteData.status,
@@ -171,6 +183,7 @@ export function useInvites() {
                     ? mapUserToInviteUser(inviteData.receiver)
                     : undefined,
             };
+
             return;
         }
 
@@ -178,11 +191,14 @@ export function useInvites() {
             invites.value.receivedInvites,
             inviteId,
         );
+
         if (receivedIndex !== -1) {
             const invite = invites.value.receivedInvites[receivedIndex];
+
             if (invite.status === 'PENDING') {
                 invites.value.totalPending--;
             }
+
             invites.value.receivedInvites[receivedIndex] = {
                 ...invite,
                 status: inviteData.status,

@@ -27,7 +27,7 @@ export type SystemMessageType =
     | 'chat:created'
     | 'chat:updated';
 
-export type Message = {
+export interface Message {
     id: number | string;
     chatId: string;
     senderId: number | string;
@@ -65,9 +65,9 @@ export type Message = {
         originalCreatedAt: string;
     } | null;
     isDeleted?: boolean;
-};
+}
 
-export type Chat = {
+export interface Chat {
     createdAt: string;
     id: string;
     isGroup: boolean;
@@ -80,7 +80,7 @@ export type Chat = {
     members?: ChatMember[];
     currentUserRole?: Role;
     hasOnlineMembers?: boolean;
-};
+}
 
 export interface Friend {
     id: string | number;

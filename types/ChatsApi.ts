@@ -70,6 +70,8 @@ export interface CreateGroupChatRequest {
     participantIds: UUID[];
 }
 
-export type CreateChatRequest = CreateDirectChatRequest | CreateGroupChatRequest;
+export type CreateChatRequest =
+    | CreateDirectChatRequest
+    | CreateGroupChatRequest;
 
 export type ChatResponse = DirectChatItem | GroupChatItem;

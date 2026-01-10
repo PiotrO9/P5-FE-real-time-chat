@@ -52,10 +52,18 @@ function formatLastSeen(lastSeen?: string): string {
     })}`;
 }
 
+const isOnline = computed(() => {
+    if (isGroup.value) {
+        return selectedChat?.hasOnlineMembers ?? false;
+    }
+
+    return selectedChat?.otherUser?.isOnline ?? false;
+});
+
 const lastSeenText = computed(() => {
     if (isGroup.value) return null;
 
-    if (selectedChat?.otherUser?.isOnline) return 'Active now';
+    if (isOnline.value) return 'Active now';
 
     if (!selectedChat?.otherUser?.lastSeen) return null;
 
@@ -102,11 +110,13 @@ function handleBackKeyDown(event: KeyboardEvent) {
                 @click="handleBack"
                 @keydown="handleBackKeyDown"
             >
-                <ArrowLeft
-                    class="size-5 text-gray-600 dark:text-gray-400"
-                />
+                <ArrowLeft class="size-5 text-gray-600 dark:text-gray-400" />
             </button>
-            <ChatInitial :chat-initial :chat-id="selectedChat?.id" />
+            <ChatInitial
+                :chat-initial="chatInitial"
+                :is-online="isOnline"
+                :chat-id="selectedChat?.id"
+            />
             <div class="flex min-w-0 flex-col">
                 <h2
                     class="line-clamp-1 min-w-0 text-base font-semibold text-gray-900 dark:text-gray-100 md:text-lg"

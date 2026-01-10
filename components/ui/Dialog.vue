@@ -84,8 +84,12 @@ onMounted(() => {
             v-show="open"
             ref="dialogRef"
             class="dialog-content w-full max-w-md rounded-xl border-0 bg-white p-0 shadow-2xl backdrop:bg-black backdrop:bg-opacity-50 backdrop:backdrop-blur-sm dark:bg-gray-800"
-            :aria-labelledby="hasHeaderSlot || title ? 'dialog-title' : undefined"
-            :aria-describedby="hasDefaultSlot || message ? 'dialog-message' : undefined"
+            :aria-labelledby="
+                hasHeaderSlot || title ? 'dialog-title' : undefined
+            "
+            :aria-describedby="
+                hasDefaultSlot || message ? 'dialog-message' : undefined
+            "
             @keydown="handleKeyDown"
             @click="handleBackdropClick"
         >

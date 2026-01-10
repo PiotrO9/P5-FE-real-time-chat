@@ -7,12 +7,15 @@ export function useMessageReads(chats: Ref<Chat[]>) {
         reader: { userId: number | string; username: string; readAt: string },
     ) {
         const chat = findById(chats.value, chatId);
+
         if (!chat) return;
 
         const messageIndex = findIndexById(chat.messages, messageId);
+
         if (messageIndex === -1) return;
 
         const message = chat.messages[messageIndex];
+
         if (!message) return;
 
         if (!message.reads) {
@@ -44,12 +47,15 @@ export function useMessageReads(chats: Ref<Chat[]>) {
         userId: number | string,
     ) {
         const chat = findById(chats.value, chatId);
+
         if (!chat) return;
 
         const messageIndex = findIndexById(chat.messages, messageId);
+
         if (messageIndex === -1) return;
 
         const message = chat.messages[messageIndex];
+
         if (!message || !message.reads) return;
 
         message.reads = message.reads.filter(
@@ -70,6 +76,7 @@ export function useMessageReads(chats: Ref<Chat[]>) {
         userId: number | string,
     ): boolean {
         if (!message.reads) return false;
+
         return message.reads.some((read) => compareIds(read.userId, userId));
     }
 

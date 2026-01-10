@@ -4,6 +4,7 @@ import type {
     FriendInviteAcceptedEvent,
     FriendInviteRejectedEvent,
     FriendRemovedEvent,
+    UserStatusEvent,
 } from '~/types/socket';
 import { nextTick } from 'vue';
 import { useSocket } from './useSocket';
@@ -124,57 +125,105 @@ export function useSocketHandlers(
         messages.updateMessage(chatId, mappedMessage);
     }
 
-    function handleUserStatus(data: {
-        userId: string;
-        isOnline: boolean;
-        lastSeen?: Date;
-    }) {
-        const userId = toNumber(data.userId);
+    function handleUserStatus(data: UserStatusEvent) {
+        const userId = data.userId;
+
+        let lastSeenDate: Date | undefined;
+
+        if (data.lastSeen) {
+            lastSeenDate =
+                data.lastSeen instanceof Date
+                    ? data.lastSeen
+                    : new Date(data.lastSeen);
+        }
 
         friendsComposable.updateFriendStatus(
             userId,
             data.isOnline,
-            data.lastSeen,
+            lastSeenDate,
         );
 
-        chats.value.forEach((chat) => {
+        let updatedChats = 0;
+
+        for (let i = 0; i < chats.value.length; i++) {
+            const chat = chats.value[i];
+
             if (
-                !chat.isGroup &&
-                chat.otherUser &&
+                !chat?.isGroup &&
+                chat?.otherUser &&
                 compareIds(chat.otherUser.id, userId)
             ) {
                 chat.otherUser.isOnline = data.isOnline;
 
-                if (data.lastSeen) {
-                    chat.otherUser.lastSeen =
-                        data.lastSeen instanceof Date
-                            ? data.lastSeen.toISOString()
-                            : String(data.lastSeen);
+                if (lastSeenDate) {
+                    chat.otherUser.lastSeen = lastSeenDate.toISOString();
+                } else if (data.isOnline === false && !data.lastSeen) {
+                    // If user is offline and has no lastSeen, use current time
+                    chat.otherUser.lastSeen = new Date().toISOString();
                 }
 
                 chat.hasOnlineMembers = data.isOnline;
+                updatedChats++;
+
+                console.log('[Socket] Updated direct chat status:', {
+                    chatId: chat.id,
+                    otherUserId: chat.otherUser.id,
+                    isOnline: data.isOnline,
+                    hasOnlineMembers: chat.hasOnlineMembers,
+                });
             }
 
-            if (chat.isGroup && chat.members) {
-                const member = chat.members.find((m) =>
+            // For group chats
+            if (chat?.isGroup && chat?.members) {
+                const memberIndex = chat.members.findIndex((m) =>
                     compareIds(m.id, userId),
                 );
 
-                if (member) {
-                    member.isOnline = data.isOnline;
+                if (memberIndex !== -1) {
+                    const member = chat.members[memberIndex];
 
-                    if (data.lastSeen) {
-                        member.lastSeen =
-                            data.lastSeen instanceof Date
-                                ? data.lastSeen.toISOString()
-                                : String(data.lastSeen);
+                    if (member) {
+                        member.isOnline = data.isOnline;
+
+                        if (lastSeenDate) {
+                            member.lastSeen = lastSeenDate.toISOString();
+                        } else if (data.isOnline === false && !data.lastSeen) {
+                            // If user is offline and has no lastSeen, use current time
+                            member.lastSeen = new Date().toISOString();
+                        }
+
+                        // Update hasOnlineMembers based on all members
+                        chat.hasOnlineMembers = chat.members.some(
+                            (m) => m.isOnline === true,
+                        );
+                        updatedChats++;
                     }
-
-                    chat.hasOnlineMembers = chat.members.some(
-                        (m) => m.isOnline === true,
-                    );
                 }
             }
+        }
+
+        if (updatedChats === 0) {
+            console.warn(
+                '[Socket] No chats found to update for userId:',
+                userId,
+                'Available chats:',
+                chats.value.map((c) => ({
+                    id: c.id,
+                    isGroup: c.isGroup,
+                    otherUserId: c.otherUser?.id,
+                })),
+            );
+        } else {
+            console.log(
+                '[Socket] Status update completed for',
+                updatedChats,
+                'chat(s)',
+            );
+        }
+
+        // Force reactivity update
+        nextTick(() => {
+            // Vue should automatically detect changes
         });
     }
 
@@ -243,8 +292,10 @@ export function useSocketHandlers(
 
         if (isCurrentUser) {
             const chatStore = useChatStore();
+
             chatStore.closeChatDetails();
             chatsComposable.removeChat(chatId);
+
             return;
         }
 

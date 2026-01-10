@@ -77,6 +77,7 @@ function handleRemoveUser() {
         <div class="flex min-w-0 flex-1 items-center gap-2">
             <ChatInitial
                 :chat-initial="member.username.charAt(0).toUpperCase()"
+                :is-online="member.isOnline"
             />
 
             <div class="min-w-0 flex-1">

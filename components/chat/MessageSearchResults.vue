@@ -45,13 +45,19 @@ function highlightText(text: string, query: string): string {
 
     const regex = new RegExp(`(${query})`, 'gi');
 
-    return text.replace(regex, '<mark class="bg-yellow-200 dark:bg-yellow-600/50">$1</mark>');
+    return text.replace(
+        regex,
+        '<mark class="bg-yellow-200 dark:bg-yellow-600/50">$1</mark>',
+    );
 }
 </script>
 
 <template>
     <div class="flex flex-col">
-        <div v-if="isLoading" class="p-4 text-center text-sm text-gray-600 dark:text-gray-400">
+        <div
+            v-if="isLoading"
+            class="p-4 text-center text-sm text-gray-600 dark:text-gray-400"
+        >
             Searching...
         </div>
         <div
@@ -84,16 +90,25 @@ function highlightText(text: string, query: string): string {
                     >
                         <div class="flex flex-col gap-1">
                             <div class="flex items-center justify-between">
-                                <span class="text-xs font-medium text-gray-700 dark:text-gray-300">
+                                <span
+                                    class="text-xs font-medium text-gray-700 dark:text-gray-300"
+                                >
                                     {{ message.senderUsername }}
                                 </span>
-                                <span class="text-xs text-gray-500 dark:text-gray-400">
+                                <span
+                                    class="text-xs text-gray-500 dark:text-gray-400"
+                                >
                                     {{ formatDate(message.createdAt) }}
                                 </span>
                             </div>
                             <p
                                 class="line-clamp-2 text-sm text-gray-900 dark:text-gray-100"
-                                v-html="highlightText(message.content, props.query || '')"
+                                v-html="
+                                    highlightText(
+                                        message.content,
+                                        props.query || '',
+                                    )
+                                "
                             />
                         </div>
                     </li>

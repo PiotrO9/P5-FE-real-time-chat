@@ -69,8 +69,10 @@ export function useChats() {
 
     function selectChat(chatId: string) {
         if (selectedChatId.value === chatId) return;
+
         selectedChatId.value = chatId;
         const chat = findById(chats.value, chatId);
+
         if (chat) chat.unreadCount = 0;
     }
 
@@ -80,6 +82,7 @@ export function useChats() {
 
     function updateChat(chatId: string, updates: Partial<Chat>) {
         const chat = findChatById(chatId);
+
         if (chat) {
             Object.assign(chat, updates);
         }
@@ -87,16 +90,21 @@ export function useChats() {
 
     function incrementUnreadCount(chatId: string) {
         const chat = findChatById(chatId);
+
         if (chat && !compareIds(selectedChatId.value, chat.id)) {
             chat.unreadCount++;
         }
     }
 
     function removeChat(chatId: string) {
-        const index = chats.value.findIndex((chat) => compareIds(chat.id, chatId));
+        const index = chats.value.findIndex((chat) =>
+            compareIds(chat.id, chatId),
+        );
+
         if (index !== -1) {
             chats.value.splice(index, 1);
         }
+
         if (compareIds(selectedChatId.value, chatId)) {
             selectedChatId.value = null;
         }

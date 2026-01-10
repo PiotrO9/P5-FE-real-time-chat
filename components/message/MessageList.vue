@@ -11,7 +11,10 @@ interface Props {
 }
 
 interface Emits {
-    (e: 'delete-message' | 'scroll-to-message', messageId: string | number): void;
+    (
+        e: 'delete-message' | 'scroll-to-message',
+        messageId: string | number,
+    ): void;
     (
         e: 'reaction-updated',
         messageId: string | number,
@@ -20,7 +23,11 @@ interface Emits {
     ): void;
     (e: 'pin-updated', messageId: string | number, isPinned: boolean): void;
     (e: 'reply', message: Message): void;
-    (e: 'forward-message', targetChatId: string, messageId: string | number): void;
+    (
+        e: 'forward-message',
+        targetChatId: string,
+        messageId: string | number,
+    ): void;
 }
 
 const props = defineProps<Props>();
@@ -52,7 +59,10 @@ function handleScrollToMessage(messageId: string | number) {
     emit('scroll-to-message', messageId);
 }
 
-function handleForwardMessage(targetChatId: string, messageId: string | number) {
+function handleForwardMessage(
+    targetChatId: string,
+    messageId: string | number,
+) {
     emit('forward-message', targetChatId, messageId);
 }
 </script>

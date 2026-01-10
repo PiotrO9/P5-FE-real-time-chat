@@ -63,6 +63,7 @@ export function useFriends() {
     async function addFriend(username: string) {
         if (!username.trim()) {
             toastError('Please provide a username');
+
             return;
         }
 
@@ -74,12 +75,14 @@ export function useFriends() {
                 err,
                 'Failed to send invitation',
             );
+
             toastError(errorMessage);
         }
     }
 
     async function removeFriend(friendId: string | number) {
         const friend = findById(friends.value, friendId);
+
         if (!friend) return;
 
         try {
@@ -91,6 +94,7 @@ export function useFriends() {
                 err,
                 'Failed to remove friend',
             );
+
             toastError(errorMessage);
         }
     }
@@ -98,13 +102,21 @@ export function useFriends() {
     function updateFriendStatus(
         userId: string | number,
         isOnline: boolean,
-        lastSeen?: Date,
+        lastSeen?: Date | string,
     ) {
         const friend = findById(friends.value, userId);
+
         if (friend) {
             friend.isOnline = isOnline;
+
             if (lastSeen) {
-                friend.lastSeen = lastSeen.toISOString();
+                const lastSeenDate =
+                    lastSeen instanceof Date ? lastSeen : new Date(lastSeen);
+
+                friend.lastSeen = lastSeenDate.toISOString();
+            } else if (isOnline === false) {
+                // If user is offline and has no lastSeen, use current time
+                friend.lastSeen = new Date().toISOString();
             }
         }
     }
@@ -141,6 +153,7 @@ export function useFriends() {
             : mapUserToFriend(friendship.requester, true);
 
         const existingFriend = findFriendById(newFriend.id);
+
         if (!existingFriend) {
             friends.value.push(newFriend);
         }
@@ -150,6 +163,7 @@ export function useFriends() {
         const index = friends.value.findIndex((friend) =>
             compareIds(friend.id, friendId),
         );
+
         if (index !== -1) {
             friends.value.splice(index, 1);
         }
@@ -160,6 +174,7 @@ export function useFriends() {
             searchResults.value = [];
             searchError.value = null;
             searchQuery.value = '';
+
             return;
         }
 
@@ -195,9 +210,11 @@ export function useFriends() {
         if (searchQuery.value.trim() && searchResults.value.length > 0) {
             return searchResults.value;
         }
+
         if (searchQuery.value.trim() && !searchLoading.value) {
             return [];
         }
+
         return friends.value;
     });
 

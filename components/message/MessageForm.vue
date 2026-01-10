@@ -109,7 +109,7 @@ watch(
             <textarea
                 id="message"
                 ref="textareaRef"
-                :aria-label="'Message'"
+                aria-label="Message"
                 :tabindex="0"
                 :rows="1"
                 :placeholder="

@@ -83,17 +83,21 @@ export function useMessages(
                     ? raw.messages
                     : [];
             const chat = findById(chats.value, chatId);
+
             if (!chat) return;
+
             if (append) {
                 chat.messages = [...chat.messages, ...items];
             } else {
                 chat.messages = items;
             }
+
             state.offset = chat.messages.length;
             state.hasMore = items.length >= state.limit;
 
             if (items.length > 0) {
                 const lastMsg = items[items.length - 1];
+
                 if (lastMsg) {
                     chat.lastMessage = lastMsg;
                 }
@@ -116,9 +120,11 @@ export function useMessages(
             const saved = res.data as unknown as Message;
 
             const chat = findById(chats.value, chatId);
+
             if (!chat) return;
 
             const exists = findById(chat.messages, saved.id);
+
             if (!exists) {
                 chat.messages.push(saved);
                 chat.lastMessage = saved as Message;
@@ -132,6 +138,7 @@ export function useMessages(
 
     async function deleteMessage(chatId: string, messageId: string | number) {
         const chat = findById(chats.value, chatId);
+
         if (!chat) return;
 
         try {
@@ -142,8 +149,10 @@ export function useMessages(
                 const deletedMessage = mapMessageFromBackend(res.data);
 
                 const messageIndex = findIndexById(chat.messages, messageId);
+
                 if (messageIndex !== -1) {
                     const existingMessage = chat.messages[messageIndex];
+
                     if (existingMessage) {
                         updateMessageFields(existingMessage, deletedMessage);
                         syncLastMessage(chat, deletedMessage);
@@ -157,6 +166,7 @@ export function useMessages(
 
     function updateLastMessage(chat: Chat) {
         const lastMessage = chat.messages[chat.messages.length - 1];
+
         if (lastMessage) {
             chat.lastMessage = lastMessage;
         } else {
@@ -192,12 +202,14 @@ export function useMessages(
 
     function addMessage(chatId: string, message: Message) {
         const chat = findById(chats.value, chatId);
+
         if (!chat) return false;
 
         const messageIndex = findIndexById(chat.messages, message.id);
 
         if (messageIndex !== -1) {
             const existingMessage = chat.messages[messageIndex];
+
             if (existingMessage) {
                 updateMessageFields(existingMessage, message);
             }
@@ -209,17 +221,20 @@ export function useMessages(
 
         chat.messages = [...chat.messages, message];
         chat.lastMessage = message;
+
         return true;
     }
 
     function updateMessage(chatId: string, message: Message) {
         const chat = findById(chats.value, chatId);
+
         if (!chat) return;
 
         const messageIndex = findIndexById(chat.messages, message.id);
 
         if (messageIndex !== -1) {
             const existingMessage = chat.messages[messageIndex];
+
             if (existingMessage) {
                 updateMessageFields(existingMessage, message);
             }
@@ -230,6 +245,7 @@ export function useMessages(
 
     function removeMessage(chatId: string, messageId: string | number) {
         const chat = findById(chats.value, chatId);
+
         if (!chat) return;
 
         chat.messages = chat.messages.filter(
@@ -250,9 +266,11 @@ export function useMessages(
             const forwardedMessage = res.data as unknown as Message;
 
             const chat = findById(chats.value, targetChatId);
+
             if (!chat) return;
 
             const exists = findById(chat.messages, forwardedMessage.id);
+
             if (!exists) {
                 chat.messages.push(forwardedMessage);
                 chat.lastMessage = forwardedMessage as Message;

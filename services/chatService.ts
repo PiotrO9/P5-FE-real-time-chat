@@ -11,7 +11,11 @@ export async function fetchChats() {
 }
 
 export async function createChat(request: CreateChatRequest) {
-    return await useApi<ApiResponse<ChatResponse>>('POST', '/api/chats', request);
+    return await useApi<ApiResponse<ChatResponse>>(
+        'POST',
+        '/api/chats',
+        request,
+    );
 }
 
 export async function fetchChatDetails(chatId: string | string) {
@@ -35,9 +39,11 @@ export async function sendMessage(
     replyToId?: string | number,
 ) {
     const body: { content: string; replyToId?: string | number } = { content };
+
     if (replyToId !== undefined) {
         body.replyToId = replyToId;
     }
+
     return await useApi<ApiResponse<Message>>(
         'POST',
         `/api/messages/${chatId}/messages`,
@@ -189,6 +195,7 @@ export async function searchMessages(
         limit: String(limit),
         offset: String(offset),
     });
+
     return await useApi<ApiResponse<MessagesResponse>>(
         'GET',
         `/api/messages/${chatId}/search?${params.toString()}`,

@@ -26,7 +26,9 @@ const { typingText } = defineProps<Props>();
                         style="animation-delay: 300ms"
                     />
                 </div>
-                <span class="text-sm font-medium text-gray-600">{{ typingText }}</span>
+                <span class="text-sm font-medium text-gray-600">{{
+                    typingText
+                }}</span>
             </div>
         </div>
     </div>

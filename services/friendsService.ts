@@ -52,6 +52,7 @@ export async function deleteFriend(friendId: string) {
 
 export async function searchFriends(query: string) {
     const params = new URLSearchParams({ query });
+
     return await useApi<ApiResponse<FriendsListResponse>>(
         'GET',
         `/api/friends/search?${params.toString()}`,

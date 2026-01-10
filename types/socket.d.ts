@@ -1,6 +1,5 @@
 import type { Socket } from 'socket.io-client';
 import type { User } from './Chat';
-import type { Invite } from './FriendsApi';
 
 declare module '#app' {
     interface NuxtApp {
@@ -44,6 +43,12 @@ export interface FriendInviteRejectedEvent {
 export interface FriendRemovedEvent {
     friendId: string;
     friend: User;
+}
+
+export interface UserStatusEvent {
+    userId: string;
+    isOnline: boolean;
+    lastSeen?: Date | string;
 }
 
 export {};
