@@ -95,20 +95,20 @@ const {
     currentUserId,
 );
 
-const editState = useMessageEdit(computed(() => props.message));
+const editState = useMessageEdit(messageRef);
 const { isPinning, togglePin } = useMessagePin(
     computed(() => props.message),
     chatStore,
 );
 
 const editContent = computed({
-    get: () => unref(editState.editContent),
+    get: () => editState.editContent.value,
     set: (value: string) => {
         editState.editContent.value = value;
     },
 });
-const isEditing = computed(() => unref(editState.isEditing));
-const isUpdating = computed(() => unref(editState.isUpdating));
+const isEditing = computed(() => editState.isEditing.value);
+const isUpdating = computed(() => editState.isUpdating.value);
 
 const shouldShowActionBar = computed(
     () =>
@@ -144,7 +144,11 @@ function shouldHideActionBar(): boolean {
     const elements = [refs.contextMenuRef, refs.emojiTooltipContainerRef];
 
     return (
-        !elements.some((el) => el?.matches(':hover')) &&
+        !elements.some((el) => {
+            if (!el || typeof el.matches !== 'function') return false;
+
+            return el.matches(':hover');
+        }) &&
         !uiState.isEmojiTooltipOpen &&
         !uiState.showContextMenu
     );
@@ -245,6 +249,42 @@ function handleReplyToClick(event: Event) {
     if (props.message.replyTo?.id) {
         emit('scroll-to-message', props.message.replyTo.id);
     }
+}
+
+function handleEditClick() {
+    console.log('handleEditClick called', {
+        isOwnMessage: isOwnMessage.value,
+        isDeleted: isDeleted.value,
+        isEditing: isEditing.value,
+        isDeleting: uiState.isDeleting,
+    });
+
+    if (
+        !isOwnMessage.value ||
+        isDeleted.value ||
+        isEditing.value ||
+        uiState.isDeleting
+    ) {
+        console.log('handleEditClick blocked by conditions');
+
+        return;
+    }
+
+    uiState.showContextMenu = false;
+    uiState.isContextMenuActionExecuting = true;
+
+    try {
+        console.log('Calling editState.startEdit()');
+        editState.startEdit();
+        console.log('After startEdit, isEditing:', editState.isEditing.value);
+    } catch (error) {
+        console.error('Error starting edit:', error);
+    }
+
+    nextTick(() => {
+        console.log('In nextTick, isEditing:', editState.isEditing.value);
+        uiState.isContextMenuActionExecuting = false;
+    });
 }
 
 function handleDeleteClick() {
@@ -428,6 +468,7 @@ function handleSelectChatForForward(chatId: string) {
                                     @focusin="handleActionBarFocusIn"
                                     @focusout="handleActionBarFocusOut"
                                     @delete="handleDeleteClick"
+                                    @edit="handleEditClick"
                                     @pin="handlePinClick"
                                     @forward="handleForwardClick"
                                     @context-menu-mouseenter="
@@ -485,6 +526,7 @@ function handleSelectChatForForward(chatId: string) {
                                 @focusin="handleActionBarFocusIn"
                                 @focusout="handleActionBarFocusOut"
                                 @delete="handleDeleteClick"
+                                @edit="handleEditClick"
                                 @pin="handlePinClick"
                                 @forward="handleForwardClick"
                                 @context-menu-mouseenter="

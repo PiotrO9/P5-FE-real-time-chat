@@ -28,6 +28,7 @@ interface Emits {
             | 'delete'
             | 'pin'
             | 'forward'
+            | 'edit'
             | 'context-menu-mouseenter'
             | 'context-menu-mouseleave'
             | 'emoji-click'
@@ -151,6 +152,7 @@ defineExpose({
                 @delete="emit('delete')"
                 @pin="emit('pin')"
                 @forward="emit('forward')"
+                @edit="emit('edit')"
                 @mouseenter="emit('context-menu-mouseenter')"
                 @mouseleave="emit('context-menu-mouseleave')"
             />

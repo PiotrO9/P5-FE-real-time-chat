@@ -130,7 +130,6 @@ const ariaLabel = computed(() => {
                 rows="3"
                 aria-label="Edit message"
                 @keydown="emit('keydown', $event)"
-                @blur="emit('cancel-edit')"
                 @input="
                     (e) =>
                         $emit(

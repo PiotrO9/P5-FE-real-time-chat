@@ -11,13 +11,46 @@ export function useMessageEdit(message: Ref<Message>, onSuccess?: () => void) {
     const { error: toastError } = useToast();
 
     function startEdit() {
-        if (isEditing.value || message.value.isDeleted) return;
+        console.log('startEdit called', {
+            isEditing: isEditing.value,
+            message: message.value,
+        });
 
+        if (isEditing.value) {
+            console.log('startEdit: already editing');
+
+            return;
+        }
+
+        const msg = message.value;
+
+        if (!msg || msg.isDeleted) {
+            console.log('startEdit: message deleted or missing', {
+                msg,
+                isDeleted: msg?.isDeleted,
+            });
+
+            return;
+        }
+
+        console.log('startEdit: setting isEditing to true');
         isEditing.value = true;
-        editContent.value = message.value.content;
+        editContent.value = msg.content || '';
+
+        console.log('startEdit: after setting', {
+            isEditing: isEditing.value,
+            editContent: editContent.value,
+        });
+
         nextTick(() => {
-            editTextareaRef.value?.focus();
-            editTextareaRef.value?.select();
+            console.log('startEdit: in nextTick', {
+                editTextareaRef: editTextareaRef.value,
+            });
+
+            if (editTextareaRef.value) {
+                editTextareaRef.value.focus();
+                editTextareaRef.value.select();
+            }
         });
     }
 

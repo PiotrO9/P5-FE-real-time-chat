@@ -7,7 +7,7 @@ interface Props {
 }
 
 interface Emits {
-    (e: 'delete' | 'pin' | 'forward' | 'mouseenter' | 'mouseleave'): void;
+    (e: 'delete' | 'pin' | 'forward' | 'edit' | 'mouseenter' | 'mouseleave'): void;
 }
 
 defineProps<Props>();
@@ -15,7 +15,7 @@ const emit = defineEmits<Emits>();
 
 function handleKeyDown(
     event: KeyboardEvent,
-    action: 'delete' | 'pin' | 'forward',
+    action: 'delete' | 'pin' | 'forward' | 'edit',
 ) {
     if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
@@ -26,6 +26,8 @@ function handleKeyDown(
             emit('pin');
         } else if (action === 'forward') {
             emit('forward');
+        } else if (action === 'edit') {
+            emit('edit');
         }
     }
 }
@@ -38,6 +40,19 @@ function handleKeyDown(
         @mouseenter="emit('mouseenter')"
         @mouseleave="emit('mouseleave')"
     >
+        <button
+            v-if="isOwnMessage"
+            type="button"
+            tabindex="0"
+            aria-label="Edit message"
+            :disabled="isDeleted"
+            class="w-full px-4 py-2 text-left text-sm text-gray-700 transition-colors hover:bg-primary-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent dark:text-gray-300 dark:hover:bg-gray-700 dark:disabled:hover:bg-transparent"
+            @mousedown.stop.prevent
+            @click.stop.prevent="!isDeleted && emit('edit')"
+            @keydown="(e) => !isDeleted && handleKeyDown(e, 'edit')"
+        >
+            Edit
+        </button>
         <button
             v-if="isOwnMessage"
             type="button"
