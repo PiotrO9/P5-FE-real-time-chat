@@ -25,9 +25,18 @@ export function useChats() {
 
         if (query.length === 0) return chats.value;
 
-        return chats.value.filter((chat) =>
-            chat.name.toLowerCase().includes(query),
-        );
+        return chats.value.filter((chat) => {
+            if (chat.isGroup) {
+                return chat.name.toLowerCase().includes(query);
+            }
+
+            const nameMatch = chat.name?.toLowerCase().includes(query) ?? false;
+            const usernameMatch =
+                chat.otherUser?.username?.toLowerCase().includes(query) ??
+                false;
+
+            return nameMatch || usernameMatch;
+        });
     });
 
     async function fetchChats() {
