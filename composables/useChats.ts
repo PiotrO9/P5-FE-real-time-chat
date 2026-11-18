@@ -39,7 +39,7 @@ export function useChats() {
         });
     });
 
-    async function fetchChats() {
+    async function fetchChats(preserveMessages = false) {
         try {
             chatsLoading.value = true;
             chatsError.value = null;
@@ -56,7 +56,9 @@ export function useChats() {
                 unreadCount: Number.isFinite(chat?.unreadCount)
                     ? Number(chat.unreadCount)
                     : 0,
-                messages: Array.isArray(chat?.messages) ? chat.messages : [],
+                messages:
+                    (preserveMessages && findChatById(chat.id)?.messages) ||
+                    (Array.isArray(chat?.messages) ? chat.messages : []),
                 members: Array.isArray(chat?.members)
                     ? chat.members
                     : undefined,

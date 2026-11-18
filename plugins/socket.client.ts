@@ -6,34 +6,10 @@ export default defineNuxtPlugin(() => {
 
     const socketUrl = config.public.socketUrl || 'http://localhost:3000';
 
-    function getTokenFromCookies(): string | null {
-        if (typeof document === 'undefined') return null;
-
-        const cookies = document.cookie.split('; ');
-        const tokenCookie = cookies.find((row) =>
-            row.startsWith('accessToken='),
-        );
-
-        return tokenCookie ? tokenCookie.split('=')[1] : null;
-    }
-
     const socket: Socket = io(socketUrl, {
         autoConnect: false,
-        transports: ['websocket', 'polling'],
+        transports: import.meta.dev ? ['websocket', 'polling'] : ['websocket'],
         withCredentials: true,
-        auth: (cb) => {
-            const token = getTokenFromCookies();
-
-            cb({ token: token || undefined });
-        },
-    });
-
-    socket.on('connect', () => {
-        // WebSocket connected
-    });
-
-    socket.on('disconnect', () => {
-        // WebSocket disconnected
     });
 
     socket.on('connect_error', (error) => {

@@ -15,6 +15,8 @@ export function useMessages(
     _selectedChatId: Ref<string | null>,
 ) {
     const { error: toastError } = useToast();
+    const nuxtApp = useNuxtApp();
+    const pendingRequests = new Map<string, Promise<void>>();
 
     const messagesState = reactive<
         Record<
@@ -55,7 +57,26 @@ export function useMessages(
         };
     }
 
-    async function fetchMessages(chatId: string, append: boolean) {
+    function fetchMessages(chatId: string, append: boolean) {
+        const pending = pendingRequests.get(chatId);
+
+        if (pending) return pending;
+
+        const request = loadMessages(chatId, append).finally(() => {
+            pendingRequests.delete(chatId);
+        });
+        pendingRequests.set(chatId, request);
+        return request;
+    }
+
+    async function refreshMessages(chatId: string) {
+        const pending = pendingRequests.get(chatId);
+
+        if (pending) await pending;
+        return nuxtApp.runWithContext(() => fetchMessages(chatId, false));
+    }
+
+    async function loadMessages(chatId: string, append: boolean) {
         const state = getChatState(chatId);
 
         if (state.loading) return;
@@ -287,6 +308,7 @@ export function useMessages(
         messagesState,
         newMessageText,
         fetchMessages,
+        refreshMessages,
         sendMessage,
         deleteMessage,
         updateLastMessage,

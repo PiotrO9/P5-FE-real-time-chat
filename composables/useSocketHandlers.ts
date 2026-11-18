@@ -32,6 +32,38 @@ export function useSocketHandlers(
     const { on, off } = useSocket();
     const { mapMessageFromBackend, createSystemMessage } = useMessageHelpers();
     const { success: toastSuccess } = useToast();
+    let queuedMessageEvents: Array<() => void> | undefined;
+
+    async function synchronizeMessages(refresh: () => Promise<void>) {
+        const events: Array<() => void> = [];
+        queuedMessageEvents = events;
+
+        try {
+            await refresh();
+        } finally {
+            if (queuedMessageEvents === events) {
+                queuedMessageEvents = undefined;
+                events.forEach((apply) => apply());
+            }
+        }
+    }
+
+    function duringMessageSync<T extends { chatId: string }>(
+        handle: (data: T) => void,
+    ) {
+        return (data: T) => {
+            const chatId = selectedChatId.value;
+            if (
+                queuedMessageEvents &&
+                chatId !== null &&
+                compareIds(data.chatId, chatId)
+            ) {
+                queuedMessageEvents.push(() => handle(data));
+                return;
+            }
+            handle(data);
+        };
+    }
 
     function handleNewMessage(data: { chatId: string; message: any }) {
         const chatId = String(data.chatId);
@@ -492,12 +524,19 @@ export function useSocketHandlers(
         friendsComposable.removeFriendFromList(data.friendId);
     }
 
+    const messageListeners = {
+        'message:new': duringMessageSync(handleNewMessage),
+        'message:updated': duringMessageSync(handleMessageUpdated),
+        'message:deleted': duringMessageSync(handleMessageDeleted),
+        'reaction:added': duringMessageSync(handleReactionAdded),
+        'reaction:removed': duringMessageSync(handleReactionRemoved),
+        'message:read': duringMessageSync(handleMessageRead),
+    };
+
     function setupListeners() {
-        on('message:new', handleNewMessage);
-        on('message:updated', handleMessageUpdated);
-        on('message:deleted', handleMessageDeleted);
-        on('reaction:added', handleReactionAdded);
-        on('reaction:removed', handleReactionRemoved);
+        for (const [event, listener] of Object.entries(messageListeners)) {
+            on(event, listener);
+        }
         on('typing:start', typingUsers.handleTypingStart);
         on('typing:stop', typingUsers.handleTypingStop);
         on('user:status', handleUserStatus);
@@ -507,7 +546,6 @@ export function useSocketHandlers(
         on('member:removed', handleMemberRemoved);
         on('message:pinned', handleMessagePinned);
         on('message:unpinned', handleMessageUnpinned);
-        on('message:read', handleMessageRead);
         on('friend:invite:received', handleFriendInviteReceived);
         on('friend:invite:accepted', handleFriendInviteAccepted);
         on('friend:invite:rejected', handleFriendInviteRejected);
@@ -515,11 +553,10 @@ export function useSocketHandlers(
     }
 
     function cleanupListeners() {
-        off('message:new', handleNewMessage);
-        off('message:updated', handleMessageUpdated);
-        off('message:deleted', handleMessageDeleted);
-        off('reaction:added', handleReactionAdded);
-        off('reaction:removed', handleReactionRemoved);
+        queuedMessageEvents = undefined;
+        for (const [event, listener] of Object.entries(messageListeners)) {
+            off(event, listener);
+        }
         off('typing:start', typingUsers.handleTypingStart);
         off('typing:stop', typingUsers.handleTypingStop);
         off('user:status', handleUserStatus);
@@ -529,7 +566,6 @@ export function useSocketHandlers(
         off('member:removed', handleMemberRemoved);
         off('message:pinned', handleMessagePinned);
         off('message:unpinned', handleMessageUnpinned);
-        off('message:read', handleMessageRead);
         off('friend:invite:received', handleFriendInviteReceived);
         off('friend:invite:accepted', handleFriendInviteAccepted);
         off('friend:invite:rejected', handleFriendInviteRejected);
@@ -539,5 +575,6 @@ export function useSocketHandlers(
     return {
         setupListeners,
         cleanupListeners,
+        synchronizeMessages,
     };
 }

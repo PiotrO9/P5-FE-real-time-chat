@@ -1,5 +1,10 @@
 export default defineNuxtConfig({
-    compatibilityDate: '2024-04-03',
+    compatibilityDate: '2024-09-23',
+    nitro: {
+        cloudflare: {
+            nodeCompat: true,
+        },
+    },
     devtools: { enabled: true },
 
     devServer: {

@@ -1,4 +1,4 @@
-# Real-Time Chat - Nuxt 3 Application
+# Real-Time Chat - Nuxt 4 Application
 
 Aplikacja real-time chat z kompleksowym systemem autentykacji opartym o JWT i HttpOnly cookies.
 
@@ -24,6 +24,14 @@ npm run preview
 # Generate static site
 npm run generate
 ```
+
+## Cloudflare Pages
+
+Użyj `npm run build` z presetem Nitro `cloudflare-pages` i katalogiem wyjściowym `dist`. W ustawieniach Pages włącz flagę `nodejs_compat` i ustaw datę zgodności na co najmniej `2024-09-23`.
+
+Przed buildem produkcyjnym ustaw zmienne `NUXT_PUBLIC_API_BASE_URL` i `NUXT_PUBLIC_SOCKET_URL` na `https://realtime-chat-api.piotr-ostrowski.eu`. Frontend działa pod `https://realtime-chat.piotr-ostrowski.eu`. Te subdomeny pozwalają przeglądarce przesyłać ciasteczka logowania `SameSite=Strict` do API i Socket.IO.
+
+W buildzie produkcyjnym klient łączy się z Socket.IO przez WebSocket na ścieżce `/socket.io`. Po ponownym dołączeniu do pokojów odświeża listę rozmów i otwartą rozmowę z REST API.
 
 ## Struktura projektu
 

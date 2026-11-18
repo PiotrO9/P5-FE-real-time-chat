@@ -5,9 +5,10 @@ import { pinnedMessagesService } from '~/services/pinnedMessagesService';
 import { markMessageAsRead, createChat } from '~/services/chatService';
 
 export function useDashboard() {
-    const { user } = useAuth();
+    const nuxtApp = useNuxtApp();
+    const { user, refreshToken } = useAuth();
     const chatStore = useChatStore();
-    const { connect, disconnect, emit } = useSocket();
+    const { connect, disconnect, emit, on, off } = useSocket();
     const { error: toastError } = useToast();
 
     const currentUserId = computed(() => {
@@ -448,13 +449,77 @@ export function useDashboard() {
         handleScrollToMessage(messageId);
     }
 
-    async function initialize() {
-        connect();
-        socketHandlers.setupListeners();
+    let dashboardActive = false;
+    let sessionEstablished = false;
+    let authRetried = false;
+    let refreshQueued = false;
+    let synchronizing = false;
 
-        window.addEventListener('scroll-to-message', ((event: CustomEvent) => {
-            handleMessageSearchScroll(event.detail.messageId);
-        }) as EventListener);
+    async function handleSessionReady() {
+        authRetried = false;
+        const wasConnected = sessionEstablished;
+        sessionEstablished = true;
+
+        if (!wasConnected) return;
+
+        refreshQueued = true;
+        if (synchronizing) return;
+
+        synchronizing = true;
+        try {
+            while (dashboardActive && refreshQueued) {
+                refreshQueued = false;
+                await socketHandlers.synchronizeMessages(async () => {
+                    await nuxtApp.runWithContext(() =>
+                        chatsComposable.fetchChats(true),
+                    );
+                    const chatId = chatsComposable.selectedChatId.value;
+
+                    if (!dashboardActive || !chatId) return;
+                    if (!chatsComposable.findChatById(chatId)) {
+                        chatsComposable.selectedChatId.value = null;
+                        chatStore.closeChatDetails();
+                        return;
+                    }
+
+                    await messagesComposable.refreshMessages(chatId);
+                    await nuxtApp.runWithContext(() =>
+                        pinnedMessagesService.fetchPinnedMessagesForChat(
+                            chatId,
+                        ),
+                    );
+                });
+            }
+        } finally {
+            synchronizing = false;
+        }
+    }
+
+    async function handleSocketAuthError(error: { data?: { code?: string } }) {
+        if (error.data?.code !== 'AUTH_REQUIRED' || authRetried) return;
+
+        authRetried = true;
+        try {
+            await nuxtApp.runWithContext(refreshToken);
+            if (dashboardActive) connect();
+        } catch {
+            // The authentication store handles the failed refresh.
+        }
+    }
+
+    function handleScrollEvent(event: Event) {
+        const messageId = (event as CustomEvent).detail.messageId;
+        handleMessageSearchScroll(messageId);
+    }
+
+    async function initialize() {
+        dashboardActive = true;
+        socketHandlers.setupListeners();
+        on('session:ready', handleSessionReady);
+        on('connect_error', handleSocketAuthError);
+        connect();
+
+        window.addEventListener('scroll-to-message', handleScrollEvent);
 
         await chatsComposable.fetchChats();
 
@@ -472,11 +537,10 @@ export function useDashboard() {
     }
 
     function cleanup() {
-        window.removeEventListener('scroll-to-message', ((
-            event: CustomEvent,
-        ) => {
-            handleMessageSearchScroll(event.detail.messageId);
-        }) as EventListener);
+        dashboardActive = false;
+        window.removeEventListener('scroll-to-message', handleScrollEvent);
+        off('session:ready', handleSessionReady);
+        off('connect_error', handleSocketAuthError);
         typingUsersComposable.cleanup();
         socketHandlers.cleanupListeners();
         disconnect();

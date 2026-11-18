@@ -11,9 +11,7 @@ export function useSocket() {
     }
 
     function disconnect(): void {
-        if (socket.connected) {
-            socket.disconnect();
-        }
+        socket.disconnect();
     }
 
     function emit(event: string, data?: any): void {
